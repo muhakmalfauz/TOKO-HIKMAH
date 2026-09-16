@@ -111,6 +111,14 @@
     font-size:12.5px;font-weight:600;flex:none;
   }
 
+  /* ===== Halaman Laporan ===== */
+  .summary-cards{display:flex;gap:10px;padding:8px 16px 4px;}
+  .summary-card{
+    flex:1;background:var(--paper);border:1px solid var(--line);border-radius:12px;padding:12px 14px;
+  }
+  .summary-card .sc-label{font-size:11.5px;color:var(--ink-soft);}
+  .summary-card .sc-value{font-size:17px;font-weight:700;color:var(--navy);margin-top:2px;}
+
   /* ===== Bottom nav ===== */
   .bottom-nav{
     position:fixed;left:0;right:0;bottom:0;background:var(--paper);
@@ -267,6 +275,25 @@
       <input type="text" id="searchStok" placeholder="Cari produk..." />
     </div>
     <div class="list-panel" id="stokList"></div>
+  <!-- ===== VIEW: LAPORAN ===== -->
+  <div id="viewLaporan" style="display:none;">
+    <div class="page-head">
+      <h2>Laporan Hari Ini</h2>
+    </div>
+    <div class="summary-cards">
+      <div class="summary-card">
+        <div class="sc-label">Total Penjualan</div>
+        <div class="sc-value" id="lapTotalPenjualan">Rp 0</div>
+      </div>
+      <div class="summary-card">
+        <div class="sc-label">Jumlah Transaksi</div>
+        <div class="sc-value" id="lapJumlahTransaksi">0</div>
+      </div>
+    </div>
+    <div class="list-panel" id="laporanList"></div>
+    <div style="padding:4px 16px 16px;">
+      <button class="btn-primary" id="btnTutupKasir" style="margin-top:0;">Tutup Kasir</button>
+    </div>
   </div>
 
 </div>
@@ -408,12 +435,37 @@
   </div>
 </div>
 
+<!-- SHEET: TUTUP KASIR -->
+<div class="sheet-overlay" id="overlayTutupKasir"></div>
+<div class="sheet" id="sheetTutupKasir">
+  <div class="sheet-handle"></div>
+  <div class="sheet-head">
+    <h2>Tutup Kasir</h2>
+    <button id="btnCloseTutupKasir">✕</button>
+  </div>
+  <div class="sheet-body">
+    <div style="font-size:12.5px;color:var(--ink-soft);">
+      Total penjualan sistem hari ini: <strong id="tkTotalSistem">Rp 0</strong>
+    </div>
+    <div class="field">
+      <label>Modal Awal</label>
+      <input type="number" id="tkModalAwal" inputmode="numeric" placeholder="0" />
+    </div>
+    <div class="field">
+      <label>Setoran Akhir (uang fisik di laci)</label>
+      <input type="number" id="tkSetoranAkhir" inputmode="numeric" placeholder="0" />
+    </div>
+    <button class="btn-primary" id="btnSimpanTutupKasir">Simpan & Tutup Kasir</button>
+  </div>
+</div>
+
 <div class="toast" id="toast"></div>
 
 <nav class="bottom-nav">
   <button class="nav-btn active" data-view="kasir"><span class="nav-icon">🛒</span>Kasir</button>
   <button class="nav-btn" data-view="produk"><span class="nav-icon">📦</span>Produk</button>
   <button class="nav-btn" data-view="stok"><span class="nav-icon">📊</span>Stok</button>
+  <button class="nav-btn" data-view="laporan"><span class="nav-icon">🧾</span>Laporan</button>
 </nav>
 
 <script>
@@ -530,9 +582,11 @@ function switchView(view){
   $("viewKasir").style.display = view === "kasir" ? "" : "none";
   $("viewProduk").style.display = view === "produk" ? "" : "none";
   $("viewStok").style.display = view === "stok" ? "" : "none";
+  $("viewLaporan").style.display = view === "laporan" ? "" : "none";
   renderCartBar();
   if(view === "produk") renderProdukList();
   if(view === "stok") renderStokList();
+  if(view === "laporan") renderLaporan();
 }
 document.querySelectorAll(".nav-btn").forEach(btn=>{
   btn.onclick = () => switchView(btn.dataset.view);
@@ -744,6 +798,89 @@ async function simpanStokMasuk(){
   }
 }
 $("btnSimpanStok").onclick = simpanStokMasuk;
+
+/* ============================================================
+   HALAMAN LAPORAN — riwayat hari ini & tutup kasir
+   ============================================================ */
+function kelompokkanTransaksi(rows){
+  const map = {};
+  rows.forEach(r => {
+    if(!map[r.ID_Transaksi]){
+      map[r.ID_Transaksi] = {
+        id: r.ID_Transaksi, jam: r.Jam, kasir: r.Kasir,
+        metode: r.Metode_Bayar, total: Number(r.Total_Transaksi), items: 0
+      };
+    }
+    map[r.ID_Transaksi].items += Number(r.Qty);
+  });
+  return Object.values(map).sort((a, b) => (a.jam < b.jam ? 1 : -1));
+}
+
+async function renderLaporan(){
+  $("laporanList").innerHTML = `<p style="color:var(--ink-soft);font-size:13.5px;padding:16px 0;">Memuat laporan...</p>`;
+  try{
+    const res = await fetch(APPS_SCRIPT_URL + "?action=getTransaksiHariIni");
+    const json = await res.json();
+    if(!json.success) throw new Error(json.error || "Gagal memuat laporan");
+
+    $("lapTotalPenjualan").textContent = rupiah(json.total_penjualan);
+    $("lapJumlahTransaksi").textContent = json.jumlah_transaksi;
+    $("tkTotalSistem").textContent = rupiah(json.total_penjualan);
+
+    const grup = kelompokkanTransaksi(json.items);
+    $("laporanList").innerHTML = grup.map(t => `
+      <div class="list-row">
+        <div class="lr-main">
+          <div class="lr-name">${t.id}</div>
+          <div class="lr-sub">${t.jam} · ${t.items} item · ${t.metode} · ${t.kasir}</div>
+        </div>
+        <div style="font-weight:700;font-size:13.5px;">${rupiah(t.total)}</div>
+      </div>
+    `).join("") || `<p style="color:var(--ink-soft);font-size:13.5px;padding:16px 0;">Belum ada transaksi hari ini.</p>`;
+  }catch(err){
+    $("laporanList").innerHTML = `<p style="color:var(--red);font-size:13px;padding:16px 0;">Gagal memuat: ${err.message}</p>`;
+  }
+}
+
+$("btnTutupKasir").onclick = () => {
+  $("tkModalAwal").value = "";
+  $("tkSetoranAkhir").value = "";
+  bukaSheet("sheetTutupKasir", "overlayTutupKasir");
+};
+$("btnCloseTutupKasir").onclick = () => tutupSheet("sheetTutupKasir", "overlayTutupKasir");
+$("overlayTutupKasir").onclick = () => tutupSheet("sheetTutupKasir", "overlayTutupKasir");
+
+async function simpanTutupKasir(){
+  const modalAwal = Number($("tkModalAwal").value) || 0;
+  const setoranAkhir = Number($("tkSetoranAkhir").value) || 0;
+
+  const payload = { action: "tutupKasir", data: {
+    modal_awal: modalAwal, setoran_akhir: setoranAkhir, kasir: NAMA_KASIR
+  }};
+
+  $("btnSimpanTutupKasir").disabled = true;
+  $("btnSimpanTutupKasir").textContent = "Menyimpan...";
+  try{
+    const res = await fetch(APPS_SCRIPT_URL, {
+      method: "POST", headers: { "Content-Type": "text/plain;charset=utf-8" },
+      body: JSON.stringify(payload)
+    });
+    const json = await res.json();
+    if(!json.success) throw new Error(json.error || "Gagal menyimpan");
+
+    tutupSheet("sheetTutupKasir", "overlayTutupKasir");
+    const info = json.selisih === 0
+      ? "Tutup kasir tersimpan. Uang pas, tidak ada selisih."
+      : `Tutup kasir tersimpan. Selisih: ${rupiah(json.selisih)}${json.selisih < 0 ? " (kurang)" : " (lebih)"}`;
+    showToast(info);
+  }catch(err){
+    showToast("Gagal simpan: " + err.message);
+  }finally{
+    $("btnSimpanTutupKasir").disabled = false;
+    $("btnSimpanTutupKasir").textContent = "Simpan & Tutup Kasir";
+  }
+}
+$("btnSimpanTutupKasir").onclick = simpanTutupKasir;
 
 /* ============================================================
    KERANJANG
