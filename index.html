@@ -26,7 +26,7 @@
     color:var(--ink);
     font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;
     -webkit-tap-highlight-color:transparent;
-    padding-bottom:92px;
+    padding-bottom:78px;
   }
   .wrap{max-width:640px;margin:0 auto;}
 
@@ -91,9 +91,42 @@
 
   .empty-msg{padding:40px 20px;text-align:center;color:var(--ink-soft);font-size:14px;}
 
+  /* ===== Halaman Produk / Stok ===== */
+  .page-head{display:flex;justify-content:space-between;align-items:center;padding:14px 16px 4px;}
+  .page-head h2{font-size:17px;margin:0;}
+  .btn-add{background:var(--amber);color:#fff;border:none;padding:9px 15px;border-radius:10px;font-size:13px;font-weight:700;}
+
+  .list-panel{padding:6px 16px 16px;}
+  .list-row{
+    display:flex;align-items:center;gap:10px;background:var(--paper);
+    border:1px solid var(--line);border-radius:12px;padding:12px;margin-bottom:8px;
+  }
+  .list-row .lr-main{flex:1;min-width:0;}
+  .list-row .lr-name{font-size:14px;font-weight:600;}
+  .list-row .lr-sub{font-size:12px;color:var(--ink-soft);margin-top:2px;}
+  .list-row .lr-stok{font-size:15px;font-weight:700;min-width:26px;text-align:center;}
+  .list-row .lr-stok.low{color:var(--red);}
+  .list-row button.lr-btn{
+    background:var(--navy);color:#fff;border:none;padding:8px 13px;border-radius:9px;
+    font-size:12.5px;font-weight:600;flex:none;
+  }
+
+  /* ===== Bottom nav ===== */
+  .bottom-nav{
+    position:fixed;left:0;right:0;bottom:0;background:var(--paper);
+    border-top:1px solid var(--line);display:flex;z-index:40;
+    padding-bottom:env(safe-area-inset-bottom,0);
+  }
+  .bottom-nav button{
+    flex:1;background:none;border:none;padding:9px 4px 8px;font-size:11px;
+    color:var(--ink-soft);display:flex;flex-direction:column;align-items:center;gap:3px;
+  }
+  .bottom-nav button.active{color:var(--navy);font-weight:700;}
+  .bottom-nav .nav-icon{font-size:18px;line-height:1;}
+
   /* ===== Bottom cart bar ===== */
   .cart-bar{
-    position:fixed;bottom:0;left:0;right:0;background:var(--navy);color:#fff;
+    position:fixed;bottom:56px;left:0;right:0;background:var(--navy);color:#fff;
     padding:12px 16px;display:flex;align-items:center;gap:12px;z-index:30;
     box-shadow:0 -4px 14px rgba(0,0,0,.15);
   }
@@ -200,14 +233,42 @@
 </div>
 
 <div class="wrap">
-  <div class="search-box">
-    <input type="text" id="searchInput" placeholder="Cari nama produk..." />
+
+  <!-- ===== VIEW: KASIR ===== -->
+  <div id="viewKasir">
+    <div class="search-box">
+      <input type="text" id="searchInput" placeholder="Cari nama produk..." />
+    </div>
+
+    <div class="cat-row" id="catRow"></div>
+
+    <div class="grid" id="productGrid"></div>
+    <div class="empty-msg" id="emptyMsg" style="display:none;">Produk tidak ditemukan.</div>
   </div>
 
-  <div class="cat-row" id="catRow"></div>
+  <!-- ===== VIEW: PRODUK ===== -->
+  <div id="viewProduk" style="display:none;">
+    <div class="page-head">
+      <h2>Kelola Produk</h2>
+      <button class="btn-add" id="btnTambahProduk">+ Produk</button>
+    </div>
+    <div class="search-box">
+      <input type="text" id="searchProduk" placeholder="Cari produk..." />
+    </div>
+    <div class="list-panel" id="produkList"></div>
+  </div>
 
-  <div class="grid" id="productGrid"></div>
-  <div class="empty-msg" id="emptyMsg" style="display:none;">Produk tidak ditemukan.</div>
+  <!-- ===== VIEW: STOK ===== -->
+  <div id="viewStok" style="display:none;">
+    <div class="page-head">
+      <h2>Stok Barang</h2>
+    </div>
+    <div class="search-box">
+      <input type="text" id="searchStok" placeholder="Cari produk..." />
+    </div>
+    <div class="list-panel" id="stokList"></div>
+  </div>
+
 </div>
 
 <div class="cart-bar" id="cartBar" style="display:none;">
@@ -278,7 +339,82 @@
   </div>
 </div>
 
+<!-- SHEET: TAMBAH/EDIT PRODUK -->
+<div class="sheet-overlay" id="overlayProdukForm"></div>
+<div class="sheet" id="sheetProdukForm">
+  <div class="sheet-handle"></div>
+  <div class="sheet-head">
+    <h2 id="produkFormTitle">Tambah Produk</h2>
+    <button id="btnCloseProdukForm">✕</button>
+  </div>
+  <div class="sheet-body">
+    <div class="field">
+      <label>ID Produk</label>
+      <input type="text" id="pfId" placeholder="misal P006" />
+    </div>
+    <div class="field">
+      <label>Nama Produk</label>
+      <input type="text" id="pfNama" placeholder="misal Kopi Sachet" />
+    </div>
+    <div class="pay-row">
+      <div class="field"><label>Kategori</label><input type="text" id="pfKategori" placeholder="Minuman" /></div>
+      <div class="field"><label>Satuan</label><input type="text" id="pfSatuan" placeholder="pcs" /></div>
+    </div>
+    <div class="field">
+      <label>Barcode (opsional)</label>
+      <input type="text" id="pfBarcode" />
+    </div>
+    <div class="pay-row">
+      <div class="field"><label>Harga Beli</label><input type="number" id="pfHargaBeli" inputmode="numeric" /></div>
+      <div class="field"><label>Harga Jual</label><input type="number" id="pfHargaJual" inputmode="numeric" /></div>
+    </div>
+    <div class="pay-row">
+      <div class="field"><label>Stok Awal</label><input type="number" id="pfStok" inputmode="numeric" /></div>
+      <div class="field"><label>Stok Minimum</label><input type="number" id="pfStokMin" value="5" inputmode="numeric" /></div>
+    </div>
+    <div style="font-size:11.5px;color:var(--ink-soft);margin-top:8px;">
+      Kolom Stok di sini untuk koreksi langsung. Untuk stok masuk normal (restock), pakai menu Stok supaya tercatat riwayatnya.
+    </div>
+    <button class="btn-primary" id="btnSimpanProduk">Simpan Produk</button>
+  </div>
+</div>
+
+<!-- SHEET: TAMBAH STOK MASUK -->
+<div class="sheet-overlay" id="overlayStokForm"></div>
+<div class="sheet" id="sheetStokForm">
+  <div class="sheet-handle"></div>
+  <div class="sheet-head">
+    <h2>Tambah Stok Masuk</h2>
+    <button id="btnCloseStokForm">✕</button>
+  </div>
+  <div class="sheet-body">
+    <div class="field">
+      <label>Produk</label>
+      <div id="sfNamaProduk" style="font-weight:700;font-size:15px;padding-top:4px;"></div>
+    </div>
+    <div class="field">
+      <label>Jumlah Masuk</label>
+      <input type="number" id="sfJumlah" inputmode="numeric" placeholder="0" />
+    </div>
+    <div class="field">
+      <label>Supplier (opsional)</label>
+      <input type="text" id="sfSupplier" />
+    </div>
+    <div class="field">
+      <label>Keterangan (opsional)</label>
+      <input type="text" id="sfKeterangan" />
+    </div>
+    <button class="btn-primary" id="btnSimpanStok">Simpan Stok Masuk</button>
+  </div>
+</div>
+
 <div class="toast" id="toast"></div>
+
+<nav class="bottom-nav">
+  <button class="nav-btn active" data-view="kasir"><span class="nav-icon">🛒</span>Kasir</button>
+  <button class="nav-btn" data-view="produk"><span class="nav-icon">📦</span>Produk</button>
+  <button class="nav-btn" data-view="stok"><span class="nav-icon">📊</span>Stok</button>
+</nav>
 
 <script>
 /* ============================================================
@@ -315,6 +451,8 @@ async function muatProduk(){
     if(!json.success) throw new Error(json.error || "Gagal memuat produk");
     PRODUK = json.data.map(p => ({
       id: p.ID_Produk, nama: p.Nama_Produk, kategori: p.Kategori || "Lainnya",
+      barcode: p.Barcode || "", satuan: p.Satuan || "pcs",
+      hargaBeli: Number(p.Harga_Beli) || 0,
       harga: Number(p.Harga_Jual), stok: Number(p.Stok), stokMin: Number(p.Stok_Minimum)
     }));
     localStorage.setItem("th_produk_cache", JSON.stringify(PRODUK));
@@ -382,6 +520,232 @@ $("searchInput").addEventListener("input", renderGrid);
 $("btnRefresh").onclick = muatProduk;
 
 /* ============================================================
+   NAVIGASI ANTAR HALAMAN (Kasir / Produk / Stok)
+   ============================================================ */
+let currentView = "kasir";
+
+function switchView(view){
+  currentView = view;
+  document.querySelectorAll(".nav-btn").forEach(b => b.classList.toggle("active", b.dataset.view === view));
+  $("viewKasir").style.display = view === "kasir" ? "" : "none";
+  $("viewProduk").style.display = view === "produk" ? "" : "none";
+  $("viewStok").style.display = view === "stok" ? "" : "none";
+  renderCartBar();
+  if(view === "produk") renderProdukList();
+  if(view === "stok") renderStokList();
+}
+document.querySelectorAll(".nav-btn").forEach(btn=>{
+  btn.onclick = () => switchView(btn.dataset.view);
+});
+
+function bukaSheet(sheetId, overlayId){
+  $(overlayId).classList.add("show");
+  $(sheetId).classList.add("show");
+}
+function tutupSheet(sheetId, overlayId){
+  $(overlayId).classList.remove("show");
+  $(sheetId).classList.remove("show");
+}
+
+/* ============================================================
+   HALAMAN PRODUK — daftar & form tambah/edit
+   ============================================================ */
+let produkFormMode = "tambah";
+
+function renderProdukList(){
+  const q = $("searchProduk").value.trim().toLowerCase();
+  const list = PRODUK.filter(p => p.nama.toLowerCase().includes(q));
+  $("produkList").innerHTML = list.map(p => `
+    <div class="list-row">
+      <div class="lr-main">
+        <div class="lr-name">${p.nama}</div>
+        <div class="lr-sub">${p.kategori} · ${rupiah(p.harga)} · Stok: ${p.stok}</div>
+      </div>
+      <button class="lr-btn" data-edit="${p.id}">Edit</button>
+    </div>
+  `).join("") || `<p style="color:var(--ink-soft);font-size:13.5px;padding:16px 0;">Belum ada produk. Tap "+ Produk" untuk tambah.</p>`;
+
+  $("produkList").querySelectorAll("[data-edit]").forEach(btn=>{
+    btn.onclick = () => bukaFormEditProduk(btn.dataset.edit);
+  });
+}
+$("searchProduk").addEventListener("input", renderProdukList);
+
+function saranIdProduk(){
+  const nums = PRODUK.map(p => {
+    const m = String(p.id).match(/(\d+)/);
+    return m ? parseInt(m[1]) : 0;
+  });
+  const next = (nums.length ? Math.max(...nums) : 0) + 1;
+  return "P" + String(next).padStart(3, "0");
+}
+
+function bukaFormTambahProduk(){
+  produkFormMode = "tambah";
+  $("produkFormTitle").textContent = "Tambah Produk";
+  $("pfId").value = saranIdProduk();
+  $("pfId").disabled = false;
+  $("pfNama").value = "";
+  $("pfKategori").value = "";
+  $("pfSatuan").value = "pcs";
+  $("pfBarcode").value = "";
+  $("pfHargaBeli").value = "";
+  $("pfHargaJual").value = "";
+  $("pfStok").value = 0;
+  $("pfStokMin").value = 5;
+  bukaSheet("sheetProdukForm", "overlayProdukForm");
+}
+$("btnTambahProduk").onclick = bukaFormTambahProduk;
+
+function bukaFormEditProduk(id){
+  const p = PRODUK.find(x => x.id === id);
+  if(!p) return;
+  produkFormMode = "edit";
+  $("produkFormTitle").textContent = "Edit Produk";
+  $("pfId").value = p.id;
+  $("pfId").disabled = true;
+  $("pfNama").value = p.nama;
+  $("pfKategori").value = p.kategori;
+  $("pfSatuan").value = p.satuan || "pcs";
+  $("pfBarcode").value = p.barcode || "";
+  $("pfHargaBeli").value = p.hargaBeli || "";
+  $("pfHargaJual").value = p.harga;
+  $("pfStok").value = p.stok;
+  $("pfStokMin").value = p.stokMin;
+  bukaSheet("sheetProdukForm", "overlayProdukForm");
+}
+
+$("btnCloseProdukForm").onclick = () => tutupSheet("sheetProdukForm", "overlayProdukForm");
+$("overlayProdukForm").onclick = () => tutupSheet("sheetProdukForm", "overlayProdukForm");
+
+async function simpanProduk(){
+  const id = $("pfId").value.trim();
+  const nama = $("pfNama").value.trim();
+  const kategori = $("pfKategori").value.trim() || "Lainnya";
+  const satuan = $("pfSatuan").value.trim() || "pcs";
+  const barcode = $("pfBarcode").value.trim();
+  const hargaBeli = Number($("pfHargaBeli").value) || 0;
+  const hargaJual = Number($("pfHargaJual").value) || 0;
+  const stok = Number($("pfStok").value) || 0;
+  const stokMin = Number($("pfStokMin").value) || 5;
+
+  if(!id || !nama || !hargaJual){ showToast("Lengkapi ID, Nama, dan Harga Jual"); return; }
+  if(produkFormMode === "tambah" && PRODUK.find(p => p.id === id)){ showToast("ID Produk sudah dipakai"); return; }
+
+  const action = produkFormMode === "tambah" ? "tambahProduk" : "editProduk";
+  const payload = { action, data: {
+    id_produk: id, nama_produk: nama, kategori, satuan, barcode,
+    harga_beli: hargaBeli, harga_jual: hargaJual, stok, stok_minimum: stokMin
+  }};
+
+  $("btnSimpanProduk").disabled = true;
+  $("btnSimpanProduk").textContent = "Menyimpan...";
+  try{
+    const res = await fetch(APPS_SCRIPT_URL, {
+      method: "POST", headers: { "Content-Type": "text/plain;charset=utf-8" },
+      body: JSON.stringify(payload)
+    });
+    const json = await res.json();
+    if(!json.success) throw new Error(json.error || "Gagal menyimpan");
+
+    if(produkFormMode === "tambah"){
+      PRODUK.push({ id, nama, kategori, satuan, barcode, hargaBeli, harga: hargaJual, stok, stokMin });
+    }else{
+      const p = PRODUK.find(x => x.id === id);
+      if(p) Object.assign(p, { nama, kategori, satuan, barcode, hargaBeli, harga: hargaJual, stok, stokMin });
+    }
+    localStorage.setItem("th_produk_cache", JSON.stringify(PRODUK));
+    tutupSheet("sheetProdukForm", "overlayProdukForm");
+    renderProdukList();
+    renderKategori();
+    renderGrid();
+    showToast(produkFormMode === "tambah" ? "Produk ditambahkan" : "Produk diperbarui");
+  }catch(err){
+    showToast("Gagal simpan: " + err.message);
+  }finally{
+    $("btnSimpanProduk").disabled = false;
+    $("btnSimpanProduk").textContent = "Simpan Produk";
+  }
+}
+$("btnSimpanProduk").onclick = simpanProduk;
+
+/* ============================================================
+   HALAMAN STOK — daftar & form tambah stok masuk
+   ============================================================ */
+let stokFormProdukId = null;
+
+function renderStokList(){
+  const q = $("searchStok").value.trim().toLowerCase();
+  const list = PRODUK.filter(p => p.nama.toLowerCase().includes(q));
+  $("stokList").innerHTML = list.map(p => {
+    const low = p.stok <= p.stokMin;
+    return `
+      <div class="list-row">
+        <div class="lr-main">
+          <div class="lr-name">${p.nama}</div>
+          <div class="lr-sub">${p.kategori} · ${p.satuan || 'pcs'}</div>
+        </div>
+        <div class="lr-stok ${low ? 'low' : ''}">${p.stok}</div>
+        <button class="lr-btn" data-add="${p.id}">+ Stok</button>
+      </div>`;
+  }).join("") || `<p style="color:var(--ink-soft);font-size:13.5px;padding:16px 0;">Belum ada produk.</p>`;
+
+  $("stokList").querySelectorAll("[data-add]").forEach(btn=>{
+    btn.onclick = () => bukaFormStok(btn.dataset.add);
+  });
+}
+$("searchStok").addEventListener("input", renderStokList);
+
+function bukaFormStok(id){
+  const p = PRODUK.find(x => x.id === id);
+  if(!p) return;
+  stokFormProdukId = id;
+  $("sfNamaProduk").textContent = p.nama + " (stok saat ini: " + p.stok + ")";
+  $("sfJumlah").value = "";
+  $("sfSupplier").value = "";
+  $("sfKeterangan").value = "";
+  bukaSheet("sheetStokForm", "overlayStokForm");
+}
+$("btnCloseStokForm").onclick = () => tutupSheet("sheetStokForm", "overlayStokForm");
+$("overlayStokForm").onclick = () => tutupSheet("sheetStokForm", "overlayStokForm");
+
+async function simpanStokMasuk(){
+  const jumlah = Number($("sfJumlah").value);
+  if(!jumlah || jumlah <= 0){ showToast("Isi jumlah stok masuk"); return; }
+  const p = PRODUK.find(x => x.id === stokFormProdukId);
+  if(!p) return;
+
+  const payload = { action: "tambahStokMasuk", data: {
+    id_produk: p.id, nama_produk: p.nama, jumlah_masuk: jumlah,
+    supplier: $("sfSupplier").value.trim(), keterangan: $("sfKeterangan").value.trim()
+  }};
+
+  $("btnSimpanStok").disabled = true;
+  $("btnSimpanStok").textContent = "Menyimpan...";
+  try{
+    const res = await fetch(APPS_SCRIPT_URL, {
+      method: "POST", headers: { "Content-Type": "text/plain;charset=utf-8" },
+      body: JSON.stringify(payload)
+    });
+    const json = await res.json();
+    if(!json.success) throw new Error(json.error || "Gagal menyimpan");
+
+    p.stok += jumlah;
+    localStorage.setItem("th_produk_cache", JSON.stringify(PRODUK));
+    tutupSheet("sheetStokForm", "overlayStokForm");
+    renderStokList();
+    renderGrid();
+    showToast("Stok berhasil ditambahkan");
+  }catch(err){
+    showToast("Gagal simpan: " + err.message);
+  }finally{
+    $("btnSimpanStok").disabled = false;
+    $("btnSimpanStok").textContent = "Simpan Stok Masuk";
+  }
+}
+$("btnSimpanStok").onclick = simpanStokMasuk;
+
+/* ============================================================
    KERANJANG
    ============================================================ */
 function tambahKeKeranjang(id){
@@ -411,7 +775,7 @@ function renderCartBar(){
   const items = Object.values(cart);
   const totalItem = items.reduce((s,i)=>s+i.qty,0);
   const totalHarga = items.reduce((s,i)=>s+i.qty*i.harga,0);
-  $("cartBar").style.display = totalItem ? "flex" : "none";
+  $("cartBar").style.display = (totalItem && currentView === "kasir") ? "flex" : "none";
   $("cartCount").textContent = totalItem + " item";
   $("cartTotal").textContent = rupiah(totalHarga);
 }
