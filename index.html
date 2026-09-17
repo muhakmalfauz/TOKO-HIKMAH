@@ -361,8 +361,12 @@
   </div>
   <div class="sheet-body">
     <div class="struk" id="strukContent"></div>
-    <button class="btn-primary" onclick="window.print()">Cetak Struk</button>
+    <button class="btn-primary" id="btnCetakBluetooth">🖨️ Cetak ke Printer</button>
+    <button class="btn-secondary" onclick="window.print()">Cetak via Browser (cadangan)</button>
     <button class="btn-secondary" id="btnTransaksiBaru">Transaksi Baru</button>
+    <div style="font-size:11px;color:var(--ink-soft);text-align:center;margin-top:10px;line-height:1.5;">
+      Cetak ke Printer butuh aplikasi gratis <strong>RawBT Print Service</strong> sudah terpasang & printer sudah dipasangkan (pairing) lewat aplikasi RawBT.
+    </div>
   </div>
 </div>
 
@@ -473,6 +477,7 @@
    KONFIGURASI — ganti sesuai punya kamu kalau perlu
    ============================================================ */
 const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwP_U7acRbU2EC99YArhcJP2FJKi9Fh3VAAEuqVeTq_r1F1-r3WsrLrLTDechbuU3Yn9Q/exec";
+const PRINTER_LEBAR_KARAKTER = 32; // 32 = printer thermal 58mm (paling umum), ganti ke 48 kalau pakai printer 80mm
 const NAMA_KASIR = localStorage.getItem("th_nama_kasir") || (function(){
   const n = prompt("Nama kasir yang bertugas:", "Kasir1") || "Kasir1";
   localStorage.setItem("th_nama_kasir", n);
@@ -1074,7 +1079,11 @@ function updateOfflineNote(){
 /* ============================================================
    STRUK
    ============================================================ */
+let strukTerakhir = null;
+
 function tampilkanStruk(idTrx, items, subtotal, diskon, total, dibayar, kembalian){
+  strukTerakhir = { idTrx, items, subtotal, diskon, total, dibayar, kembalian };
+
   const waktu = new Date().toLocaleString("id-ID");
   let html = `
     <div class="t-center"><strong>TOKO HIKMAH</strong><br/>${waktu}</div>
@@ -1093,7 +1102,7 @@ function tampilkanStruk(idTrx, items, subtotal, diskon, total, dibayar, kembalia
     <div class="line"><span>Dibayar</span><span>${rupiah(dibayar)}</span></div>
     <div class="line"><span>Kembali</span><span>${rupiah(kembalian)}</span></div>
     <hr/>
-    <div class="t-center">Terima kasih 🙏</div>
+    <div class="t-center">Terima kasih</div>
   `;
   $("strukContent").innerHTML = html;
   $("overlayStruk").classList.add("show");
@@ -1107,6 +1116,75 @@ $("btnTransaksiBaru").onclick = () => {
   $("overlayStruk").classList.remove("show");
   $("sheetStruk").classList.remove("show");
 };
+
+/* ============================================================
+   CETAK KE PRINTER THERMAL (Bluetooth / WiFi) via RawBT
+   RawBT adalah aplikasi gratis di Play Store yang jadi
+   "penghubung" ke printer, apapun mereknya, Bluetooth atau WiFi.
+   ============================================================ */
+function escposBuilder(){
+  const bytes = [];
+  function text(str){ for(let i=0;i<str.length;i++) bytes.push(str.charCodeAt(i) & 0xFF); }
+  return {
+    init(){ bytes.push(0x1B,0x40); return this; },
+    center(){ bytes.push(0x1B,0x61,0x01); return this; },
+    left(){ bytes.push(0x1B,0x61,0x00); return this; },
+    bold(on){ bytes.push(0x1B,0x45, on?1:0); return this; },
+    line(str=""){ text(str); bytes.push(0x0A); return this; },
+    feed(n=1){ for(let i=0;i<n;i++) bytes.push(0x0A); return this; },
+    cut(){ bytes.push(0x1D,0x56,0x00); return this; },
+    toBase64(){
+      let binary = "";
+      bytes.forEach(b => binary += String.fromCharCode(b));
+      return btoa(binary);
+    }
+  };
+}
+
+function rupiahPolos(n){ return "Rp" + Math.round(n).toLocaleString("id-ID"); }
+
+// susun 1 baris dengan teks kiri & kanan, dorong ke tepi sesuai lebar kertas
+function formatBaris(kiri, kanan, W){
+  if(kiri.length + kanan.length + 1 > W){
+    return kiri + "\n" + " ".repeat(Math.max(W - kanan.length, 0)) + kanan;
+  }
+  return kiri + " ".repeat(W - kiri.length - kanan.length) + kanan;
+}
+
+function cetakViaRawBT(){
+  if(!strukTerakhir){ showToast("Belum ada transaksi untuk dicetak"); return; }
+  const { idTrx, items, subtotal, diskon, total, dibayar, kembalian } = strukTerakhir;
+  const W = PRINTER_LEBAR_KARAKTER;
+  const garis = "-".repeat(W);
+  const waktu = new Date().toLocaleString("id-ID");
+
+  const p = escposBuilder();
+  p.init();
+  p.center().bold(true).line("TOKO HIKMAH").bold(false);
+  p.line(waktu);
+  p.line(garis);
+  p.left();
+  p.line("ID: " + idTrx);
+  p.line("Kasir: " + NAMA_KASIR);
+  p.line(garis);
+  items.forEach(i => {
+    p.line(formatBaris(`${i.nama_produk} x${i.qty}`, rupiahPolos(i.qty * i.harga_satuan), W));
+  });
+  p.line(garis);
+  p.line(formatBaris("Subtotal", rupiahPolos(subtotal), W));
+  p.line(formatBaris("Diskon", rupiahPolos(diskon), W));
+  p.bold(true).line(formatBaris("TOTAL", rupiahPolos(total), W)).bold(false);
+  p.line(formatBaris("Dibayar", rupiahPolos(dibayar), W));
+  p.line(formatBaris("Kembali", rupiahPolos(kembalian), W));
+  p.line(garis);
+  p.center().line("Terima kasih");
+  p.feed(3);
+  p.cut();
+
+  const base64 = p.toBase64();
+  window.location.href = `intent:base64,${base64}#Intent;scheme=rawbt;package=ru.a402d.rawbtprinter;end;`;
+}
+$("btnCetakBluetooth").onclick = cetakViaRawBT;
 
 /* ============================================================
    TOAST
