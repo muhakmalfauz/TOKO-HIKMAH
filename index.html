@@ -91,6 +91,25 @@
 
   .empty-msg{padding:40px 20px;text-align:center;color:var(--ink-soft);font-size:14px;}
 
+  /* ===== Scan barcode ===== */
+  .search-row{display:flex;gap:8px;}
+  .search-row input{flex:1;}
+  .scan-btn{
+    flex:none;width:46px;border-radius:var(--radius);border:1px solid var(--line);
+    background:var(--paper);font-size:18px;
+  }
+  .scan-frame{
+    position:relative;width:100%;aspect-ratio:4/3;background:#000;
+    border-radius:14px;overflow:hidden;
+  }
+  #scanVideo{width:100%;height:100%;object-fit:cover;}
+  .scan-line{
+    position:absolute;left:8%;right:8%;top:20%;height:2px;background:var(--amber);
+    box-shadow:0 0 8px var(--amber);animation:scanmove 1.6s ease-in-out infinite;
+  }
+  @keyframes scanmove{0%,100%{top:20%;}50%{top:80%;}}
+  .scan-status{text-align:center;font-size:13px;color:var(--ink-soft);margin-top:12px;}
+
   /* ===== Halaman Produk / Stok ===== */
   .page-head{display:flex;justify-content:space-between;align-items:center;padding:14px 16px 4px;}
   .page-head h2{font-size:17px;margin:0;}
@@ -287,7 +306,10 @@
   <!-- ===== VIEW: KASIR ===== -->
   <div id="viewKasir">
     <div class="search-box">
-      <input type="text" id="searchInput" placeholder="Cari nama produk..." />
+      <div class="search-row">
+        <input type="text" id="searchInput" placeholder="Cari nama produk..." />
+        <button class="scan-btn" id="btnScanKasir" type="button">📷</button>
+      </div>
     </div>
 
     <div class="cat-row" id="catRow"></div>
@@ -444,7 +466,10 @@
     </div>
     <div class="field">
       <label>Barcode (opsional)</label>
-      <input type="text" id="pfBarcode" />
+      <div class="search-row">
+        <input type="text" id="pfBarcode" />
+        <button class="scan-btn" id="btnScanProduk" type="button">📷</button>
+      </div>
     </div>
     <div class="pay-row">
       <div class="field"><label>Harga Beli</label><input type="number" id="pfHargaBeli" inputmode="numeric" /></div>
@@ -511,6 +536,23 @@
       <input type="number" id="tkSetoranAkhir" inputmode="numeric" placeholder="0" />
     </div>
     <button class="btn-primary" id="btnSimpanTutupKasir">Simpan & Tutup Kasir</button>
+  </div>
+</div>
+
+<!-- SHEET: SCAN BARCODE -->
+<div class="sheet-overlay" id="overlayScan"></div>
+<div class="sheet" id="sheetScan">
+  <div class="sheet-handle"></div>
+  <div class="sheet-head">
+    <h2>Scan Barcode</h2>
+    <button id="btnCloseScan">✕</button>
+  </div>
+  <div class="sheet-body">
+    <div class="scan-frame">
+      <video id="scanVideo" playsinline autoplay muted></video>
+      <div class="scan-line"></div>
+    </div>
+    <div class="scan-status" id="scanStatus">Arahkan kamera ke barcode...</div>
   </div>
 </div>
 
@@ -1166,6 +1208,93 @@ function tambahKeKeranjang(id){
   renderGrid();
   renderCartBar();
 }
+
+/* ============================================================
+   SCAN BARCODE (kamera HP)
+   ============================================================ */
+let scanStream = null;
+let scanDetector = null;
+let scanLoopId = null;
+let scanMode = "kasir"; // "kasir" atau "produk" — target beda setelah scan berhasil
+
+async function bukaScan(mode){
+  scanMode = mode || "kasir";
+
+  if(!("BarcodeDetector" in window)){
+    showToast("Kamera scan belum didukung browser ini. Pakai Chrome terbaru di Android.");
+    return;
+  }
+
+  bukaSheet("sheetScan", "overlayScan");
+  $("scanStatus").textContent = "Meminta izin kamera...";
+
+  try{
+    scanStream = await navigator.mediaDevices.getUserMedia({
+      video: { facingMode: "environment" }
+    });
+    $("scanVideo").srcObject = scanStream;
+    scanDetector = new BarcodeDetector({
+      formats: ["ean_13", "ean_8", "upc_a", "upc_e", "code_128", "code_39"]
+    });
+    $("scanStatus").textContent = "Arahkan kamera ke barcode...";
+    mulaiLoopScan();
+  }catch(err){
+    $("scanStatus").textContent = "Tidak bisa akses kamera: " + err.message;
+  }
+}
+
+function mulaiLoopScan(){
+  const cek = async () => {
+    if(!scanStream) return;
+    try{
+      const hasil = await scanDetector.detect($("scanVideo"));
+      if(hasil.length > 0){
+        prosesHasilScan(hasil[0].rawValue);
+        return; // sudah ketemu, hentikan loop
+      }
+    }catch(e){ /* frame belum siap, coba lagi frame berikutnya */ }
+    scanLoopId = requestAnimationFrame(cek);
+  };
+  scanLoopId = requestAnimationFrame(cek);
+}
+
+function tutupScan(){
+  if(scanLoopId) cancelAnimationFrame(scanLoopId);
+  scanLoopId = null;
+  if(scanStream){
+    scanStream.getTracks().forEach(t => t.stop());
+    scanStream = null;
+  }
+  tutupSheet("sheetScan", "overlayScan");
+}
+$("btnCloseScan").onclick = tutupScan;
+$("overlayScan").onclick = tutupScan;
+
+function prosesHasilScan(kode){
+  if(scanMode === "produk"){
+    $("pfBarcode").value = kode;
+    tutupScan();
+    showToast("Barcode terisi: " + kode);
+    return;
+  }
+
+  // mode kasir: cari produk dengan barcode yang cocok
+  const p = PRODUK.find(x => x.barcode && x.barcode === kode);
+  tutupScan();
+  if(p){
+    tambahKeKeranjang(p.id);
+    showToast("Ditambahkan: " + p.nama);
+  }else{
+    if(confirm("Barcode tidak dikenal: " + kode + "\n\nTambah sebagai produk baru?")){
+      switchView("produk");
+      bukaFormTambahProduk();
+      $("pfBarcode").value = kode;
+    }
+  }
+}
+
+$("btnScanKasir").onclick = () => bukaScan("kasir");
+$("btnScanProduk").onclick = () => bukaScan("produk");
 
 function ubahQty(id, delta){
   if(!cart[id]) return;
