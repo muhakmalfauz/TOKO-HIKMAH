@@ -226,44 +226,32 @@
   }
   .login-box{width:100%;max-width:320px;text-align:center;}
   .login-logo{color:#fff;font-size:24px;font-weight:800;letter-spacing:.3px;}
-  .login-sub{color:#CFE0DB;font-size:13px;margin-top:6px;margin-bottom:26px;}
-  .pin-dots{display:flex;justify-content:center;gap:14px;margin-bottom:10px;}
-  .pin-dot{
-    width:14px;height:14px;border-radius:50%;border:2px solid #CFE0DB;background:transparent;
-    transition:background .15s;
-  }
-  .pin-dot.filled{background:var(--amber);border-color:var(--amber);}
-  .pin-error{color:#F4B6A6;font-size:12.5px;min-height:18px;margin-bottom:14px;}
-  .keypad{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;}
-  .keypad button{
+  .login-sub{color:#CFE0DB;font-size:13px;margin-top:6px;margin-bottom:22px;}
+  .user-list{display:flex;flex-direction:column;gap:10px;}
+  .user-item{
     background:rgba(255,255,255,.08);color:#fff;border:none;border-radius:14px;
-    font-size:20px;font-weight:600;padding:18px 0;
+    padding:15px 18px;text-align:left;display:flex;justify-content:space-between;align-items:center;
   }
-  .keypad button:active{background:rgba(255,255,255,.2);}
-  .keypad .key-empty{background:none;}
-  .keypad #keyBackspace{font-size:17px;}
+  .user-item:active{background:rgba(255,255,255,.2);}
+  .user-item .ui-name{font-size:15px;font-weight:700;}
+  .user-item .ui-role{font-size:11px;color:#CFE0DB;background:rgba(255,255,255,.12);padding:3px 10px;border-radius:999px;}
+  .login-msg{color:#CFE0DB;font-size:13px;}
   .logout-btn{
     background:none;border:1px solid rgba(255,255,255,.35);color:#fff;
     font-size:11px;padding:4px 10px;border-radius:999px;margin-left:8px;
   }
 </style>
 </head>
+
 <body>
 
 <!-- ===== LOGIN SCREEN ===== -->
 <div class="login-screen" id="loginScreen">
   <div class="login-box">
     <div class="login-logo">TOKO HIKMAH</div>
-    <div class="login-sub">Masukkan PIN untuk masuk</div>
-    <div class="pin-dots" id="pinDots">
-      <span class="pin-dot"></span><span class="pin-dot"></span><span class="pin-dot"></span><span class="pin-dot"></span>
-    </div>
-    <div class="pin-error" id="pinError">&nbsp;</div>
-    <div class="keypad">
-      <button data-k="1">1</button><button data-k="2">2</button><button data-k="3">3</button>
-      <button data-k="4">4</button><button data-k="5">5</button><button data-k="6">6</button>
-      <button data-k="7">7</button><button data-k="8">8</button><button data-k="9">9</button>
-      <button class="key-empty"></button><button data-k="0">0</button><button id="keyBackspace">⌫</button>
+    <div class="login-sub">Pilih siapa yang bertugas</div>
+    <div class="user-list" id="userList">
+      <div class="login-msg">Memuat daftar user...</div>
     </div>
   </div>
 </div>
@@ -541,7 +529,6 @@ let cart = {}; // { id_produk: {..produk, qty} }
 let activeCategory = "Semua";
 let NAMA_KASIR = "";
 let ROLE_KASIR = "";
-let pinInput = "";
 
 const $ = (id) => document.getElementById(id);
 const rupiah = (n) => "Rp " + Math.round(n).toLocaleString("id-ID");
@@ -549,47 +536,36 @@ const rupiah = (n) => "Rp " + Math.round(n).toLocaleString("id-ID");
 $("tanggalNow").textContent = new Date().toLocaleDateString("id-ID", {weekday:"long", year:"numeric", month:"long", day:"numeric"});
 
 /* ============================================================
-   LOGIN PIN
+   LOGIN — pilih user dari daftar (tanpa PIN)
    ============================================================ */
-function renderPinDots(){
-  const dots = $("pinDots").querySelectorAll(".pin-dot");
-  dots.forEach((d, i) => d.classList.toggle("filled", i < pinInput.length));
+let DAFTAR_USER = [];
+
+async function muatDaftarUser(){
+  try{
+    const res = await fetch(APPS_SCRIPT_URL + "?action=getUser");
+    const json = await res.json();
+    if(!json.success) throw new Error(json.error || "Gagal memuat user");
+    DAFTAR_USER = json.data;
+    renderUserList();
+  }catch(err){
+    $("userList").innerHTML = `<div class="login-msg">Gagal memuat daftar user. Cek koneksi internet, lalu buka ulang halaman ini.</div>`;
+  }
 }
 
-document.querySelectorAll(".keypad button[data-k]").forEach(btn=>{
-  btn.onclick = () => {
-    if(pinInput.length >= 4) return;
-    pinInput += btn.dataset.k;
-    renderPinDots();
-    if(pinInput.length === 4) cobaLogin();
-  };
-});
-$("keyBackspace").onclick = () => {
-  pinInput = pinInput.slice(0, -1);
-  renderPinDots();
-  $("pinError").textContent = "\u00A0";
-};
-
-async function cobaLogin(){
-  $("pinError").textContent = "Memeriksa...";
-  try{
-    const res = await fetch(APPS_SCRIPT_URL, {
-      method: "POST", headers: { "Content-Type": "text/plain;charset=utf-8" },
-      body: JSON.stringify({ action: "login", data: { pin: pinInput } })
-    });
-    const json = await res.json();
-    if(!json.success){
-      $("pinError").textContent = json.error || "PIN salah";
-      pinInput = "";
-      renderPinDots();
-      return;
-    }
-    masuk(json.nama, json.role);
-  }catch(err){
-    $("pinError").textContent = "Gagal memeriksa PIN. Cek internet.";
-    pinInput = "";
-    renderPinDots();
+function renderUserList(){
+  if(!DAFTAR_USER.length){
+    $("userList").innerHTML = `<div class="login-msg">Belum ada user di sheet User.</div>`;
+    return;
   }
+  $("userList").innerHTML = DAFTAR_USER.map(u => `
+    <button class="user-item" data-nama="${u.Nama}" data-role="${u.Role}">
+      <span class="ui-name">${u.Nama}</span>
+      <span class="ui-role">${u.Role}</span>
+    </button>
+  `).join("");
+  $("userList").querySelectorAll(".user-item").forEach(btn=>{
+    btn.onclick = () => masuk(btn.dataset.nama, btn.dataset.role);
+  });
 }
 
 function masuk(nama, role){
@@ -600,9 +576,6 @@ function masuk(nama, role){
   terapkanBatasanRole();
   $("loginScreen").style.display = "none";
   $("appContainer").style.display = "block";
-  pinInput = "";
-  renderPinDots();
-  $("pinError").textContent = "\u00A0";
   muatProduk();
   syncAntrian();
 }
@@ -622,11 +595,14 @@ $("btnLogout").onclick = () => {
 };
 
 // coba lanjutkan sesi kalau baru refresh halaman (belum tutup browser)
+// kalau belum ada sesi, muat daftar user untuk ditampilkan di layar login
 (function cekSesi(){
   const saved = sessionStorage.getItem("th_user");
   if(saved){
     const u = JSON.parse(saved);
     masuk(u.nama, u.role);
+  }else{
+    muatDaftarUser();
   }
 })();
 
