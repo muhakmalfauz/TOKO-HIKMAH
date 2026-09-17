@@ -218,15 +218,67 @@
     .struk, .struk *{visibility:visible;}
     .struk{position:fixed;top:0;left:0;width:100%;border:none;}
   }
+
+  /* ===== Login ===== */
+  .login-screen{
+    position:fixed;inset:0;background:var(--navy);z-index:100;
+    display:flex;align-items:center;justify-content:center;padding:20px;
+  }
+  .login-box{width:100%;max-width:320px;text-align:center;}
+  .login-logo{color:#fff;font-size:24px;font-weight:800;letter-spacing:.3px;}
+  .login-sub{color:#CFE0DB;font-size:13px;margin-top:6px;margin-bottom:26px;}
+  .pin-dots{display:flex;justify-content:center;gap:14px;margin-bottom:10px;}
+  .pin-dot{
+    width:14px;height:14px;border-radius:50%;border:2px solid #CFE0DB;background:transparent;
+    transition:background .15s;
+  }
+  .pin-dot.filled{background:var(--amber);border-color:var(--amber);}
+  .pin-error{color:#F4B6A6;font-size:12.5px;min-height:18px;margin-bottom:14px;}
+  .keypad{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;}
+  .keypad button{
+    background:rgba(255,255,255,.08);color:#fff;border:none;border-radius:14px;
+    font-size:20px;font-weight:600;padding:18px 0;
+  }
+  .keypad button:active{background:rgba(255,255,255,.2);}
+  .keypad .key-empty{background:none;}
+  .keypad #keyBackspace{font-size:17px;}
+  .logout-btn{
+    background:none;border:1px solid rgba(255,255,255,.35);color:#fff;
+    font-size:11px;padding:4px 10px;border-radius:999px;margin-left:8px;
+  }
 </style>
 </head>
 <body>
+
+<!-- ===== LOGIN SCREEN ===== -->
+<div class="login-screen" id="loginScreen">
+  <div class="login-box">
+    <div class="login-logo">TOKO HIKMAH</div>
+    <div class="login-sub">Masukkan PIN untuk masuk</div>
+    <div class="pin-dots" id="pinDots">
+      <span class="pin-dot"></span><span class="pin-dot"></span><span class="pin-dot"></span><span class="pin-dot"></span>
+    </div>
+    <div class="pin-error" id="pinError">&nbsp;</div>
+    <div class="keypad">
+      <button data-k="1">1</button><button data-k="2">2</button><button data-k="3">3</button>
+      <button data-k="4">4</button><button data-k="5">5</button><button data-k="6">6</button>
+      <button data-k="7">7</button><button data-k="8">8</button><button data-k="9">9</button>
+      <button class="key-empty"></button><button data-k="0">0</button><button id="keyBackspace">⌫</button>
+    </div>
+  </div>
+</div>
+
+<!-- ===== ISI APLIKASI (tersembunyi sampai login berhasil) ===== -->
+<div id="appContainer" style="display:none;">
 
 <header>
   <div class="wrap">
     <div class="row">
       <h1>TOKO HIKMAH</h1>
-      <span class="kasir-tag" id="kasirTag">Kasir</span>
+      <span>
+        <span class="kasir-tag" id="kasirTag">Kasir</span>
+        <button class="logout-btn" id="btnLogout">Keluar</button>
+      </span>
     </div>
     <div class="meta" id="tanggalNow">—</div>
   </div>
@@ -472,17 +524,14 @@
   <button class="nav-btn" data-view="laporan"><span class="nav-icon">🧾</span>Laporan</button>
 </nav>
 
+</div><!-- /appContainer -->
+
 <script>
 /* ============================================================
    KONFIGURASI — ganti sesuai punya kamu kalau perlu
    ============================================================ */
 const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwP_U7acRbU2EC99YArhcJP2FJKi9Fh3VAAEuqVeTq_r1F1-r3WsrLrLTDechbuU3Yn9Q/exec";
 const PRINTER_LEBAR_KARAKTER = 32; // 32 = printer thermal 58mm (paling umum), ganti ke 48 kalau pakai printer 80mm
-const NAMA_KASIR = localStorage.getItem("th_nama_kasir") || (function(){
-  const n = prompt("Nama kasir yang bertugas:", "Kasir1") || "Kasir1";
-  localStorage.setItem("th_nama_kasir", n);
-  return n;
-})();
 
 /* ============================================================
    STATE
@@ -490,12 +539,96 @@ const NAMA_KASIR = localStorage.getItem("th_nama_kasir") || (function(){
 let PRODUK = [];
 let cart = {}; // { id_produk: {..produk, qty} }
 let activeCategory = "Semua";
+let NAMA_KASIR = "";
+let ROLE_KASIR = "";
+let pinInput = "";
 
 const $ = (id) => document.getElementById(id);
 const rupiah = (n) => "Rp " + Math.round(n).toLocaleString("id-ID");
 
-$("kasirTag").textContent = NAMA_KASIR;
 $("tanggalNow").textContent = new Date().toLocaleDateString("id-ID", {weekday:"long", year:"numeric", month:"long", day:"numeric"});
+
+/* ============================================================
+   LOGIN PIN
+   ============================================================ */
+function renderPinDots(){
+  const dots = $("pinDots").querySelectorAll(".pin-dot");
+  dots.forEach((d, i) => d.classList.toggle("filled", i < pinInput.length));
+}
+
+document.querySelectorAll(".keypad button[data-k]").forEach(btn=>{
+  btn.onclick = () => {
+    if(pinInput.length >= 4) return;
+    pinInput += btn.dataset.k;
+    renderPinDots();
+    if(pinInput.length === 4) cobaLogin();
+  };
+});
+$("keyBackspace").onclick = () => {
+  pinInput = pinInput.slice(0, -1);
+  renderPinDots();
+  $("pinError").textContent = "\u00A0";
+};
+
+async function cobaLogin(){
+  $("pinError").textContent = "Memeriksa...";
+  try{
+    const res = await fetch(APPS_SCRIPT_URL, {
+      method: "POST", headers: { "Content-Type": "text/plain;charset=utf-8" },
+      body: JSON.stringify({ action: "login", data: { pin: pinInput } })
+    });
+    const json = await res.json();
+    if(!json.success){
+      $("pinError").textContent = json.error || "PIN salah";
+      pinInput = "";
+      renderPinDots();
+      return;
+    }
+    masuk(json.nama, json.role);
+  }catch(err){
+    $("pinError").textContent = "Gagal memeriksa PIN. Cek internet.";
+    pinInput = "";
+    renderPinDots();
+  }
+}
+
+function masuk(nama, role){
+  NAMA_KASIR = nama;
+  ROLE_KASIR = role;
+  sessionStorage.setItem("th_user", JSON.stringify({ nama, role }));
+  $("kasirTag").textContent = nama + (role ? " · " + role : "");
+  terapkanBatasanRole();
+  $("loginScreen").style.display = "none";
+  $("appContainer").style.display = "block";
+  pinInput = "";
+  renderPinDots();
+  $("pinError").textContent = "\u00A0";
+  muatProduk();
+  syncAntrian();
+}
+
+function terapkanBatasanRole(){
+  const isOwner = ROLE_KASIR.toLowerCase() === "owner";
+  document.querySelectorAll(".nav-btn").forEach(btn=>{
+    const view = btn.dataset.view;
+    if(view === "kasir") return; // semua role boleh akses Kasir
+    btn.style.display = isOwner ? "" : "none";
+  });
+}
+
+$("btnLogout").onclick = () => {
+  sessionStorage.removeItem("th_user");
+  location.reload();
+};
+
+// coba lanjutkan sesi kalau baru refresh halaman (belum tutup browser)
+(function cekSesi(){
+  const saved = sessionStorage.getItem("th_user");
+  if(saved){
+    const u = JSON.parse(saved);
+    masuk(u.nama, u.role);
+  }
+})();
 
 /* ============================================================
    AMBIL DATA PRODUK
@@ -1201,12 +1334,10 @@ function showToast(msg){
 /* ============================================================
    INIT
    ============================================================ */
-window.addEventListener("online", () => { setStatus(true,"Kembali online"); syncAntrian(); muatProduk(); });
+window.addEventListener("online", () => { setStatus(true,"Kembali online"); syncAntrian(); if(NAMA_KASIR) muatProduk(); });
 window.addEventListener("offline", () => setStatus(false,"Offline"));
 
 updateOfflineNote();
-muatProduk();
-syncAntrian();
 </script>
 </body>
 </html>
