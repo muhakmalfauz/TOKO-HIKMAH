@@ -110,6 +110,8 @@
     background:var(--navy);color:#fff;border:none;padding:8px 13px;border-radius:9px;
     font-size:12.5px;font-weight:600;flex:none;
   }
+  .list-row button.lr-btn.danger{background:var(--red);}
+  .list-row .lr-actions{display:flex;gap:6px;flex:none;}
 
   /* ===== Halaman Laporan ===== */
   .summary-cards{display:flex;gap:10px;padding:8px 16px 4px;}
@@ -336,6 +338,15 @@
     </div>
   </div>
 
+  <!-- ===== VIEW: PENGATURAN ===== -->
+  <div id="viewPengaturan" style="display:none;">
+    <div class="page-head">
+      <h2>Kelola User</h2>
+      <button class="btn-add" id="btnTambahUser">+ User</button>
+    </div>
+    <div class="list-panel" id="pengaturanList"></div>
+  </div>
+
 </div>
 
 <div class="cart-bar" id="cartBar" style="display:none;">
@@ -503,6 +514,30 @@
   </div>
 </div>
 
+<!-- SHEET: TAMBAH/EDIT USER -->
+<div class="sheet-overlay" id="overlayUserForm"></div>
+<div class="sheet" id="sheetUserForm">
+  <div class="sheet-handle"></div>
+  <div class="sheet-head">
+    <h2 id="userFormTitle">Tambah User</h2>
+    <button id="btnCloseUserForm">✕</button>
+  </div>
+  <div class="sheet-body">
+    <div class="field">
+      <label>Nama</label>
+      <input type="text" id="ufNama" placeholder="misal Kasir2" />
+    </div>
+    <div class="field">
+      <label>Role</label>
+      <select id="ufRole">
+        <option value="Kasir">Kasir — hanya akses tab Kasir</option>
+        <option value="Owner">Owner — akses semua tab</option>
+      </select>
+    </div>
+    <button class="btn-primary" id="btnSimpanUser">Simpan User</button>
+  </div>
+</div>
+
 <div class="toast" id="toast"></div>
 
 <nav class="bottom-nav">
@@ -510,6 +545,7 @@
   <button class="nav-btn" data-view="produk"><span class="nav-icon">📦</span>Produk</button>
   <button class="nav-btn" data-view="stok"><span class="nav-icon">📊</span>Stok</button>
   <button class="nav-btn" data-view="laporan"><span class="nav-icon">🧾</span>Laporan</button>
+  <button class="nav-btn" data-view="pengaturan"><span class="nav-icon">⚙️</span>Atur</button>
 </nav>
 
 </div><!-- /appContainer -->
@@ -697,10 +733,12 @@ function switchView(view){
   $("viewProduk").style.display = view === "produk" ? "" : "none";
   $("viewStok").style.display = view === "stok" ? "" : "none";
   $("viewLaporan").style.display = view === "laporan" ? "" : "none";
+  $("viewPengaturan").style.display = view === "pengaturan" ? "" : "none";
   renderCartBar();
   if(view === "produk") renderProdukList();
   if(view === "stok") renderStokList();
   if(view === "laporan") renderLaporan();
+  if(view === "pengaturan") renderPengaturanList();
 }
 document.querySelectorAll(".nav-btn").forEach(btn=>{
   btn.onclick = () => switchView(btn.dataset.view);
@@ -995,6 +1033,126 @@ async function simpanTutupKasir(){
   }
 }
 $("btnSimpanTutupKasir").onclick = simpanTutupKasir;
+
+/* ============================================================
+   HALAMAN PENGATURAN — kelola user (tambah/edit/hapus)
+   ============================================================ */
+let userFormMode = "tambah";
+let userFormNamaLama = "";
+
+function renderPengaturanList(){
+  $("pengaturanList").innerHTML = DAFTAR_USER.map(u => `
+    <div class="list-row">
+      <div class="lr-main">
+        <div class="lr-name">${u.Nama}</div>
+        <div class="lr-sub">${u.Role}${u.Nama === NAMA_KASIR ? " · sedang login" : ""}</div>
+      </div>
+      <div class="lr-actions">
+        <button class="lr-btn" data-edit="${u.Nama}">Edit</button>
+        <button class="lr-btn danger" data-hapus="${u.Nama}">Hapus</button>
+      </div>
+    </div>
+  `).join("") || `<p style="color:var(--ink-soft);font-size:13.5px;padding:16px 0;">Belum ada user.</p>`;
+
+  $("pengaturanList").querySelectorAll("[data-edit]").forEach(btn=>{
+    btn.onclick = () => bukaFormEditUser(btn.dataset.edit);
+  });
+  $("pengaturanList").querySelectorAll("[data-hapus]").forEach(btn=>{
+    btn.onclick = () => hapusUser(btn.dataset.hapus);
+  });
+}
+
+function bukaFormTambahUser(){
+  userFormMode = "tambah";
+  $("userFormTitle").textContent = "Tambah User";
+  $("ufNama").value = "";
+  $("ufRole").value = "Kasir";
+  bukaSheet("sheetUserForm", "overlayUserForm");
+}
+$("btnTambahUser").onclick = bukaFormTambahUser;
+
+function bukaFormEditUser(nama){
+  const u = DAFTAR_USER.find(x => x.Nama === nama);
+  if(!u) return;
+  userFormMode = "edit";
+  userFormNamaLama = nama;
+  $("userFormTitle").textContent = "Edit User";
+  $("ufNama").value = u.Nama;
+  $("ufRole").value = u.Role;
+  bukaSheet("sheetUserForm", "overlayUserForm");
+}
+$("btnCloseUserForm").onclick = () => tutupSheet("sheetUserForm", "overlayUserForm");
+$("overlayUserForm").onclick = () => tutupSheet("sheetUserForm", "overlayUserForm");
+
+async function simpanUser(){
+  const nama = $("ufNama").value.trim();
+  const role = $("ufRole").value;
+
+  if(!nama){ showToast("Isi nama dulu"); return; }
+  if(userFormMode === "tambah" && DAFTAR_USER.find(u => u.Nama.toLowerCase() === nama.toLowerCase())){
+    showToast("Nama sudah dipakai, pakai nama lain");
+    return;
+  }
+
+  const payload = userFormMode === "tambah"
+    ? { action: "tambahUser", data: { nama, role } }
+    : { action: "editUser", data: { nama_lama: userFormNamaLama, nama, role } };
+
+  $("btnSimpanUser").disabled = true;
+  $("btnSimpanUser").textContent = "Menyimpan...";
+  try{
+    const res = await fetch(APPS_SCRIPT_URL, {
+      method: "POST", headers: { "Content-Type": "text/plain;charset=utf-8" },
+      body: JSON.stringify(payload)
+    });
+    const json = await res.json();
+    if(!json.success) throw new Error(json.error || "Gagal menyimpan");
+
+    if(userFormMode === "tambah"){
+      DAFTAR_USER.push({ Nama: nama, Role: role, PIN: "-" });
+    }else{
+      const u = DAFTAR_USER.find(x => x.Nama === userFormNamaLama);
+      if(u){ u.Nama = nama; u.Role = role; }
+      // kalau yang diedit adalah akun yang sedang login, update sesi juga
+      if(userFormNamaLama === NAMA_KASIR){
+        NAMA_KASIR = nama;
+        ROLE_KASIR = role;
+        $("kasirTag").textContent = nama + " · " + role;
+        sessionStorage.setItem("th_user", JSON.stringify({ nama, role }));
+        terapkanBatasanRole();
+      }
+    }
+    tutupSheet("sheetUserForm", "overlayUserForm");
+    renderPengaturanList();
+    showToast(userFormMode === "tambah" ? "User ditambahkan" : "User diperbarui");
+  }catch(err){
+    showToast("Gagal simpan: " + err.message);
+  }finally{
+    $("btnSimpanUser").disabled = false;
+    $("btnSimpanUser").textContent = "Simpan User";
+  }
+}
+$("btnSimpanUser").onclick = simpanUser;
+
+async function hapusUser(nama){
+  if(nama === NAMA_KASIR){ showToast("Tidak bisa hapus akun yang sedang login"); return; }
+  if(!confirm(`Hapus user "${nama}"?`)) return;
+
+  try{
+    const res = await fetch(APPS_SCRIPT_URL, {
+      method: "POST", headers: { "Content-Type": "text/plain;charset=utf-8" },
+      body: JSON.stringify({ action: "hapusUser", data: { nama } })
+    });
+    const json = await res.json();
+    if(!json.success) throw new Error(json.error || "Gagal menghapus");
+
+    DAFTAR_USER = DAFTAR_USER.filter(u => u.Nama !== nama);
+    renderPengaturanList();
+    showToast("User dihapus");
+  }catch(err){
+    showToast("Gagal hapus: " + err.message);
+  }
+}
 
 /* ============================================================
    KERANJANG
