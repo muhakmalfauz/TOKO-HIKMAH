@@ -140,6 +140,12 @@
   .summary-card .sc-label{font-size:11.5px;color:var(--ink-soft);}
   .summary-card .sc-value{font-size:17px;font-weight:700;color:var(--navy);margin-top:2px;}
 
+  .tren-row{display:flex;align-items:center;gap:8px;padding:6px 0;font-size:12px;}
+  .tren-label{width:50px;color:var(--ink-soft);flex:none;}
+  .tren-bar-wrap{flex:1;background:var(--line);border-radius:6px;height:10px;overflow:hidden;}
+  .tren-bar{height:100%;background:var(--navy);border-radius:6px;}
+  .tren-value{width:84px;text-align:right;flex:none;font-weight:600;}
+
   /* ===== Bottom nav ===== */
   .bottom-nav{
     position:fixed;left:0;right:0;bottom:0;background:var(--paper);
@@ -342,7 +348,12 @@
   <!-- ===== VIEW: LAPORAN ===== -->
   <div id="viewLaporan" style="display:none;">
     <div class="page-head">
-      <h2>Laporan Hari Ini</h2>
+      <h2>Laporan</h2>
+    </div>
+    <div class="cat-row" id="periodeRow">
+      <button class="cat-chip active" data-periode="harian">Hari Ini</button>
+      <button class="cat-chip" data-periode="mingguan">Minggu Ini</button>
+      <button class="cat-chip" data-periode="bulanan">Bulan Ini</button>
     </div>
     <div class="summary-cards">
       <div class="summary-card">
@@ -354,8 +365,27 @@
         <div class="sc-value" id="lapJumlahTransaksi">0</div>
       </div>
     </div>
-    <div class="list-panel" id="laporanList"></div>
-    <div style="padding:4px 16px 16px;">
+
+    <div class="page-head" style="padding-top:14px;">
+      <h2 style="font-size:14.5px;">Produk Terlaris</h2>
+    </div>
+    <div class="list-panel" id="produkTerlarisList"></div>
+
+    <div id="trenHarianWrap" style="display:none;">
+      <div class="page-head" style="padding-top:2px;">
+        <h2 style="font-size:14.5px;">Tren Harian</h2>
+      </div>
+      <div class="list-panel" id="trenHarianList"></div>
+    </div>
+
+    <div id="riwayatHarianWrap">
+      <div class="page-head" style="padding-top:2px;">
+        <h2 style="font-size:14.5px;">Riwayat Transaksi Hari Ini</h2>
+      </div>
+      <div class="list-panel" id="laporanList"></div>
+    </div>
+
+    <div style="padding:4px 16px 16px;" id="tutupKasirWrap">
       <button class="btn-primary" id="btnTutupKasir" style="margin-top:0;">Tutup Kasir</button>
     </div>
   </div>
@@ -1010,10 +1040,44 @@ function kelompokkanTransaksi(rows){
   return Object.values(map).sort((a, b) => (a.jam < b.jam ? 1 : -1));
 }
 
+let periodeLaporan = "harian";
+
+function getRentangTanggal(periode){
+  const now = new Date();
+  const fmt = (d) => {
+    const y = d.getFullYear(), m = String(d.getMonth()+1).padStart(2,"0"), day = String(d.getDate()).padStart(2,"0");
+    return `${y}-${m}-${day}`;
+  };
+  let mulai = new Date(now);
+  if(periode === "mingguan"){
+    const hari = mulai.getDay(); // 0 = Minggu
+    const mundur = hari === 0 ? 6 : hari - 1; // mundur ke Senin terdekat
+    mulai.setDate(mulai.getDate() - mundur);
+  }else if(periode === "bulanan"){
+    mulai = new Date(now.getFullYear(), now.getMonth(), 1);
+  }
+  return { mulai: fmt(mulai), selesai: fmt(now) };
+}
+
+document.querySelectorAll("#periodeRow .cat-chip").forEach(btn=>{
+  btn.onclick = () => {
+    periodeLaporan = btn.dataset.periode;
+    document.querySelectorAll("#periodeRow .cat-chip").forEach(b => b.classList.toggle("active", b === btn));
+    renderLaporan();
+  };
+});
+
 async function renderLaporan(){
-  $("laporanList").innerHTML = `<p style="color:var(--ink-soft);font-size:13.5px;padding:16px 0;">Memuat laporan...</p>`;
+  const isHarian = periodeLaporan === "harian";
+  $("riwayatHarianWrap").style.display = isHarian ? "" : "none";
+  $("tutupKasirWrap").style.display = isHarian ? "" : "none";
+  $("trenHarianWrap").style.display = isHarian ? "none" : "";
+  $("produkTerlarisList").innerHTML = `<p style="color:var(--ink-soft);font-size:13.5px;padding:16px 0;">Memuat laporan...</p>`;
+
+  const { mulai, selesai } = getRentangTanggal(periodeLaporan);
+
   try{
-    const res = await fetch(APPS_SCRIPT_URL + "?action=getTransaksiHariIni");
+    const res = await fetch(`${APPS_SCRIPT_URL}?action=getLaporanPeriode&tanggal_mulai=${mulai}&tanggal_selesai=${selesai}`);
     const json = await res.json();
     if(!json.success) throw new Error(json.error || "Gagal memuat laporan");
 
@@ -1021,18 +1085,46 @@ async function renderLaporan(){
     $("lapJumlahTransaksi").textContent = json.jumlah_transaksi;
     $("tkTotalSistem").textContent = rupiah(json.total_penjualan);
 
-    const grup = kelompokkanTransaksi(json.items);
-    $("laporanList").innerHTML = grup.map(t => `
+    // Produk terlaris (10 teratas)
+    const top = json.produk_terlaris.slice(0, 10);
+    $("produkTerlarisList").innerHTML = top.map((p, i) => `
       <div class="list-row">
+        <div style="font-weight:700;color:var(--navy);width:24px;flex:none;">#${i+1}</div>
         <div class="lr-main">
-          <div class="lr-name">${t.id}</div>
-          <div class="lr-sub">${t.jam} · ${t.items} item · ${t.metode} · ${t.kasir}</div>
+          <div class="lr-name">${p.nama}</div>
+          <div class="lr-sub">Terjual ${p.qty} pcs</div>
         </div>
-        <div style="font-weight:700;font-size:13.5px;">${rupiah(t.total)}</div>
+        <div style="font-weight:700;font-size:13px;">${rupiah(p.omzet)}</div>
       </div>
-    `).join("") || `<p style="color:var(--ink-soft);font-size:13.5px;padding:16px 0;">Belum ada transaksi hari ini.</p>`;
+    `).join("") || `<p style="color:var(--ink-soft);font-size:13.5px;padding:16px 0;">Belum ada penjualan di periode ini.</p>`;
+
+    // Tren harian (khusus mingguan/bulanan)
+    if(!isHarian){
+      const maxTotal = Math.max(...json.tren_harian.map(t => t.total), 1);
+      $("trenHarianList").innerHTML = json.tren_harian.map(t => `
+        <div class="tren-row">
+          <div class="tren-label">${new Date(t.tanggal + "T00:00:00").toLocaleDateString("id-ID", {day:"2-digit", month:"short"})}</div>
+          <div class="tren-bar-wrap"><div class="tren-bar" style="width:${((t.total / maxTotal) * 100).toFixed(0)}%"></div></div>
+          <div class="tren-value">${rupiah(t.total)}</div>
+        </div>
+      `).join("") || `<p style="color:var(--ink-soft);font-size:13.5px;padding:16px 0;">Belum ada data.</p>`;
+    }
+
+    // Riwayat transaksi (khusus harian)
+    if(isHarian){
+      const grup = kelompokkanTransaksi(json.items);
+      $("laporanList").innerHTML = grup.map(t => `
+        <div class="list-row">
+          <div class="lr-main">
+            <div class="lr-name">${t.id}</div>
+            <div class="lr-sub">${t.jam} · ${t.items} item · ${t.metode} · ${t.kasir}</div>
+          </div>
+          <div style="font-weight:700;font-size:13.5px;">${rupiah(t.total)}</div>
+        </div>
+      `).join("") || `<p style="color:var(--ink-soft);font-size:13.5px;padding:16px 0;">Belum ada transaksi hari ini.</p>`;
+    }
   }catch(err){
-    $("laporanList").innerHTML = `<p style="color:var(--red);font-size:13px;padding:16px 0;">Gagal memuat: ${err.message}</p>`;
+    $("produkTerlarisList").innerHTML = `<p style="color:var(--red);font-size:13px;padding:16px 0;">Gagal memuat: ${err.message}</p>`;
   }
 }
 
