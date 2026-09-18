@@ -26,7 +26,7 @@
     color:var(--ink);
     font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;
     -webkit-tap-highlight-color:transparent;
-    padding-bottom:78px;
+    padding-bottom:24px;
   }
   .wrap{max-width:640px;margin:0 auto;}
 
@@ -140,28 +140,59 @@
   .summary-card .sc-label{font-size:11.5px;color:var(--ink-soft);}
   .summary-card .sc-value{font-size:17px;font-weight:700;color:var(--navy);margin-top:2px;}
 
+  /* ===== Beranda (Dashboard) ===== */
+  .dash-card{
+    margin:14px 16px 6px;padding:20px 20px 18px;border-radius:18px;
+    background:linear-gradient(135deg,var(--navy) 0%,var(--navy-dark) 100%);color:#fff;
+  }
+  .dash-card .dc-label{font-size:12.5px;color:#CFE0DB;}
+  .dash-card .dc-value{font-size:26px;font-weight:800;margin-top:2px;}
+  .dash-card .dc-sub{font-size:12px;color:#CFE0DB;margin-top:8px;}
+  .dash-grid{
+    display:grid;grid-template-columns:repeat(3,1fr);gap:10px;padding:16px;
+  }
+  .dash-tile{
+    background:var(--paper);border:1px solid var(--line);border-radius:16px;
+    padding:16px 8px;display:flex;flex-direction:column;align-items:center;gap:8px;
+  }
+  .dash-tile:active{background:#F3EFE6;}
+  .dash-tile .dt-icon{font-size:24px;line-height:1;}
+  .dash-tile .dt-label{font-size:12px;font-weight:600;color:var(--ink);text-align:center;}
+
   .tren-row{display:flex;align-items:center;gap:8px;padding:6px 0;font-size:12px;}
   .tren-label{width:50px;color:var(--ink-soft);flex:none;}
   .tren-bar-wrap{flex:1;background:var(--line);border-radius:6px;height:10px;overflow:hidden;}
   .tren-bar{height:100%;background:var(--navy);border-radius:6px;}
   .tren-value{width:84px;text-align:right;flex:none;font-weight:600;}
 
-  /* ===== Bottom nav ===== */
-  .bottom-nav{
-    position:fixed;left:0;right:0;bottom:0;background:var(--paper);
-    border-top:1px solid var(--line);display:flex;z-index:40;
-    padding-bottom:env(safe-area-inset-bottom,0);
+  /* ===== Hamburger & Drawer menu ===== */
+  .hamburger-btn{
+    background:none;border:none;color:#fff;font-size:22px;line-height:1;
+    padding:4px 8px 4px 0;flex:none;
   }
-  .bottom-nav button{
-    flex:1;background:none;border:none;padding:9px 4px 8px;font-size:11px;
-    color:var(--ink-soft);display:flex;flex-direction:column;align-items:center;gap:3px;
+  .header-left{display:flex;align-items:center;gap:4px;}
+  .drawer-overlay{
+    position:fixed;inset:0;background:rgba(20,53,64,.45);z-index:70;display:none;
   }
-  .bottom-nav button.active{color:var(--navy);font-weight:700;}
-  .bottom-nav .nav-icon{font-size:18px;line-height:1;}
+  .drawer-overlay.show{display:block;}
+  .drawer-panel{
+    position:fixed;top:0;left:0;bottom:0;width:78%;max-width:300px;background:var(--paper);
+    z-index:71;transform:translateX(-100%);transition:transform .22s ease;
+    box-shadow:4px 0 18px rgba(0,0,0,.15);overflow-y:auto;padding:18px 14px;
+  }
+  .drawer-panel.show{transform:translateX(0);}
+  .drawer-title{color:var(--navy);font-size:18px;font-weight:800;padding:6px 10px 18px;}
+  .drawer-item{
+    width:100%;display:flex;align-items:center;gap:14px;background:none;border:none;
+    padding:13px 12px;border-radius:12px;font-size:14.5px;color:var(--ink);
+    text-align:left;margin-bottom:2px;
+  }
+  .drawer-item .nav-icon{font-size:19px;line-height:1;flex:none;width:22px;text-align:center;}
+  .drawer-item.active{background:#FBEBD3;color:var(--amber-dark);font-weight:700;}
 
   /* ===== Bottom cart bar ===== */
   .cart-bar{
-    position:fixed;bottom:56px;left:0;right:0;background:var(--navy);color:#fff;
+    position:fixed;bottom:0;left:0;right:0;background:var(--navy);color:#fff;
     padding:12px 16px;display:flex;align-items:center;gap:12px;z-index:30;
     box-shadow:0 -4px 14px rgba(0,0,0,.15);
   }
@@ -286,10 +317,25 @@
 <!-- ===== ISI APLIKASI (tersembunyi sampai login berhasil) ===== -->
 <div id="appContainer" style="display:none;">
 
+<!-- DRAWER MENU -->
+<div class="drawer-overlay" id="drawerOverlay"></div>
+<div class="drawer-panel" id="drawerPanel">
+  <div class="drawer-title">TOKO HIKMAH</div>
+  <button class="nav-btn drawer-item active" data-view="beranda"><span class="nav-icon">🏠</span>Beranda</button>
+  <button class="nav-btn drawer-item" data-view="kasir"><span class="nav-icon">🛒</span>Kasir</button>
+  <button class="nav-btn drawer-item" data-view="produk"><span class="nav-icon">📦</span>Produk</button>
+  <button class="nav-btn drawer-item" data-view="stok"><span class="nav-icon">📊</span>Stok</button>
+  <button class="nav-btn drawer-item" data-view="laporan"><span class="nav-icon">🧾</span>Laporan</button>
+  <button class="nav-btn drawer-item" data-view="pengaturan"><span class="nav-icon">⚙️</span>Pengaturan</button>
+</div>
+
 <header>
   <div class="wrap">
     <div class="row">
-      <h1>TOKO HIKMAH</h1>
+      <span class="header-left">
+        <button class="hamburger-btn" id="btnBukaDrawer">☰</button>
+        <h1>TOKO HIKMAH</h1>
+      </span>
       <span>
         <span class="kasir-tag" id="kasirTag">Kasir</span>
         <button class="logout-btn" id="btnLogout">Keluar</button>
@@ -309,8 +355,24 @@
 
 <div class="wrap">
 
+  <!-- ===== VIEW: BERANDA ===== -->
+  <div id="viewBeranda">
+    <div class="dash-card">
+      <div class="dc-label">Penjualan Hari Ini</div>
+      <div class="dc-value" id="dashTotalHariIni">Rp 0</div>
+      <div class="dc-sub" id="dashJumlahHariIni">0 transaksi</div>
+    </div>
+    <div class="dash-grid">
+      <button class="dash-tile" data-view="kasir"><span class="dt-icon">🛒</span><span class="dt-label">Kasir</span></button>
+      <button class="dash-tile" data-view="produk"><span class="dt-icon">📦</span><span class="dt-label">Produk</span></button>
+      <button class="dash-tile" data-view="stok"><span class="dt-icon">📊</span><span class="dt-label">Stok</span></button>
+      <button class="dash-tile" data-view="laporan"><span class="dt-icon">🧾</span><span class="dt-label">Laporan</span></button>
+      <button class="dash-tile" data-view="pengaturan"><span class="dt-icon">⚙️</span><span class="dt-label">Pengaturan</span></button>
+    </div>
+  </div>
+
   <!-- ===== VIEW: KASIR ===== -->
-  <div id="viewKasir">
+  <div id="viewKasir" style="display:none;">
     <div class="search-box">
       <div class="search-row">
         <input type="text" id="searchInput" placeholder="Cari nama produk..." />
@@ -635,21 +697,41 @@
 
 <div class="toast" id="toast"></div>
 
-<nav class="bottom-nav">
-  <button class="nav-btn active" data-view="kasir"><span class="nav-icon">🛒</span>Kasir</button>
-  <button class="nav-btn" data-view="produk"><span class="nav-icon">📦</span>Produk</button>
-  <button class="nav-btn" data-view="stok"><span class="nav-icon">📊</span>Stok</button>
-  <button class="nav-btn" data-view="laporan"><span class="nav-icon">🧾</span>Laporan</button>
-  <button class="nav-btn" data-view="pengaturan"><span class="nav-icon">⚙️</span>Atur</button>
-</nav>
-
 </div><!-- /appContainer -->
 
-<script>
+<script type="module">
 /* ============================================================
-   KONFIGURASI — ganti sesuai punya kamu kalau perlu
+   FIREBASE — konfigurasi & inisialisasi
    ============================================================ */
-const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwP_U7acRbU2EC99YArhcJP2FJKi9Fh3VAAEuqVeTq_r1F1-r3WsrLrLTDechbuU3Yn9Q/exec";
+import { initializeApp } from "https://www.gstatic.com/firebasejs/12.11.0/firebase-app.js";
+import {
+  initializeFirestore, persistentLocalCache, persistentSingleTabManager,
+  collection, doc, getDoc, getDocs, setDoc, updateDoc, deleteDoc,
+  query, where, writeBatch, increment
+} from "https://www.gstatic.com/firebasejs/12.11.0/firebase-firestore.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyBTjZiiSTwCQHvxwcHKUeHmRZ9pu7q7ddI",
+  authDomain: "toko-hikmah.firebaseapp.com",
+  projectId: "toko-hikmah",
+  storageBucket: "toko-hikmah.firebasestorage.app",
+  messagingSenderId: "580630074882",
+  appId: "1:580630074882:web:b85a5c7906ef02a0b2391b"
+};
+
+const fbApp = initializeApp(firebaseConfig);
+// persistentLocalCache = data tersimpan otomatis di HP, aplikasi tetap bisa dipakai
+// walau internet lemah/putus, lalu otomatis sinkron sendiri saat online lagi.
+const db = initializeFirestore(fbApp, {
+  localCache: persistentLocalCache({ tabManager: persistentSingleTabManager() })
+});
+
+const colProduk = collection(db, "produk");
+const colUser = collection(db, "user");
+const colTransaksi = collection(db, "transaksi");
+const colStokMasuk = collection(db, "stokMasuk");
+const colRekapHarian = collection(db, "rekapHarian");
+
 const PRINTER_LEBAR_KARAKTER = 32; // 32 = printer thermal 58mm (paling umum), ganti ke 48 kalau pakai printer 80mm
 
 /* ============================================================
@@ -663,27 +745,12 @@ let NAMA_KASIR = "";
 let ROLE_KASIR = "";
 const DAFTAR_KATEGORI = ["Semua", "Makanan", "Minuman", "Snack", "Sembako", "Obat", "Sabun", "Gas & Galon", "Lainnya"];
 
-
 const $ = (id) => document.getElementById(id);
 const rupiah = (n) => "Rp " + Math.round(n).toLocaleString("id-ID");
 
-// Kirim data ke Apps Script, otomatis coba ulang 1x kalau koneksi sempat putus
-// (mengatasi error "Failed to fetch" akibat sinyal internet lemah sesaat)
-async function postKeServer(action, data, percobaanKe){
-  percobaanKe = percobaanKe || 1;
-  try{
-    const res = await fetch(APPS_SCRIPT_URL, {
-      method: "POST", headers: { "Content-Type": "text/plain;charset=utf-8" },
-      body: JSON.stringify({ action, data })
-    });
-    return await res.json();
-  }catch(err){
-    if(percobaanKe < 2){
-      await new Promise(r => setTimeout(r, 1500));
-      return postKeServer(action, data, percobaanKe + 1);
-    }
-    throw new Error("Koneksi internet terputus. Cek sinyal HP, lalu coba lagi.");
-  }
+function setStatus(online, text){
+  $("statusDot").className = "status-dot" + (online ? "" : " off");
+  $("statusText").textContent = text;
 }
 
 $("tanggalNow").textContent = new Date().toLocaleDateString("id-ID", {weekday:"long", year:"numeric", month:"long", day:"numeric"});
@@ -695,10 +762,8 @@ let DAFTAR_USER = [];
 
 async function muatDaftarUser(){
   try{
-    const res = await fetch(APPS_SCRIPT_URL + "?action=getUser");
-    const json = await res.json();
-    if(!json.success) throw new Error(json.error || "Gagal memuat user");
-    DAFTAR_USER = json.data;
+    const snap = await getDocs(colUser);
+    DAFTAR_USER = snap.docs.map(d => ({ Nama: d.id, Role: d.data().role }));
     renderUserList();
   }catch(err){
     $("userList").innerHTML = `<div class="login-msg">Gagal memuat daftar user. Cek koneksi internet, lalu buka ulang halaman ini.</div>`;
@@ -707,7 +772,7 @@ async function muatDaftarUser(){
 
 function renderUserList(){
   if(!DAFTAR_USER.length){
-    $("userList").innerHTML = `<div class="login-msg">Belum ada user di sheet User.</div>`;
+    $("userList").innerHTML = `<div class="login-msg">Belum ada user. Tambahkan dulu lewat Firebase Console (koleksi "user").</div>`;
     return;
   }
   $("userList").innerHTML = DAFTAR_USER.map(u => `
@@ -729,9 +794,9 @@ function masuk(nama, role){
   terapkanBatasanRole();
   $("loginScreen").style.display = "none";
   $("appContainer").style.display = "block";
+  switchView(role.toLowerCase() === "owner" ? "beranda" : "kasir");
   muatProduk();
   muatDaftarUser();
-  syncAntrian();
 }
 
 function terapkanBatasanRole(){
@@ -766,17 +831,18 @@ $("btnLogout").onclick = () => {
 async function muatProduk(){
   setStatus(false, "Memuat produk...");
   try{
-    const res = await fetch(APPS_SCRIPT_URL + "?action=getProduk");
-    const json = await res.json();
-    if(!json.success) throw new Error(json.error || "Gagal memuat produk");
-    PRODUK = json.data.map(p => ({
-      id: p.ID_Produk, nama: p.Nama_Produk, kategori: p.Kategori || "Lainnya",
-      barcode: p.Barcode || "", satuan: p.Satuan || "pcs",
-      hargaBeli: Number(p.Harga_Beli) || 0,
-      harga: Number(p.Harga_Jual), stok: Number(p.Stok), stokMin: Number(p.Stok_Minimum)
-    }));
+    const snap = await getDocs(colProduk);
+    PRODUK = snap.docs.map(d => {
+      const p = d.data();
+      return {
+        id: d.id, nama: p.nama, kategori: p.kategori || "Lainnya",
+        barcode: p.barcode || "", satuan: p.satuan || "pcs",
+        hargaBeli: Number(p.hargaBeli) || 0,
+        harga: Number(p.hargaJual), stok: Number(p.stok), stokMin: Number(p.stokMin)
+      };
+    });
     localStorage.setItem("th_produk_cache", JSON.stringify(PRODUK));
-    setStatus(true, "Tersambung ke Google Sheets");
+    setStatus(true, "Tersambung ke Firebase");
     renderKategori();
     renderGrid();
   }catch(err){
@@ -790,11 +856,6 @@ async function muatProduk(){
       setStatus(false, "Gagal memuat. Cek koneksi internet.");
     }
   }
-}
-
-function setStatus(online, text){
-  $("statusDot").className = "status-dot" + (online ? "" : " off");
-  $("statusText").textContent = text;
 }
 
 /* ============================================================
@@ -839,27 +900,72 @@ $("searchInput").addEventListener("input", renderGrid);
 $("btnRefresh").onclick = muatProduk;
 
 /* ============================================================
-   NAVIGASI ANTAR HALAMAN (Kasir / Produk / Stok)
+   NAVIGASI ANTAR HALAMAN (Beranda / Kasir / Produk / Stok / Laporan / Pengaturan)
    ============================================================ */
-let currentView = "kasir";
+let currentView = "beranda";
 
 function switchView(view){
   currentView = view;
   document.querySelectorAll(".nav-btn").forEach(b => b.classList.toggle("active", b.dataset.view === view));
+  $("viewBeranda").style.display = view === "beranda" ? "" : "none";
   $("viewKasir").style.display = view === "kasir" ? "" : "none";
   $("viewProduk").style.display = view === "produk" ? "" : "none";
   $("viewStok").style.display = view === "stok" ? "" : "none";
   $("viewLaporan").style.display = view === "laporan" ? "" : "none";
   $("viewPengaturan").style.display = view === "pengaturan" ? "" : "none";
   renderCartBar();
+  if(view === "beranda") renderBeranda();
   if(view === "produk"){ renderKategoriProduk(); renderProdukList(); }
   if(view === "stok") renderStokList();
   if(view === "laporan") renderLaporan();
   if(view === "pengaturan") renderPengaturanList();
 }
 document.querySelectorAll(".nav-btn").forEach(btn=>{
+  btn.onclick = () => { switchView(btn.dataset.view); tutupDrawer(); };
+});
+document.querySelectorAll(".dash-tile").forEach(btn=>{
   btn.onclick = () => switchView(btn.dataset.view);
 });
+
+/* ============================================================
+   DRAWER MENU (hamburger)
+   ============================================================ */
+function bukaDrawer(){
+  $("drawerOverlay").classList.add("show");
+  $("drawerPanel").classList.add("show");
+}
+function tutupDrawer(){
+  $("drawerOverlay").classList.remove("show");
+  $("drawerPanel").classList.remove("show");
+}
+$("btnBukaDrawer").onclick = bukaDrawer;
+$("drawerOverlay").onclick = tutupDrawer;
+
+/* ============================================================
+   Helper: ambil transaksi (tidak dibatalkan) pada 1 tanggal tertentu
+   ============================================================ */
+async function ambilTransaksiTanggal(tanggal){
+  const q = query(colTransaksi, where("tanggal", "==", tanggal));
+  const snap = await getDocs(q);
+  return snap.docs.map(d => ({ id: d.id, ...d.data() }));
+}
+
+/* ============================================================
+   BERANDA (Dashboard) — ringkasan penjualan hari ini
+   ============================================================ */
+async function renderBeranda(){
+  try{
+    const tz = new Date();
+    const tanggal = formatTanggal(tz);
+    const semua = await ambilTransaksiTanggal(tanggal);
+    const aktif = semua.filter(t => t.status !== "Dibatalkan");
+    const total = aktif.reduce((s, t) => s + Number(t.total), 0);
+    $("dashTotalHariIni").textContent = rupiah(total);
+    $("dashJumlahHariIni").textContent = aktif.length + " transaksi";
+  }catch(err){
+    $("dashJumlahHariIni").textContent = "Gagal memuat data";
+  }
+}
 
 function bukaSheet(sheetId, overlayId){
   $(overlayId).classList.add("show");
@@ -977,17 +1083,12 @@ async function simpanProduk(){
   if(!id || !nama || !hargaJual){ showToast("Lengkapi ID, Nama, dan Harga Jual"); return; }
   if(produkFormMode === "tambah" && PRODUK.find(p => p.id === id)){ showToast("ID Produk sudah dipakai"); return; }
 
-  const action = produkFormMode === "tambah" ? "tambahProduk" : "editProduk";
-  const dataProduk = {
-    id_produk: id, nama_produk: nama, kategori, satuan, barcode,
-    harga_beli: hargaBeli, harga_jual: hargaJual, stok, stok_minimum: stokMin
-  };
+  const dataProduk = { nama, kategori, satuan, barcode, hargaBeli, hargaJual, stok, stokMin };
 
   $("btnSimpanProduk").disabled = true;
   $("btnSimpanProduk").textContent = "Menyimpan...";
   try{
-    const json = await postKeServer(action, dataProduk);
-    if(!json.success) throw new Error(json.error || "Gagal menyimpan");
+    await setDoc(doc(colProduk, id), dataProduk);
 
     if(produkFormMode === "tambah"){
       PRODUK.push({ id, nama, kategori, satuan, barcode, hargaBeli, harga: hargaJual, stok, stokMin });
@@ -1056,16 +1157,16 @@ async function simpanStokMasuk(){
   const p = PRODUK.find(x => x.id === stokFormProdukId);
   if(!p) return;
 
-  const dataStok = {
-    id_produk: p.id, nama_produk: p.nama, jumlah_masuk: jumlah,
-    supplier: $("sfSupplier").value.trim(), keterangan: $("sfKeterangan").value.trim()
-  };
-
   $("btnSimpanStok").disabled = true;
   $("btnSimpanStok").textContent = "Menyimpan...";
   try{
-    const json = await postKeServer("tambahStokMasuk", dataStok);
-    if(!json.success) throw new Error(json.error || "Gagal menyimpan");
+    const batch = writeBatch(db);
+    batch.set(doc(colStokMasuk), {
+      tanggal: formatTanggal(new Date()), idProduk: p.id, namaProduk: p.nama,
+      jumlahMasuk: jumlah, supplier: $("sfSupplier").value.trim(), keterangan: $("sfKeterangan").value.trim()
+    });
+    batch.update(doc(colProduk, p.id), { stok: increment(jumlah) });
+    await batch.commit();
 
     p.stok += jumlah;
     localStorage.setItem("th_produk_cache", JSON.stringify(PRODUK));
@@ -1083,31 +1184,17 @@ async function simpanStokMasuk(){
 $("btnSimpanStok").onclick = simpanStokMasuk;
 
 /* ============================================================
-   HALAMAN LAPORAN — riwayat hari ini & tutup kasir
+   HALAMAN LAPORAN — riwayat hari ini, mingguan/bulanan & tutup kasir
    ============================================================ */
-function kelompokkanTransaksi(rows){
-  const map = {};
-  rows.forEach(r => {
-    if(!map[r.ID_Transaksi]){
-      map[r.ID_Transaksi] = {
-        id: r.ID_Transaksi, jam: r.Jam, kasir: r.Kasir,
-        metode: r.Metode_Bayar, total: Number(r.Total_Transaksi), items: 0,
-        status: r.Status
-      };
-    }
-    map[r.ID_Transaksi].items += Number(r.Qty);
-  });
-  return Object.values(map).sort((a, b) => (a.jam < b.jam ? 1 : -1));
-}
-
 let periodeLaporan = "harian";
+
+function formatTanggal(d){
+  const y = d.getFullYear(), m = String(d.getMonth()+1).padStart(2,"0"), day = String(d.getDate()).padStart(2,"0");
+  return `${y}-${m}-${day}`;
+}
 
 function getRentangTanggal(periode){
   const now = new Date();
-  const fmt = (d) => {
-    const y = d.getFullYear(), m = String(d.getMonth()+1).padStart(2,"0"), day = String(d.getDate()).padStart(2,"0");
-    return `${y}-${m}-${day}`;
-  };
   let mulai = new Date(now);
   if(periode === "mingguan"){
     const hari = mulai.getDay(); // 0 = Minggu
@@ -1116,7 +1203,7 @@ function getRentangTanggal(periode){
   }else if(periode === "bulanan"){
     mulai = new Date(now.getFullYear(), now.getMonth(), 1);
   }
-  return { mulai: fmt(mulai), selesai: fmt(now) };
+  return { mulai: formatTanggal(mulai), selesai: formatTanggal(now) };
 }
 
 document.querySelectorAll("#periodeRow .cat-chip").forEach(btn=>{
@@ -1137,16 +1224,26 @@ async function renderLaporan(){
   const { mulai, selesai } = getRentangTanggal(periodeLaporan);
 
   try{
-    const res = await fetch(`${APPS_SCRIPT_URL}?action=getLaporanPeriode&tanggal_mulai=${mulai}&tanggal_selesai=${selesai}`);
-    const json = await res.json();
-    if(!json.success) throw new Error(json.error || "Gagal memuat laporan");
+    const q = query(colTransaksi, where("tanggal", ">=", mulai), where("tanggal", "<=", selesai));
+    const snap = await getDocs(q);
+    const semua = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+    const aktif = semua.filter(t => t.status !== "Dibatalkan");
 
-    $("lapTotalPenjualan").textContent = rupiah(json.total_penjualan);
-    $("lapJumlahTransaksi").textContent = json.jumlah_transaksi;
-    $("tkTotalSistem").textContent = rupiah(json.total_penjualan);
+    const totalPenjualan = aktif.reduce((s, t) => s + Number(t.total), 0);
+    $("lapTotalPenjualan").textContent = rupiah(totalPenjualan);
+    $("lapJumlahTransaksi").textContent = aktif.length;
+    $("tkTotalSistem").textContent = rupiah(totalPenjualan);
 
     // Produk terlaris (10 teratas)
-    const top = json.produk_terlaris.slice(0, 10);
+    const perProduk = {};
+    aktif.forEach(t => {
+      (t.items || []).forEach(it => {
+        if(!perProduk[it.idProduk]) perProduk[it.idProduk] = { nama: it.namaProduk, qty: 0, omzet: 0 };
+        perProduk[it.idProduk].qty += Number(it.qty);
+        perProduk[it.idProduk].omzet += Number(it.qty) * Number(it.hargaSatuan);
+      });
+    });
+    const top = Object.values(perProduk).sort((a,b) => b.qty - a.qty).slice(0, 10);
     $("produkTerlarisList").innerHTML = top.map((p, i) => `
       <div class="list-row">
         <div style="font-weight:700;color:var(--navy);width:24px;flex:none;">#${i+1}</div>
@@ -1160,8 +1257,11 @@ async function renderLaporan(){
 
     // Tren harian (khusus mingguan/bulanan)
     if(!isHarian){
-      const maxTotal = Math.max(...json.tren_harian.map(t => t.total), 1);
-      $("trenHarianList").innerHTML = json.tren_harian.map(t => `
+      const perHari = {};
+      aktif.forEach(t => { perHari[t.tanggal] = (perHari[t.tanggal] || 0) + Number(t.total); });
+      const trenHarian = Object.keys(perHari).sort().map(tgl => ({ tanggal: tgl, total: perHari[tgl] }));
+      const maxTotal = Math.max(...trenHarian.map(t => t.total), 1);
+      $("trenHarianList").innerHTML = trenHarian.map(t => `
         <div class="tren-row">
           <div class="tren-label">${new Date(t.tanggal + "T00:00:00").toLocaleDateString("id-ID", {day:"2-digit", month:"short"})}</div>
           <div class="tren-bar-wrap"><div class="tren-bar" style="width:${((t.total / maxTotal) * 100).toFixed(0)}%"></div></div>
@@ -1170,16 +1270,17 @@ async function renderLaporan(){
       `).join("") || `<p style="color:var(--ink-soft);font-size:13.5px;padding:16px 0;">Belum ada data.</p>`;
     }
 
-    // Riwayat transaksi (khusus harian)
+    // Riwayat transaksi (khusus harian) — urut terbaru dulu
     if(isHarian){
-      const grup = kelompokkanTransaksi(json.items);
-      $("laporanList").innerHTML = grup.map(t => {
+      const urut = [...semua].sort((a, b) => (a.jam < b.jam ? 1 : -1));
+      $("laporanList").innerHTML = urut.map(t => {
         const batal = t.status === "Dibatalkan";
+        const jumlahItem = (t.items || []).reduce((s, it) => s + Number(it.qty), 0);
         return `
         <div class="list-row" style="${batal ? 'opacity:.55;' : ''}">
           <div class="lr-main">
             <div class="lr-name">${t.id}${batal ? ' <span style="color:var(--red);font-weight:700;">(Dibatalkan)</span>' : ''}</div>
-            <div class="lr-sub">${t.jam} · ${t.items} item · ${t.metode} · ${t.kasir}</div>
+            <div class="lr-sub">${t.jam} · ${jumlahItem} item · ${t.metodeBayar} · ${t.kasir}</div>
           </div>
           <div style="display:flex;flex-direction:column;align-items:flex-end;gap:5px;flex:none;">
             <div style="font-weight:700;font-size:13.5px;${batal ? 'text-decoration:line-through;' : ''}">${rupiah(t.total)}</div>
@@ -1200,8 +1301,19 @@ async function renderLaporan(){
 async function batalkanTransaksi(idTrx){
   if(!confirm(`Batalkan transaksi ${idTrx}?\n\nStok akan otomatis dikembalikan.`)) return;
   try{
-    const json = await postKeServer("batalkanTransaksi", { id_transaksi: idTrx });
-    if(!json.success) throw new Error(json.error || "Gagal membatalkan transaksi");
+    const ref = doc(colTransaksi, idTrx);
+    const snap = await getDoc(ref);
+    if(!snap.exists()){ showToast("Transaksi tidak ditemukan"); return; }
+    const data = snap.data();
+    if(data.status === "Dibatalkan"){ showToast("Transaksi ini sudah dibatalkan sebelumnya"); return; }
+
+    const batch = writeBatch(db);
+    batch.update(ref, { status: "Dibatalkan" });
+    (data.items || []).forEach(it => {
+      batch.update(doc(colProduk, it.idProduk), { stok: increment(Number(it.qty)) });
+    });
+    await batch.commit();
+
     showToast("Transaksi dibatalkan, stok dikembalikan");
     renderLaporan();
     muatProduk();
@@ -1222,20 +1334,24 @@ async function simpanTutupKasir(){
   const modalAwal = Number($("tkModalAwal").value) || 0;
   const setoranAkhir = Number($("tkSetoranAkhir").value) || 0;
 
-  const dataTutup = {
-    modal_awal: modalAwal, setoran_akhir: setoranAkhir, kasir: NAMA_KASIR
-  };
-
   $("btnSimpanTutupKasir").disabled = true;
   $("btnSimpanTutupKasir").textContent = "Menyimpan...";
   try{
-    const json = await postKeServer("tutupKasir", dataTutup);
-    if(!json.success) throw new Error(json.error || "Gagal menyimpan");
+    const tanggal = formatTanggal(new Date());
+    const semua = await ambilTransaksiTanggal(tanggal);
+    const aktif = semua.filter(t => t.status !== "Dibatalkan");
+    const totalPenjualan = aktif.reduce((s, t) => s + Number(t.total), 0);
+    const selisih = setoranAkhir - (modalAwal + totalPenjualan);
+
+    await setDoc(doc(colRekapHarian, tanggal), {
+      tanggal, totalPenjualan, jumlahTransaksi: aktif.length,
+      modalAwal, setoranAkhir, selisih, kasir: NAMA_KASIR
+    });
 
     tutupSheet("sheetTutupKasir", "overlayTutupKasir");
-    const info = json.selisih === 0
+    const info = selisih === 0
       ? "Tutup kasir tersimpan. Uang pas, tidak ada selisih."
-      : `Tutup kasir tersimpan. Selisih: ${rupiah(json.selisih)}${json.selisih < 0 ? " (kurang)" : " (lebih)"}`;
+      : `Tutup kasir tersimpan. Selisih: ${rupiah(selisih)}${selisih < 0 ? " (kurang)" : " (lebih)"}`;
     showToast(info);
   }catch(err){
     showToast("Gagal simpan: " + err.message);
@@ -1306,31 +1422,35 @@ async function simpanUser(){
     return;
   }
 
-  const action = userFormMode === "tambah" ? "tambahUser" : "editUser";
-  const dataUser = userFormMode === "tambah"
-    ? { nama, role }
-    : { nama_lama: userFormNamaLama, nama, role };
-
   $("btnSimpanUser").disabled = true;
   $("btnSimpanUser").textContent = "Menyimpan...";
   try{
-    const json = await postKeServer(action, dataUser);
-    if(!json.success) throw new Error(json.error || "Gagal menyimpan");
-
     if(userFormMode === "tambah"){
-      DAFTAR_USER.push({ Nama: nama, Role: role, PIN: "-" });
-    }else{
+      await setDoc(doc(colUser, nama), { role });
+      DAFTAR_USER.push({ Nama: nama, Role: role });
+    }else if(nama !== userFormNamaLama){
+      // nama diubah → nama itu ID dokumen, jadi harus buat dokumen baru + hapus yang lama
+      const batch = writeBatch(db);
+      batch.set(doc(colUser, nama), { role });
+      batch.delete(doc(colUser, userFormNamaLama));
+      await batch.commit();
       const u = DAFTAR_USER.find(x => x.Nama === userFormNamaLama);
       if(u){ u.Nama = nama; u.Role = role; }
-      // kalau yang diedit adalah akun yang sedang login, update sesi juga
-      if(userFormNamaLama === NAMA_KASIR){
-        NAMA_KASIR = nama;
-        ROLE_KASIR = role;
-        $("kasirTag").textContent = nama + " · " + role;
-        sessionStorage.setItem("th_user", JSON.stringify({ nama, role }));
-        terapkanBatasanRole();
-      }
+    }else{
+      await updateDoc(doc(colUser, nama), { role });
+      const u = DAFTAR_USER.find(x => x.Nama === nama);
+      if(u) u.Role = role;
     }
+
+    // kalau yang diedit adalah akun yang sedang login, update sesi juga
+    if(userFormMode === "edit" && userFormNamaLama === NAMA_KASIR){
+      NAMA_KASIR = nama;
+      ROLE_KASIR = role;
+      $("kasirTag").textContent = nama + " · " + role;
+      sessionStorage.setItem("th_user", JSON.stringify({ nama, role }));
+      terapkanBatasanRole();
+    }
+
     tutupSheet("sheetUserForm", "overlayUserForm");
     renderPengaturanList();
     showToast(userFormMode === "tambah" ? "User ditambahkan" : "User diperbarui");
@@ -1348,9 +1468,7 @@ async function hapusUser(nama){
   if(!confirm(`Hapus user "${nama}"?`)) return;
 
   try{
-    const json = await postKeServer("hapusUser", { nama });
-    if(!json.success) throw new Error(json.error || "Gagal menghapus");
-
+    await deleteDoc(doc(colUser, nama));
     DAFTAR_USER = DAFTAR_USER.filter(u => u.Nama !== nama);
     renderPengaturanList();
     showToast("User dihapus");
@@ -1544,96 +1662,66 @@ $("btnCloseSheet").onclick = tutupSheetBayar;
 $("overlay").onclick = tutupSheetBayar;
 
 /* ============================================================
-   SIMPAN TRANSAKSI (kirim ke Google Sheets)
+   SIMPAN TRANSAKSI (langsung ke Firestore)
+   Catatan: tidak menunggu (await) hasil akhir supaya kasir tidak
+   pernah "nge-hang" saat koneksi lemah — struk & keranjang langsung
+   beres di layar, sementara data tersimpan (otomatis sinkron oleh
+   Firestore begitu ada koneksi, berkat persistentLocalCache).
    ============================================================ */
-async function simpanTransaksi(){
+function buatIdTransaksi(){
+  const now = new Date();
+  const pad = (n) => String(n).padStart(2, "0");
+  return "TRX-" + formatTanggal(now).replace(/-/g,"") + "-" +
+    pad(now.getHours()) + pad(now.getMinutes()) + pad(now.getSeconds());
+}
+
+function simpanTransaksi(){
   const { subtotal, diskon, total, dibayar, kembalian } = hitungTotal();
   const items = Object.values(cart).map(i => ({
-    id_produk: i.id, nama_produk: i.nama, qty: i.qty, harga_satuan: i.harga
+    idProduk: i.id, namaProduk: i.nama, qty: i.qty, hargaSatuan: i.harga
   }));
+  if(items.length === 0) return;
 
-  const payload = {
-    action: "simpanTransaksi",
-    data: {
-      kasir: NAMA_KASIR,
-      metode_bayar: $("metodeBayar").value,
-      nominal_dibayar: dibayar,
-      diskon: diskon,
-      items: items
-    }
+  const now = new Date();
+  const idTransaksi = buatIdTransaksi();
+  const dataTransaksi = {
+    idTransaksi, tanggal: formatTanggal(now),
+    jam: String(now.getHours()).padStart(2,"0") + ":" + String(now.getMinutes()).padStart(2,"0"),
+    kasir: NAMA_KASIR, items, subtotal, diskon, total,
+    metodeBayar: $("metodeBayar").value, nominalDibayar: dibayar, kembalian,
+    status: "Selesai"
   };
 
   $("btnSimpan").disabled = true;
   $("btnSimpan").textContent = "Menyimpan...";
 
-  try{
-    const res = await fetch(APPS_SCRIPT_URL, {
-      method: "POST",
-      headers: { "Content-Type": "text/plain;charset=utf-8" },
-      body: JSON.stringify(payload)
-    });
-    const json = await res.json();
-    if(!json.success) throw new Error(json.error || "Gagal menyimpan");
+  // kurangi stok lokal & tampilkan struk LANGSUNG (tidak menunggu server)
+  items.forEach(it => {
+    const p = PRODUK.find(x => x.id === it.idProduk);
+    if(p) p.stok -= it.qty;
+  });
+  localStorage.setItem("th_produk_cache", JSON.stringify(PRODUK));
+  tampilkanStruk(idTransaksi, items, subtotal, diskon, total, dibayar, kembalian);
+  cart = {};
+  renderCartBar();
+  renderGrid();
+  tutupSheetBayar();
+  $("inputDiskon").value = 0;
+  $("inputBayar").value = "";
+  $("btnSimpan").disabled = false;
+  $("btnSimpan").textContent = "Simpan Transaksi";
 
-    // kurangi stok lokal biar tampilan langsung update
-    items.forEach(it => {
-      const p = PRODUK.find(x => x.id === it.id_produk);
-      if(p) p.stok -= it.qty;
-    });
-
-    tampilkanStruk(json.id_transaksi, items, subtotal, diskon, total, dibayar, kembalian);
-    cart = {};
-    renderCartBar();
-    renderGrid();
-    tutupSheetBayar();
-    $("inputDiskon").value = 0;
-    $("inputBayar").value = "";
-  }catch(err){
-    // OFFLINE FALLBACK: simpan ke antrian lokal, sync belakangan
-    antreOffline(payload);
-    tampilkanStruk("(offline) menunggu sync", items, subtotal, diskon, total, dibayar, kembalian);
-    cart = {};
-    renderCartBar();
-    renderGrid();
-    tutupSheetBayar();
-    showToast("Tersimpan offline, akan sync otomatis saat online");
-  }finally{
-    $("btnSimpan").textContent = "Simpan Transaksi";
-  }
+  // kirim ke Firestore di belakang layar
+  const batch = writeBatch(db);
+  batch.set(doc(colTransaksi, idTransaksi), dataTransaksi);
+  items.forEach(it => {
+    batch.update(doc(colProduk, it.idProduk), { stok: increment(-it.qty) });
+  });
+  batch.commit().catch(err => {
+    showToast("Perhatian: transaksi " + idTransaksi + " gagal tersimpan (" + err.message + ")");
+  });
 }
 $("btnSimpan").onclick = simpanTransaksi;
-
-/* ============================================================
-   ANTRIAN OFFLINE (kalau internet lagi mati/lemah)
-   ============================================================ */
-function antreOffline(payload){
-  const antrian = JSON.parse(localStorage.getItem("th_antrian") || "[]");
-  antrian.push(payload);
-  localStorage.setItem("th_antrian", JSON.stringify(antrian));
-  updateOfflineNote();
-}
-async function syncAntrian(){
-  const antrian = JSON.parse(localStorage.getItem("th_antrian") || "[]");
-  if(!antrian.length) return;
-  const sisa = [];
-  for(const payload of antrian){
-    try{
-      const res = await fetch(APPS_SCRIPT_URL, {
-        method:"POST", headers:{"Content-Type":"text/plain;charset=utf-8"},
-        body: JSON.stringify(payload)
-      });
-      const json = await res.json();
-      if(!json.success) sisa.push(payload);
-    }catch(e){ sisa.push(payload); }
-  }
-  localStorage.setItem("th_antrian", JSON.stringify(sisa));
-  updateOfflineNote();
-  if(sisa.length === 0 && antrian.length > 0) showToast("Semua transaksi offline berhasil disinkronkan");
-}
-function updateOfflineNote(){
-  const antrian = JSON.parse(localStorage.getItem("th_antrian") || "[]");
-  $("offlineNote").textContent = antrian.length ? `${antrian.length} transaksi menunggu sinkron` : "";
-}
 
 /* ============================================================
    STRUK
@@ -1651,7 +1739,7 @@ function tampilkanStruk(idTrx, items, subtotal, diskon, total, dibayar, kembalia
     <div>Kasir: ${NAMA_KASIR}</div>
     <hr/>`;
   items.forEach(i=>{
-    html += `<div class="line"><span>${i.nama_produk} x${i.qty}</span><span>${rupiah(i.qty*i.harga_satuan)}</span></div>`;
+    html += `<div class="line"><span>${i.namaProduk} x${i.qty}</span><span>${rupiah(i.qty*i.hargaSatuan)}</span></div>`;
   });
   html += `
     <hr/>
@@ -1727,7 +1815,7 @@ function cetakViaRawBT(){
   p.line("Kasir: " + NAMA_KASIR);
   p.line(garis);
   items.forEach(i => {
-    p.line(formatBaris(`${i.nama_produk} x${i.qty}`, rupiahPolos(i.qty * i.harga_satuan), W));
+    p.line(formatBaris(`${i.namaProduk} x${i.qty}`, rupiahPolos(i.qty * i.hargaSatuan), W));
   });
   p.line(garis);
   p.line(formatBaris("Subtotal", rupiahPolos(subtotal), W));
@@ -1760,10 +1848,9 @@ function showToast(msg){
 /* ============================================================
    INIT
    ============================================================ */
-window.addEventListener("online", () => { setStatus(true,"Kembali online"); syncAntrian(); if(NAMA_KASIR) muatProduk(); });
-window.addEventListener("offline", () => setStatus(false,"Offline"));
+window.addEventListener("online", () => { setStatus(true,"Kembali online"); if(NAMA_KASIR) muatProduk(); });
+window.addEventListener("offline", () => setStatus(false,"Offline — data akan sinkron otomatis"));
 
-updateOfflineNote();
 </script>
 </body>
 </html>
