@@ -36,24 +36,23 @@
   header{
     background:var(--navy);
     color:#fff;
-    padding:16px 18px 14px;
+    padding:14px 18px;
     position:sticky;top:0;z-index:20;
   }
-  header .row{display:flex;justify-content:space-between;align-items:baseline;}
-  header h1{font-size:19px;margin:0;letter-spacing:.2px;font-weight:700;}
-  header .meta{font-size:12px;color:#D9D5F5;margin-top:2px;}
-  header .kasir-tag{font-size:12px;background:rgba(255,255,255,.12);padding:4px 10px;border-radius:999px;}
-
-  .status-bar{
-    font-size:12px;padding:7px 18px;display:flex;align-items:center;gap:6px;
-    background:var(--navy-dark);color:#D9D5F5;
+  header .row{display:flex;justify-content:space-between;align-items:center;}
+  header h1{font-size:18px;margin:0;letter-spacing:.2px;font-weight:700;}
+  header .kasir-tag{font-size:12px;background:rgba(255,255,255,.14);padding:4px 10px;border-radius:999px;}
+  .header-right{display:flex;align-items:center;gap:8px;}
+  .icon-btn{
+    background:none;border:none;color:#fff;opacity:.85;flex:none;
+    width:28px;height:28px;display:flex;align-items:center;justify-content:center;
   }
-  .status-dot{width:7px;height:7px;border-radius:50%;background:#7CC48F;flex:none;}
-  .status-dot.off{background:#E0A63C;}
-  .status-bar button{
-    margin-left:auto;background:none;border:1px solid rgba(255,255,255,.35);
-    color:#fff;font-size:11px;padding:3px 9px;border-radius:999px;
+  .icon-btn svg{width:18px;height:18px;display:block;}
+  .status-dot-mini{
+    width:8px;height:8px;border-radius:50%;background:#7CC48F;flex:none;
+    box-shadow:0 0 0 2px rgba(255,255,255,.15);
   }
+  .status-dot-mini.off{background:#E0A63C;}
 
   /* ===== Search ===== */
   .search-box{padding:14px 16px 8px;}
@@ -322,10 +321,6 @@
   .user-item .ui-name{font-size:15px;font-weight:700;}
   .user-item .ui-role{font-size:11px;color:#D9D5F5;background:rgba(255,255,255,.12);padding:3px 10px;border-radius:999px;}
   .login-msg{color:#D9D5F5;font-size:13px;}
-  .logout-btn{
-    background:none;border:1px solid rgba(255,255,255,.35);color:#fff;
-    font-size:11px;padding:4px 10px;border-radius:999px;margin-left:8px;
-  }
 </style>
 </head>
 
@@ -365,22 +360,19 @@
         <button class="hamburger-btn" id="btnBukaDrawer"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg></button>
         <h1>TOKO HIKMAH</h1>
       </span>
-      <span>
+      <span class="header-right">
+        <button class="icon-btn" id="btnRefresh" title="Muat ulang" aria-label="Muat ulang">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 1 1-3-6.7"/><polyline points="21 3 21 9 15 9"/></svg>
+        </button>
+        <span class="status-dot-mini" id="statusDot" title="Menghubungkan..."></span>
         <span class="kasir-tag" id="kasirTag">Kasir</span>
-        <button class="logout-btn" id="btnLogout">Keluar</button>
+        <button class="icon-btn" id="btnLogout" title="Keluar" aria-label="Keluar">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+        </button>
       </span>
     </div>
-    <div class="meta" id="tanggalNow">—</div>
   </div>
 </header>
-
-<div class="status-bar">
-  <div class="wrap" style="display:flex;align-items:center;gap:6px;">
-    <span class="status-dot" id="statusDot"></span>
-    <span id="statusText">Menghubungkan...</span>
-    <button id="btnRefresh">Muat ulang</button>
-  </div>
-</div>
 
 <div class="wrap">
 
@@ -844,11 +836,10 @@ function denganBatasWaktu(promise, detik){
 }
 
 function setStatus(online, text){
-  $("statusDot").className = "status-dot" + (online ? "" : " off");
-  $("statusText").textContent = text;
+  const dot = $("statusDot");
+  dot.className = "status-dot-mini" + (online ? "" : " off");
+  dot.title = text;
 }
-
-$("tanggalNow").textContent = new Date().toLocaleDateString("id-ID", {weekday:"long", year:"numeric", month:"long", day:"numeric"});
 
 /* ============================================================
    LOGIN — pilih user dari daftar (tanpa PIN)
@@ -946,11 +937,13 @@ async function muatProduk(){
     if(cache){
       PRODUK = JSON.parse(cache);
       setStatus(false, "Offline — pakai data tersimpan");
+      showToast("Offline — memakai data produk tersimpan di HP");
       renderKategori();
       renderGrid();
       renderPesanan();
     }else{
       setStatus(false, "Gagal memuat. Cek koneksi internet.");
+      showToast("Gagal memuat produk. Cek koneksi internet.");
     }
   }
 }
@@ -2119,8 +2112,8 @@ function showToast(msg){
 /* ============================================================
    INIT
    ============================================================ */
-window.addEventListener("online", () => { setStatus(true,"Kembali online"); if(NAMA_KASIR) muatProduk(); });
-window.addEventListener("offline", () => setStatus(false,"Offline — data akan sinkron otomatis"));
+window.addEventListener("online", () => { setStatus(true,"Kembali online"); showToast("Kembali online"); if(NAMA_KASIR) muatProduk(); });
+window.addEventListener("offline", () => { setStatus(false,"Offline — data akan sinkron otomatis"); showToast("Koneksi terputus — data tersimpan & sinkron otomatis nanti"); });
 
 </script>
 </body>
