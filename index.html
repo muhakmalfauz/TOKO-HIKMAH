@@ -493,8 +493,26 @@
       <input type="text" id="pfNama" placeholder="misal Kopi Sachet" />
     </div>
     <div class="pay-row">
-      <div class="field"><label>Kategori</label><input type="text" id="pfKategori" placeholder="Minuman" /></div>
-      <div class="field"><label>Satuan</label><input type="text" id="pfSatuan" placeholder="pcs" /></div>
+      <div class="field">
+        <label>Kategori</label>
+        <select id="pfKategori">
+          <option value="Sembako">Sembako</option>
+          <option value="Minuman">Minuman</option>
+          <option value="Sabun">Sabun</option>
+          <option value="Obat">Obat</option>
+          <option value="Gas & Galon">Gas & Galon</option>
+          <option value="Lainnya">Lainnya</option>
+        </select>
+      </div>
+      <div class="field">
+        <label>Satuan</label>
+        <select id="pfSatuan">
+          <option value="pcs">pcs</option>
+          <option value="kg">kg</option>
+          <option value="ltr">ltr</option>
+          <option value="pck">pck</option>
+        </select>
+      </div>
     </div>
     <div class="field">
       <label>Barcode (opsional)</label>
@@ -867,7 +885,7 @@ function bukaFormTambahProduk(){
   $("pfId").value = saranIdProduk();
   $("pfId").disabled = false;
   $("pfNama").value = "";
-  $("pfKategori").value = "";
+  $("pfKategori").value = "Sembako";
   $("pfSatuan").value = "pcs";
   $("pfBarcode").value = "";
   $("pfHargaBeli").value = "";
@@ -878,6 +896,18 @@ function bukaFormTambahProduk(){
 }
 $("btnTambahProduk").onclick = bukaFormTambahProduk;
 
+function pilihAtauTambahOpsi(selectEl, value){
+  if(!value) return;
+  const ada = Array.from(selectEl.options).some(o => o.value === value);
+  if(!ada){
+    const opt = document.createElement("option");
+    opt.value = value;
+    opt.textContent = value + " (data lama)";
+    selectEl.appendChild(opt);
+  }
+  selectEl.value = value;
+}
+
 function bukaFormEditProduk(id){
   const p = PRODUK.find(x => x.id === id);
   if(!p) return;
@@ -886,8 +916,8 @@ function bukaFormEditProduk(id){
   $("pfId").value = p.id;
   $("pfId").disabled = true;
   $("pfNama").value = p.nama;
-  $("pfKategori").value = p.kategori;
-  $("pfSatuan").value = p.satuan || "pcs";
+  pilihAtauTambahOpsi($("pfKategori"), p.kategori);
+  pilihAtauTambahOpsi($("pfSatuan"), p.satuan || "pcs");
   $("pfBarcode").value = p.barcode || "";
   $("pfHargaBeli").value = p.hargaBeli || "";
   $("pfHargaJual").value = p.harga;
