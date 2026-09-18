@@ -333,6 +333,7 @@
     <div class="search-box">
       <input type="text" id="searchProduk" placeholder="Cari produk..." />
     </div>
+    <div class="cat-row" id="catRowProduk"></div>
     <div class="list-panel" id="produkList"></div>
   </div>
 
@@ -496,10 +497,12 @@
       <div class="field">
         <label>Kategori</label>
         <select id="pfKategori">
-          <option value="Sembako">Sembako</option>
+          <option value="Makanan">Makanan</option>
           <option value="Minuman">Minuman</option>
-          <option value="Sabun">Sabun</option>
+          <option value="Snack">Snack</option>
+          <option value="Sembako">Sembako</option>
           <option value="Obat">Obat</option>
+          <option value="Sabun">Sabun</option>
           <option value="Gas & Galon">Gas & Galon</option>
           <option value="Lainnya">Lainnya</option>
         </select>
@@ -655,8 +658,11 @@ const PRINTER_LEBAR_KARAKTER = 32; // 32 = printer thermal 58mm (paling umum), g
 let PRODUK = [];
 let cart = {}; // { id_produk: {..produk, qty} }
 let activeCategory = "Semua";
+let activeCategoryProduk = "Semua";
 let NAMA_KASIR = "";
 let ROLE_KASIR = "";
+const DAFTAR_KATEGORI = ["Semua", "Makanan", "Minuman", "Snack", "Sembako", "Obat", "Sabun", "Gas & Galon", "Lainnya"];
+
 
 const $ = (id) => document.getElementById(id);
 const rupiah = (n) => "Rp " + Math.round(n).toLocaleString("id-ID");
@@ -776,8 +782,7 @@ function setStatus(online, text){
    RENDER PRODUK
    ============================================================ */
 function renderKategori(){
-  const kategoris = ["Semua", ...new Set(PRODUK.map(p => p.kategori))];
-  $("catRow").innerHTML = kategoris.map(k =>
+  $("catRow").innerHTML = DAFTAR_KATEGORI.map(k =>
     `<button class="cat-chip ${k===activeCategory?'active':''}" data-cat="${k}">${k}</button>`
   ).join("");
   $("catRow").querySelectorAll(".cat-chip").forEach(btn=>{
@@ -828,7 +833,7 @@ function switchView(view){
   $("viewLaporan").style.display = view === "laporan" ? "" : "none";
   $("viewPengaturan").style.display = view === "pengaturan" ? "" : "none";
   renderCartBar();
-  if(view === "produk") renderProdukList();
+  if(view === "produk"){ renderKategoriProduk(); renderProdukList(); }
   if(view === "stok") renderStokList();
   if(view === "laporan") renderLaporan();
   if(view === "pengaturan") renderPengaturanList();
@@ -851,9 +856,19 @@ function tutupSheet(sheetId, overlayId){
    ============================================================ */
 let produkFormMode = "tambah";
 
+function renderKategoriProduk(){
+  $("catRowProduk").innerHTML = DAFTAR_KATEGORI.map(k =>
+    `<button class="cat-chip ${k===activeCategoryProduk?'active':''}" data-cat="${k}">${k}</button>`
+  ).join("");
+  $("catRowProduk").querySelectorAll(".cat-chip").forEach(btn=>{
+    btn.onclick = () => { activeCategoryProduk = btn.dataset.cat; renderKategoriProduk(); renderProdukList(); };
+  });
+}
+
 function renderProdukList(){
   const q = $("searchProduk").value.trim().toLowerCase();
-  const list = PRODUK.filter(p => p.nama.toLowerCase().includes(q));
+  let list = PRODUK.filter(p => p.nama.toLowerCase().includes(q));
+  if(activeCategoryProduk !== "Semua") list = list.filter(p => p.kategori === activeCategoryProduk);
   $("produkList").innerHTML = list.map(p => `
     <div class="list-row">
       <div class="lr-main">
