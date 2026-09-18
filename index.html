@@ -133,9 +133,31 @@
   .list-row .lr-actions{display:flex;gap:6px;flex:none;}
 
   /* ===== Halaman Laporan ===== */
-  .summary-cards{display:flex;gap:10px;padding:8px 16px 4px;}
+  .summary-cards{display:flex;gap:10px;padding:8px 16px 4px;flex-wrap:wrap;}
+
+  /* ===== Halaman Riwayat Penjualan ===== */
+  .riwayat-filter-row{display:flex;gap:8px;padding:10px 16px 4px;flex-wrap:wrap;}
+  .riwayat-select{
+    flex:none;padding:10px 10px;border-radius:10px;border:1px solid var(--line);
+    font-size:13px;background:var(--paper);
+  }
+  .riwayat-tanggal-wrap{flex:1;display:flex;gap:6px;min-width:130px;}
+  .riwayat-date-input{
+    flex:1;min-width:0;padding:10px 8px;border-radius:10px;border:1px solid var(--line);
+    font-size:12.5px;background:var(--paper);
+  }
+  .kat-row{
+    background:var(--paper);border:1px solid var(--line);border-radius:12px;
+    padding:12px 14px;margin-bottom:8px;
+  }
+  .kat-row-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;}
+  .kat-row-nama{font-size:13.5px;font-weight:600;}
+  .kat-row-persen{font-size:13px;font-weight:700;color:var(--navy);}
+  .kat-bar-wrap{background:var(--line);border-radius:6px;height:8px;overflow:hidden;}
+  .kat-bar{height:100%;background:var(--amber);border-radius:6px;}
+  .kat-row-omset{font-size:11.5px;color:var(--ink-soft);margin-top:4px;}
   .summary-card{
-    flex:1;background:var(--paper);border:1px solid var(--line);border-radius:12px;padding:12px 14px;
+    flex:1 1 45%;background:var(--paper);border:1px solid var(--line);border-radius:12px;padding:12px 14px;
   }
   .summary-card .sc-label{font-size:11.5px;color:var(--ink-soft);}
   .summary-card .sc-value{font-size:17px;font-weight:700;color:var(--navy);margin-top:2px;}
@@ -324,8 +346,8 @@
   <button class="nav-btn drawer-item active" data-view="beranda"><span class="nav-icon">🏠</span>Beranda</button>
   <button class="nav-btn drawer-item" data-view="kasir"><span class="nav-icon">🛒</span>Kasir</button>
   <button class="nav-btn drawer-item" data-view="produk"><span class="nav-icon">📦</span>Produk</button>
-  <button class="nav-btn drawer-item" data-view="stok"><span class="nav-icon">📊</span>Stok</button>
-  <button class="nav-btn drawer-item" data-view="pesanan"><span class="nav-icon">🛍️</span>Daftar Pesanan</button>
+  <button class="nav-btn drawer-item" data-view="riwayat"><span class="nav-icon">📈</span>Riwayat Penjualan</button>
+  <button class="nav-btn drawer-item" data-view="pesanan"><span class="nav-icon">📊</span>Daftar Pesanan</button>
   <button class="nav-btn drawer-item" data-view="laporan"><span class="nav-icon">🧾</span>Laporan</button>
   <button class="nav-btn drawer-item" data-view="pengaturan"><span class="nav-icon">⚙️</span>Pengaturan</button>
 </div>
@@ -366,8 +388,8 @@
     <div class="dash-grid">
       <button class="dash-tile" data-view="kasir"><span class="dt-icon">🛒</span><span class="dt-label">Kasir</span></button>
       <button class="dash-tile" data-view="produk"><span class="dt-icon">📦</span><span class="dt-label">Produk</span></button>
-      <button class="dash-tile" data-view="stok"><span class="dt-icon">📊</span><span class="dt-label">Stok</span></button>
-      <button class="dash-tile" data-view="pesanan"><span class="dt-icon">🛍️</span><span class="dt-label">Daftar Pesanan</span></button>
+      <button class="dash-tile" data-view="riwayat"><span class="dt-icon">📈</span><span class="dt-label">Riwayat Penjualan</span></button>
+      <button class="dash-tile" data-view="pesanan"><span class="dt-icon">📊</span><span class="dt-label">Daftar Pesanan</span></button>
       <button class="dash-tile" data-view="laporan"><span class="dt-icon">🧾</span><span class="dt-label">Laporan</span></button>
       <button class="dash-tile" data-view="pengaturan"><span class="dt-icon">⚙️</span><span class="dt-label">Pengaturan</span></button>
     </div>
@@ -401,15 +423,46 @@
     <div class="list-panel" id="produkList"></div>
   </div>
 
-  <!-- ===== VIEW: STOK ===== -->
-  <div id="viewStok" style="display:none;">
+  <!-- ===== VIEW: RIWAYAT PENJUALAN ===== -->
+  <div id="viewRiwayat" style="display:none;">
     <div class="page-head">
-      <h2>Stok Barang</h2>
+      <h2>Riwayat Penjualan</h2>
     </div>
-    <div class="search-box">
-      <input type="text" id="searchStok" placeholder="Cari produk..." />
+
+    <div class="riwayat-filter-row">
+      <select id="riwayatPeriode" class="riwayat-select">
+        <option value="harian">Harian</option>
+        <option value="mingguan">Mingguan</option>
+        <option value="bulanan">Bulanan</option>
+        <option value="tahunan">Tahunan</option>
+        <option value="custom">Custom</option>
+      </select>
+      <div id="riwayatTanggalWrap" class="riwayat-tanggal-wrap"></div>
     </div>
-    <div class="list-panel" id="stokList"></div>
+
+    <div class="summary-cards">
+      <div class="summary-card">
+        <div class="sc-label">Jumlah Transaksi</div>
+        <div class="sc-value" id="rwJumlahTransaksi">0</div>
+      </div>
+      <div class="summary-card">
+        <div class="sc-label">Produk Terjual</div>
+        <div class="sc-value" id="rwJumlahProduk">0</div>
+      </div>
+      <div class="summary-card">
+        <div class="sc-label">Omset</div>
+        <div class="sc-value" id="rwOmset">Rp 0</div>
+      </div>
+      <div class="summary-card">
+        <div class="sc-label">Profit</div>
+        <div class="sc-value" id="rwProfit">Rp 0</div>
+      </div>
+    </div>
+
+    <div class="page-head" style="padding-top:14px;">
+      <h2 style="font-size:14.5px;">Rincian per Kategori</h2>
+    </div>
+    <div class="list-panel" id="rwKategoriList"></div>
   </div>
 
   <!-- ===== VIEW: DAFTAR PESANAN (produk stok habis) ===== -->
@@ -684,6 +737,19 @@
   </div>
 </div>
 
+<!-- SHEET: DRILL-DOWN KATEGORI (Riwayat Penjualan) -->
+<div class="sheet-overlay" id="overlayRwKategori"></div>
+<div class="sheet" id="sheetRwKategori">
+  <div class="sheet-handle"></div>
+  <div class="sheet-head">
+    <h2 id="rwKategoriJudul">Kategori</h2>
+    <button id="btnCloseRwKategori">✕</button>
+  </div>
+  <div class="sheet-body">
+    <div class="list-panel" id="rwKategoriProdukList" style="padding:0;"></div>
+  </div>
+</div>
+
 <!-- SHEET: TAMBAH/EDIT USER -->
 <div class="sheet-overlay" id="overlayUserForm"></div>
 <div class="sheet" id="sheetUserForm">
@@ -935,14 +1001,14 @@ function switchView(view){
   $("viewBeranda").style.display = view === "beranda" ? "" : "none";
   $("viewKasir").style.display = view === "kasir" ? "" : "none";
   $("viewProduk").style.display = view === "produk" ? "" : "none";
-  $("viewStok").style.display = view === "stok" ? "" : "none";
+  $("viewRiwayat").style.display = view === "riwayat" ? "" : "none";
   $("viewPesanan").style.display = view === "pesanan" ? "" : "none";
   $("viewLaporan").style.display = view === "laporan" ? "" : "none";
   $("viewPengaturan").style.display = view === "pengaturan" ? "" : "none";
   renderCartBar();
   if(view === "beranda") renderBeranda();
   if(view === "produk"){ renderKategoriProduk(); renderProdukList(); }
-  if(view === "stok") renderStokList();
+  if(view === "riwayat") renderRiwayatPenjualan();
   if(view === "pesanan") renderPesanan();
   if(view === "laporan") renderLaporan();
   if(view === "pengaturan") renderPengaturanList();
@@ -1140,31 +1206,9 @@ async function simpanProduk(){
 $("btnSimpanProduk").onclick = simpanProduk;
 
 /* ============================================================
-   HALAMAN STOK — daftar & form tambah stok masuk
+   FORM STOK MASUK (dipakai dari halaman Daftar Pesanan)
    ============================================================ */
 let stokFormProdukId = null;
-
-function renderStokList(){
-  const q = $("searchStok").value.trim().toLowerCase();
-  const list = PRODUK.filter(p => p.nama.toLowerCase().includes(q));
-  $("stokList").innerHTML = list.map(p => {
-    const low = p.stok <= p.stokMin;
-    return `
-      <div class="list-row">
-        <div class="lr-main">
-          <div class="lr-name">${p.nama}</div>
-          <div class="lr-sub">${p.kategori} · ${p.satuan || 'pcs'}</div>
-        </div>
-        <div class="lr-stok ${low ? 'low' : ''}">${p.stok}</div>
-        <button class="lr-btn" data-add="${p.id}">+ Stok</button>
-      </div>`;
-  }).join("") || `<p style="color:var(--ink-soft);font-size:13.5px;padding:16px 0;">Belum ada produk.</p>`;
-
-  $("stokList").querySelectorAll("[data-add]").forEach(btn=>{
-    btn.onclick = () => bukaFormStok(btn.dataset.add);
-  });
-}
-$("searchStok").addEventListener("input", renderStokList);
 
 function bukaFormStok(id){
   const p = PRODUK.find(x => x.id === id);
@@ -1199,7 +1243,6 @@ async function simpanStokMasuk(){
     p.stok += jumlah;
     localStorage.setItem("th_produk_cache", JSON.stringify(PRODUK));
     tutupSheet("sheetStokForm", "overlayStokForm");
-    renderStokList();
     renderGrid();
     renderPesanan();
     showToast("Stok berhasil ditambahkan");
@@ -1241,7 +1284,7 @@ function renderPesanan(){
 async function hapusProduk(id){
   const p = PRODUK.find(x => x.id === id);
   if(!p) return;
-  if(!confirm(`Hapus produk "${p.nama}" secara permanen?\n\nRiwayat transaksi lama tetap aman, tapi produk ini tidak akan muncul lagi di Kasir/Produk/Stok.`)) return;
+  if(!confirm(`Hapus produk "${p.nama}" secara permanen?\n\nRiwayat transaksi lama tetap aman, tapi produk ini tidak akan muncul lagi di Kasir/Produk.`)) return;
 
   try{
     await denganBatasWaktu(deleteDoc(doc(colProduk, id)));
@@ -1251,7 +1294,6 @@ async function hapusProduk(id){
     renderKategori();
     renderGrid();
     renderProdukList();
-    renderStokList();
     renderPesanan();
     renderCartBar();
     showToast("Produk dihapus");
@@ -1259,6 +1301,146 @@ async function hapusProduk(id){
     showToast("Gagal hapus: " + err.message);
   }
 }
+
+/* ============================================================
+   HALAMAN RIWAYAT PENJUALAN — analitik penjualan per kategori
+   ============================================================ */
+let riwayatPeriode = "harian";
+
+function renderKontrolTanggalRiwayat(){
+  const wrap = $("riwayatTanggalWrap");
+  const hariIni = formatTanggal(new Date());
+  if(riwayatPeriode === "harian" || riwayatPeriode === "mingguan"){
+    wrap.innerHTML = `<input type="date" id="rwTglSatu" class="riwayat-date-input" value="${hariIni}" />`;
+  }else if(riwayatPeriode === "bulanan"){
+    wrap.innerHTML = `<input type="month" id="rwTglSatu" class="riwayat-date-input" value="${hariIni.slice(0,7)}" />`;
+  }else if(riwayatPeriode === "tahunan"){
+    wrap.innerHTML = `<input type="number" id="rwTglSatu" class="riwayat-date-input" value="${new Date().getFullYear()}" min="2000" max="2100" />`;
+  }else{
+    wrap.innerHTML = `
+      <input type="date" id="rwTglDari" class="riwayat-date-input" value="${hariIni}" />
+      <input type="date" id="rwTglSampai" class="riwayat-date-input" value="${hariIni}" />
+    `;
+  }
+  wrap.querySelectorAll("input").forEach(inp => inp.addEventListener("change", renderRiwayatPenjualan));
+}
+
+$("riwayatPeriode").addEventListener("change", () => {
+  riwayatPeriode = $("riwayatPeriode").value;
+  renderKontrolTanggalRiwayat();
+  renderRiwayatPenjualan();
+});
+
+function hitungRentangRiwayat(){
+  if(riwayatPeriode === "harian"){
+    const d = $("rwTglSatu").value || formatTanggal(new Date());
+    return { mulai: d, selesai: d };
+  }
+  if(riwayatPeriode === "mingguan"){
+    const d = new Date(($("rwTglSatu").value || formatTanggal(new Date())) + "T00:00:00");
+    const hari = d.getDay();
+    const mundur = hari === 0 ? 6 : hari - 1;
+    const senin = new Date(d); senin.setDate(d.getDate() - mundur);
+    const minggu = new Date(senin); minggu.setDate(senin.getDate() + 6);
+    return { mulai: formatTanggal(senin), selesai: formatTanggal(minggu) };
+  }
+  if(riwayatPeriode === "bulanan"){
+    const val = $("rwTglSatu").value || formatTanggal(new Date()).slice(0,7);
+    const [y, m] = val.split("-").map(Number);
+    return { mulai: formatTanggal(new Date(y, m-1, 1)), selesai: formatTanggal(new Date(y, m, 0)) };
+  }
+  if(riwayatPeriode === "tahunan"){
+    const y = Number($("rwTglSatu").value) || new Date().getFullYear();
+    return { mulai: `${y}-01-01`, selesai: `${y}-12-31` };
+  }
+  // custom
+  const dari = $("rwTglDari").value || formatTanggal(new Date());
+  const sampai = $("rwTglSampai").value || formatTanggal(new Date());
+  return dari <= sampai ? { mulai: dari, selesai: sampai } : { mulai: sampai, selesai: dari };
+}
+
+async function renderRiwayatPenjualan(){
+  $("rwKategoriList").innerHTML = `<p style="color:var(--ink-soft);font-size:13.5px;padding:16px 0;">Memuat...</p>`;
+  const { mulai, selesai } = hitungRentangRiwayat();
+
+  try{
+    const q = query(colTransaksi, where("tanggal", ">=", mulai), where("tanggal", "<=", selesai));
+    const snap = await denganBatasWaktu(getDocs(q));
+    const aktif = snap.docs.map(d => d.data()).filter(t => t.status !== "Dibatalkan");
+
+    let jumlahProduk = 0, omset = 0, modal = 0;
+    const perKategori = {}; // { nama: { omset, items: { idProduk: {nama, qty, omzet} } } }
+
+    aktif.forEach(t => {
+      omset += Number(t.total);
+      (t.items || []).forEach(it => {
+        const qty = Number(it.qty);
+        jumlahProduk += qty;
+        const p = PRODUK.find(x => x.id === it.idProduk);
+        const kategori = p ? p.kategori : "Lainnya";
+        modal += (p ? p.hargaBeli : 0) * qty;
+
+        if(!perKategori[kategori]) perKategori[kategori] = { omset: 0, items: {} };
+        const omzetItem = qty * Number(it.hargaSatuan);
+        perKategori[kategori].omset += omzetItem;
+        if(!perKategori[kategori].items[it.idProduk]){
+          perKategori[kategori].items[it.idProduk] = { nama: it.namaProduk, qty: 0, omzet: 0 };
+        }
+        perKategori[kategori].items[it.idProduk].qty += qty;
+        perKategori[kategori].items[it.idProduk].omzet += omzetItem;
+      });
+    });
+
+    $("rwJumlahTransaksi").textContent = aktif.length;
+    $("rwJumlahProduk").textContent = jumlahProduk;
+    $("rwOmset").textContent = rupiah(omset);
+    $("rwProfit").textContent = rupiah(omset - modal);
+
+    const totalOmsetKategori = Object.values(perKategori).reduce((s,k) => s + k.omset, 0) || 1;
+    const daftarKategori = Object.keys(perKategori)
+      .map(nama => ({ nama, omset: perKategori[nama].omset, items: perKategori[nama].items }))
+      .sort((a,b) => b.omset - a.omset);
+
+    $("rwKategoriList").innerHTML = daftarKategori.map(k => {
+      const persen = ((k.omset / totalOmsetKategori) * 100).toFixed(1);
+      return `
+        <div class="kat-row" data-kategori="${k.nama}">
+          <div class="kat-row-top">
+            <div class="kat-row-nama">${k.nama}</div>
+            <div class="kat-row-persen">${persen}%</div>
+          </div>
+          <div class="kat-bar-wrap"><div class="kat-bar" style="width:${persen}%"></div></div>
+          <div class="kat-row-omset">${rupiah(k.omset)}</div>
+        </div>`;
+    }).join("") || `<p style="color:var(--ink-soft);font-size:13.5px;padding:16px 0;">Belum ada penjualan di periode ini.</p>`;
+
+    $("rwKategoriList").querySelectorAll("[data-kategori]").forEach(row => {
+      row.onclick = () => bukaDrillKategori(row.dataset.kategori, perKategori[row.dataset.kategori].items);
+    });
+  }catch(err){
+    $("rwKategoriList").innerHTML = `<p style="color:var(--red);font-size:13px;padding:16px 0;">Gagal memuat: ${err.message}</p>`;
+  }
+}
+
+function bukaDrillKategori(nama, itemsObj){
+  $("rwKategoriJudul").textContent = "Kategori: " + nama;
+  const list = Object.values(itemsObj).sort((a,b) => b.qty - a.qty);
+  $("rwKategoriProdukList").innerHTML = list.map((p, i) => `
+    <div class="list-row">
+      <div style="font-weight:700;color:var(--navy);width:24px;flex:none;">#${i+1}</div>
+      <div class="lr-main">
+        <div class="lr-name">${p.nama}</div>
+        <div class="lr-sub">Terjual ${p.qty} pcs</div>
+      </div>
+      <div style="font-weight:700;font-size:13px;">${rupiah(p.omzet)}</div>
+    </div>
+  `).join("");
+  bukaSheet("sheetRwKategori", "overlayRwKategori");
+}
+$("btnCloseRwKategori").onclick = () => tutupSheet("sheetRwKategori", "overlayRwKategori");
+$("overlayRwKategori").onclick = () => tutupSheet("sheetRwKategori", "overlayRwKategori");
+
+renderKontrolTanggalRiwayat();
 
 /* ============================================================
    HALAMAN LAPORAN — riwayat hari ini, mingguan/bulanan & tutup kasir
