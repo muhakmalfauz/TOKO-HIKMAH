@@ -6,18 +6,20 @@
 <title>TOKO HIKMAH — Kasir</title>
 <style>
   :root{
-    --navy:#1F4E5F;
-    --navy-dark:#143540;
-    --cream:#FBF8F3;
+    --navy:#534AB7;
+    --navy-dark:#3C3489;
+    --cream:#F7F7FA;
     --paper:#FFFFFF;
-    --ink:#20302F;
-    --ink-soft:#5C6E6C;
-    --amber:#D98E2C;
-    --amber-dark:#B5721A;
-    --line:#E4E0D6;
-    --green:#3B7A57;
+    --ink:#1A1D29;
+    --ink-soft:#8B8D98;
+    --amber:#534AB7;
+    --amber-dark:#3C3489;
+    --line:#EEEEF3;
+    --green:#0F6E56;
     --red:#B4402A;
-    --radius:14px;
+    --radius:16px;
+    --shadow-soft:0 1px 3px rgba(20,20,30,.06);
+    --shadow-card:0 1px 4px rgba(20,20,30,.05), 0 1px 1px rgba(20,20,30,.04);
   }
   *{box-sizing:border-box;}
   html,body{margin:0;padding:0;}
@@ -39,12 +41,12 @@
   }
   header .row{display:flex;justify-content:space-between;align-items:baseline;}
   header h1{font-size:19px;margin:0;letter-spacing:.2px;font-weight:700;}
-  header .meta{font-size:12px;color:#CFE0DB;margin-top:2px;}
+  header .meta{font-size:12px;color:#D9D5F5;margin-top:2px;}
   header .kasir-tag{font-size:12px;background:rgba(255,255,255,.12);padding:4px 10px;border-radius:999px;}
 
   .status-bar{
     font-size:12px;padding:7px 18px;display:flex;align-items:center;gap:6px;
-    background:var(--navy-dark);color:#CFE0DB;
+    background:var(--navy-dark);color:#D9D5F5;
   }
   .status-dot{width:7px;height:7px;border-radius:50%;background:#7CC48F;flex:none;}
   .status-dot.off{background:#E0A63C;}
@@ -73,7 +75,7 @@
     display:grid;grid-template-columns:1fr 1fr;gap:10px;padding:4px 16px 16px;
   }
   .card{
-    background:var(--paper);border:1px solid var(--line);border-radius:var(--radius);
+    background:var(--paper);border:none;box-shadow:var(--shadow-card);border-radius:var(--radius);
     padding:12px;text-align:left;position:relative;min-height:112px;display:flex;flex-direction:column;
     justify-content:space-between;
   }
@@ -95,8 +97,9 @@
   .search-row{display:flex;gap:8px;}
   .search-row input{flex:1;}
   .scan-btn{
-    flex:none;width:46px;border-radius:var(--radius);border:1px solid var(--line);
-    background:var(--paper);font-size:18px;
+    flex:none;width:46px;border-radius:var(--radius);border:none;box-shadow:var(--shadow-soft);
+    background:var(--paper);font-size:18px;color:var(--navy);
+    display:flex;align-items:center;justify-content:center;
   }
   .scan-frame{
     position:relative;width:100%;aspect-ratio:4/3;background:#000;
@@ -118,7 +121,7 @@
   .list-panel{padding:6px 16px 16px;}
   .list-row{
     display:flex;align-items:center;gap:10px;background:var(--paper);
-    border:1px solid var(--line);border-radius:12px;padding:12px;margin-bottom:8px;
+    border:none;box-shadow:var(--shadow-card);border-radius:14px;padding:12px;margin-bottom:8px;
   }
   .list-row .lr-main{flex:1;min-width:0;}
   .list-row .lr-name{font-size:14px;font-weight:600;}
@@ -147,7 +150,7 @@
     font-size:12.5px;background:var(--paper);
   }
   .kat-row{
-    background:var(--paper);border:1px solid var(--line);border-radius:12px;
+    background:var(--paper);border:none;box-shadow:var(--shadow-card);border-radius:14px;
     padding:12px 14px;margin-bottom:8px;
   }
   .kat-row-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;}
@@ -157,28 +160,29 @@
   .kat-bar{height:100%;background:var(--amber);border-radius:6px;}
   .kat-row-omset{font-size:11.5px;color:var(--ink-soft);margin-top:4px;}
   .summary-card{
-    flex:1 1 45%;background:var(--paper);border:1px solid var(--line);border-radius:12px;padding:12px 14px;
+    flex:1 1 45%;background:var(--paper);border:none;box-shadow:var(--shadow-card);border-radius:14px;padding:12px 14px;
   }
   .summary-card .sc-label{font-size:11.5px;color:var(--ink-soft);}
   .summary-card .sc-value{font-size:17px;font-weight:700;color:var(--navy);margin-top:2px;}
 
   /* ===== Beranda (Dashboard) ===== */
   .dash-card{
-    margin:14px 16px 6px;padding:20px 20px 18px;border-radius:18px;
+    margin:14px 16px 6px;padding:20px 20px 18px;border-radius:20px;
     background:linear-gradient(135deg,var(--navy) 0%,var(--navy-dark) 100%);color:#fff;
   }
-  .dash-card .dc-label{font-size:12.5px;color:#CFE0DB;}
+  .dash-card .dc-label{font-size:12.5px;color:#D9D5F5;}
   .dash-card .dc-value{font-size:26px;font-weight:800;margin-top:2px;}
-  .dash-card .dc-sub{font-size:12px;color:#CFE0DB;margin-top:8px;}
+  .dash-card .dc-sub{font-size:12px;color:#D9D5F5;margin-top:8px;}
   .dash-grid{
     display:grid;grid-template-columns:repeat(3,1fr);gap:10px;padding:16px;
   }
   .dash-tile{
-    background:var(--paper);border:1px solid var(--line);border-radius:16px;
+    background:var(--paper);border:none;box-shadow:var(--shadow-card);border-radius:18px;
     padding:16px 8px;display:flex;flex-direction:column;align-items:center;gap:8px;
   }
-  .dash-tile:active{background:#F3EFE6;}
-  .dash-tile .dt-icon{font-size:24px;line-height:1;}
+  .dash-tile:active{background:#EEEDFE;}
+  .dash-tile .dt-icon{font-size:24px;line-height:1;color:var(--navy);}
+  .dash-tile .dt-icon svg{width:24px;height:24px;display:block;}
   .dash-tile .dt-label{font-size:12px;font-weight:600;color:var(--ink);text-align:center;}
 
   .tren-row{display:flex;align-items:center;gap:8px;padding:6px 0;font-size:12px;}
@@ -192,6 +196,7 @@
     background:none;border:none;color:#fff;font-size:22px;line-height:1;
     padding:4px 8px 4px 0;flex:none;
   }
+  .hamburger-btn svg{width:22px;height:22px;display:block;}
   .header-left{display:flex;align-items:center;gap:4px;}
   .drawer-overlay{
     position:fixed;inset:0;background:rgba(20,53,64,.45);z-index:70;display:none;
@@ -210,7 +215,8 @@
     text-align:left;margin-bottom:2px;
   }
   .drawer-item .nav-icon{font-size:19px;line-height:1;flex:none;width:22px;text-align:center;}
-  .drawer-item.active{background:#FBEBD3;color:var(--amber-dark);font-weight:700;}
+  .drawer-item .nav-icon svg{width:20px;height:20px;display:block;margin:0 auto;}
+  .drawer-item.active{background:#EEEDFE;color:var(--amber-dark);font-weight:700;}
 
   /* ===== Bottom cart bar ===== */
   .cart-bar{
@@ -220,7 +226,7 @@
   }
   .cart-bar .wrap{display:flex;align-items:center;gap:12px;width:100%;}
   .cart-bar .info{flex:1;}
-  .cart-bar .info .count{font-size:11.5px;color:#CFE0DB;}
+  .cart-bar .info .count{font-size:11.5px;color:#D9D5F5;}
   .cart-bar .info .total{font-size:17px;font-weight:700;}
   .cart-bar button{
     background:var(--amber);color:#fff;border:none;padding:12px 22px;border-radius:11px;
@@ -306,7 +312,7 @@
   }
   .login-box{width:100%;max-width:320px;text-align:center;}
   .login-logo{color:#fff;font-size:24px;font-weight:800;letter-spacing:.3px;}
-  .login-sub{color:#CFE0DB;font-size:13px;margin-top:6px;margin-bottom:22px;}
+  .login-sub{color:#D9D5F5;font-size:13px;margin-top:6px;margin-bottom:22px;}
   .user-list{display:flex;flex-direction:column;gap:10px;}
   .user-item{
     background:rgba(255,255,255,.08);color:#fff;border:none;border-radius:14px;
@@ -314,8 +320,8 @@
   }
   .user-item:active{background:rgba(255,255,255,.2);}
   .user-item .ui-name{font-size:15px;font-weight:700;}
-  .user-item .ui-role{font-size:11px;color:#CFE0DB;background:rgba(255,255,255,.12);padding:3px 10px;border-radius:999px;}
-  .login-msg{color:#CFE0DB;font-size:13px;}
+  .user-item .ui-role{font-size:11px;color:#D9D5F5;background:rgba(255,255,255,.12);padding:3px 10px;border-radius:999px;}
+  .login-msg{color:#D9D5F5;font-size:13px;}
   .logout-btn{
     background:none;border:1px solid rgba(255,255,255,.35);color:#fff;
     font-size:11px;padding:4px 10px;border-radius:999px;margin-left:8px;
@@ -343,20 +349,20 @@
 <div class="drawer-overlay" id="drawerOverlay"></div>
 <div class="drawer-panel" id="drawerPanel">
   <div class="drawer-title">TOKO HIKMAH</div>
-  <button class="nav-btn drawer-item active" data-view="beranda"><span class="nav-icon">🏠</span>Beranda</button>
-  <button class="nav-btn drawer-item" data-view="kasir"><span class="nav-icon">🛒</span>Kasir</button>
-  <button class="nav-btn drawer-item" data-view="produk"><span class="nav-icon">📦</span>Produk</button>
-  <button class="nav-btn drawer-item" data-view="riwayat"><span class="nav-icon">📈</span>Riwayat Penjualan</button>
-  <button class="nav-btn drawer-item" data-view="pesanan"><span class="nav-icon">📊</span>Daftar Pesanan</button>
-  <button class="nav-btn drawer-item" data-view="laporan"><span class="nav-icon">🧾</span>Laporan</button>
-  <button class="nav-btn drawer-item" data-view="pengaturan"><span class="nav-icon">⚙️</span>Pengaturan</button>
+  <button class="nav-btn drawer-item active" data-view="beranda"><span class="nav-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11l9-8 9 8"/><path d="M5 10v10a1 1 0 0 0 1 1h4v-6h4v6h4a1 1 0 0 0 1-1V10"/></svg></span>Beranda</button>
+  <button class="nav-btn drawer-item" data-view="kasir"><span class="nav-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="21" r="1"/><circle cx="18" cy="21" r="1"/><path d="M2.5 3h2l2.4 12.2a2 2 0 0 0 2 1.6h7.7a2 2 0 0 0 2-1.6L20.5 8H6"/></svg></span>Kasir</button>
+  <button class="nav-btn drawer-item" data-view="produk"><span class="nav-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 7.5l-9-5-9 5 9 5 9-5z"/><path d="M3 7.5v9l9 5 9-5v-9"/><path d="M12 12.5v9"/></svg></span>Produk</button>
+  <button class="nav-btn drawer-item" data-view="riwayat"><span class="nav-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 17 9 11 13 15 21 6"/><polyline points="15 6 21 6 21 12"/></svg></span>Riwayat Penjualan</button>
+  <button class="nav-btn drawer-item" data-view="pesanan"><span class="nav-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="20" x2="5" y2="11"/><line x1="12" y1="20" x2="12" y2="5"/><line x1="19" y1="20" x2="19" y2="14"/></svg></span>Daftar Pesanan</button>
+  <button class="nav-btn drawer-item" data-view="laporan"><span class="nav-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3h12v18l-3-2-3 2-3-2-3 2V3z"/><line x1="9" y1="8" x2="15" y2="8"/><line x1="9" y1="12" x2="15" y2="12"/></svg></span>Laporan</button>
+  <button class="nav-btn drawer-item" data-view="pengaturan"><span class="nav-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3.2"/><path d="M12 2.5v3M12 18.5v3M4.6 4.6l2.1 2.1M17.3 17.3l2.1 2.1M2.5 12h3M18.5 12h3M4.6 19.4l2.1-2.1M17.3 6.7l2.1-2.1"/></svg></span>Pengaturan</button>
 </div>
 
 <header>
   <div class="wrap">
     <div class="row">
       <span class="header-left">
-        <button class="hamburger-btn" id="btnBukaDrawer">☰</button>
+        <button class="hamburger-btn" id="btnBukaDrawer"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg></button>
         <h1>TOKO HIKMAH</h1>
       </span>
       <span>
@@ -386,12 +392,12 @@
       <div class="dc-sub" id="dashJumlahHariIni">0 transaksi</div>
     </div>
     <div class="dash-grid">
-      <button class="dash-tile" data-view="kasir"><span class="dt-icon">🛒</span><span class="dt-label">Kasir</span></button>
-      <button class="dash-tile" data-view="produk"><span class="dt-icon">📦</span><span class="dt-label">Produk</span></button>
-      <button class="dash-tile" data-view="riwayat"><span class="dt-icon">📈</span><span class="dt-label">Riwayat Penjualan</span></button>
-      <button class="dash-tile" data-view="pesanan"><span class="dt-icon">📊</span><span class="dt-label">Daftar Pesanan</span></button>
-      <button class="dash-tile" data-view="laporan"><span class="dt-icon">🧾</span><span class="dt-label">Laporan</span></button>
-      <button class="dash-tile" data-view="pengaturan"><span class="dt-icon">⚙️</span><span class="dt-label">Pengaturan</span></button>
+      <button class="dash-tile" data-view="kasir"><span class="dt-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="21" r="1"/><circle cx="18" cy="21" r="1"/><path d="M2.5 3h2l2.4 12.2a2 2 0 0 0 2 1.6h7.7a2 2 0 0 0 2-1.6L20.5 8H6"/></svg></span><span class="dt-label">Kasir</span></button>
+      <button class="dash-tile" data-view="produk"><span class="dt-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 7.5l-9-5-9 5 9 5 9-5z"/><path d="M3 7.5v9l9 5 9-5v-9"/><path d="M12 12.5v9"/></svg></span><span class="dt-label">Produk</span></button>
+      <button class="dash-tile" data-view="riwayat"><span class="dt-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 17 9 11 13 15 21 6"/><polyline points="15 6 21 6 21 12"/></svg></span><span class="dt-label">Riwayat Penjualan</span></button>
+      <button class="dash-tile" data-view="pesanan"><span class="dt-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="20" x2="5" y2="11"/><line x1="12" y1="20" x2="12" y2="5"/><line x1="19" y1="20" x2="19" y2="14"/></svg></span><span class="dt-label">Daftar Pesanan</span></button>
+      <button class="dash-tile" data-view="laporan"><span class="dt-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3h12v18l-3-2-3 2-3-2-3 2V3z"/><line x1="9" y1="8" x2="15" y2="8"/><line x1="9" y1="12" x2="15" y2="12"/></svg></span><span class="dt-label">Laporan</span></button>
+      <button class="dash-tile" data-view="pengaturan"><span class="dt-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3.2"/><path d="M12 2.5v3M12 18.5v3M4.6 4.6l2.1 2.1M17.3 17.3l2.1 2.1M2.5 12h3M18.5 12h3M4.6 19.4l2.1-2.1M17.3 6.7l2.1-2.1"/></svg></span><span class="dt-label">Pengaturan</span></button>
     </div>
   </div>
 
@@ -400,7 +406,7 @@
     <div class="search-box">
       <div class="search-row">
         <input type="text" id="searchInput" placeholder="Cari nama produk..." />
-        <button class="scan-btn" id="btnScanKasir" type="button">📷</button>
+        <button class="scan-btn" id="btnScanKasir" type="button"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:19px;height:19px;"><path d="M4 8a2 2 0 0 1 2-2h1.2l1-1.6A1 1 0 0 1 9 4h6a1 1 0 0 1 .8.4l1 1.6H18a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V8z"/><circle cx="12" cy="13" r="3.4"/></svg></button>
       </div>
     </div>
 
@@ -649,7 +655,7 @@
       <label>Barcode (opsional)</label>
       <div class="search-row">
         <input type="text" id="pfBarcode" />
-        <button class="scan-btn" id="btnScanProduk" type="button">📷</button>
+        <button class="scan-btn" id="btnScanProduk" type="button"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:19px;height:19px;"><path d="M4 8a2 2 0 0 1 2-2h1.2l1-1.6A1 1 0 0 1 9 4h6a1 1 0 0 1 .8.4l1 1.6H18a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V8z"/><circle cx="12" cy="13" r="3.4"/></svg></button>
       </div>
     </div>
     <div class="pay-row">
