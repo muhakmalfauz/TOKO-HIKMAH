@@ -345,6 +345,8 @@
       <input type="text" id="searchStok" placeholder="Cari produk..." />
     </div>
     <div class="list-panel" id="stokList"></div>
+  </div>
+
   <!-- ===== VIEW: LAPORAN ===== -->
   <div id="viewLaporan" style="display:none;">
     <div class="page-head">
@@ -685,6 +687,7 @@ function masuk(nama, role){
   $("loginScreen").style.display = "none";
   $("appContainer").style.display = "block";
   muatProduk();
+  muatDaftarUser();
   syncAntrian();
 }
 
