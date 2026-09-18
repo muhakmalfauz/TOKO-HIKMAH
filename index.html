@@ -748,6 +748,16 @@ const DAFTAR_KATEGORI = ["Semua", "Makanan", "Minuman", "Snack", "Sembako", "Oba
 const $ = (id) => document.getElementById(id);
 const rupiah = (n) => "Rp " + Math.round(n).toLocaleString("id-ID");
 
+// Batasi waktu tunggu operasi Firestore (10 detik), supaya kalau koneksi
+// sempat macet, aplikasi kasih pesan jelas alih-alih terlihat "freeze" selamanya.
+function denganBatasWaktu(promise, detik){
+  detik = detik || 10;
+  return Promise.race([
+    promise,
+    new Promise((_, reject) => setTimeout(() => reject(new Error("Koneksi lambat/putus, coba lagi")), detik * 1000))
+  ]);
+}
+
 function setStatus(online, text){
   $("statusDot").className = "status-dot" + (online ? "" : " off");
   $("statusText").textContent = text;
@@ -762,7 +772,7 @@ let DAFTAR_USER = [];
 
 async function muatDaftarUser(){
   try{
-    const snap = await getDocs(colUser);
+    const snap = await denganBatasWaktu(getDocs(colUser));
     DAFTAR_USER = snap.docs.map(d => ({ Nama: d.id, Role: d.data().role }));
     renderUserList();
   }catch(err){
@@ -831,7 +841,7 @@ $("btnLogout").onclick = () => {
 async function muatProduk(){
   setStatus(false, "Memuat produk...");
   try{
-    const snap = await getDocs(colProduk);
+    const snap = await denganBatasWaktu(getDocs(colProduk));
     PRODUK = snap.docs.map(d => {
       const p = d.data();
       return {
@@ -946,7 +956,7 @@ $("drawerOverlay").onclick = tutupDrawer;
    ============================================================ */
 async function ambilTransaksiTanggal(tanggal){
   const q = query(colTransaksi, where("tanggal", "==", tanggal));
-  const snap = await getDocs(q);
+  const snap = await denganBatasWaktu(getDocs(q));
   return snap.docs.map(d => ({ id: d.id, ...d.data() }));
 }
 
@@ -1088,7 +1098,7 @@ async function simpanProduk(){
   $("btnSimpanProduk").disabled = true;
   $("btnSimpanProduk").textContent = "Menyimpan...";
   try{
-    await setDoc(doc(colProduk, id), dataProduk);
+    await denganBatasWaktu(setDoc(doc(colProduk, id), dataProduk));
 
     if(produkFormMode === "tambah"){
       PRODUK.push({ id, nama, kategori, satuan, barcode, hargaBeli, harga: hargaJual, stok, stokMin });
@@ -1166,7 +1176,7 @@ async function simpanStokMasuk(){
       jumlahMasuk: jumlah, supplier: $("sfSupplier").value.trim(), keterangan: $("sfKeterangan").value.trim()
     });
     batch.update(doc(colProduk, p.id), { stok: increment(jumlah) });
-    await batch.commit();
+    await denganBatasWaktu(batch.commit());
 
     p.stok += jumlah;
     localStorage.setItem("th_produk_cache", JSON.stringify(PRODUK));
@@ -1225,7 +1235,7 @@ async function renderLaporan(){
 
   try{
     const q = query(colTransaksi, where("tanggal", ">=", mulai), where("tanggal", "<=", selesai));
-    const snap = await getDocs(q);
+    const snap = await denganBatasWaktu(getDocs(q));
     const semua = snap.docs.map(d => ({ id: d.id, ...d.data() }));
     const aktif = semua.filter(t => t.status !== "Dibatalkan");
 
@@ -1300,9 +1310,13 @@ async function renderLaporan(){
 
 async function batalkanTransaksi(idTrx){
   if(!confirm(`Batalkan transaksi ${idTrx}?\n\nStok akan otomatis dikembalikan.`)) return;
+
+  const tombol = document.querySelector(`[data-batal="${idTrx}"]`);
+  if(tombol){ tombol.disabled = true; tombol.textContent = "Memproses..."; }
+
   try{
     const ref = doc(colTransaksi, idTrx);
-    const snap = await getDoc(ref);
+    const snap = await denganBatasWaktu(getDoc(ref));
     if(!snap.exists()){ showToast("Transaksi tidak ditemukan"); return; }
     const data = snap.data();
     if(data.status === "Dibatalkan"){ showToast("Transaksi ini sudah dibatalkan sebelumnya"); return; }
@@ -1312,13 +1326,14 @@ async function batalkanTransaksi(idTrx){
     (data.items || []).forEach(it => {
       batch.update(doc(colProduk, it.idProduk), { stok: increment(Number(it.qty)) });
     });
-    await batch.commit();
+    await denganBatasWaktu(batch.commit());
 
     showToast("Transaksi dibatalkan, stok dikembalikan");
     renderLaporan();
     muatProduk();
   }catch(err){
     showToast("Gagal: " + err.message);
+    if(tombol){ tombol.disabled = false; tombol.textContent = "Batalkan"; }
   }
 }
 
@@ -1343,10 +1358,10 @@ async function simpanTutupKasir(){
     const totalPenjualan = aktif.reduce((s, t) => s + Number(t.total), 0);
     const selisih = setoranAkhir - (modalAwal + totalPenjualan);
 
-    await setDoc(doc(colRekapHarian, tanggal), {
+    await denganBatasWaktu(setDoc(doc(colRekapHarian, tanggal), {
       tanggal, totalPenjualan, jumlahTransaksi: aktif.length,
       modalAwal, setoranAkhir, selisih, kasir: NAMA_KASIR
-    });
+    }));
 
     tutupSheet("sheetTutupKasir", "overlayTutupKasir");
     const info = selisih === 0
@@ -1426,18 +1441,18 @@ async function simpanUser(){
   $("btnSimpanUser").textContent = "Menyimpan...";
   try{
     if(userFormMode === "tambah"){
-      await setDoc(doc(colUser, nama), { role });
+      await denganBatasWaktu(setDoc(doc(colUser, nama), { role }));
       DAFTAR_USER.push({ Nama: nama, Role: role });
     }else if(nama !== userFormNamaLama){
       // nama diubah → nama itu ID dokumen, jadi harus buat dokumen baru + hapus yang lama
       const batch = writeBatch(db);
       batch.set(doc(colUser, nama), { role });
       batch.delete(doc(colUser, userFormNamaLama));
-      await batch.commit();
+      await denganBatasWaktu(batch.commit());
       const u = DAFTAR_USER.find(x => x.Nama === userFormNamaLama);
       if(u){ u.Nama = nama; u.Role = role; }
     }else{
-      await updateDoc(doc(colUser, nama), { role });
+      await denganBatasWaktu(updateDoc(doc(colUser, nama), { role }));
       const u = DAFTAR_USER.find(x => x.Nama === nama);
       if(u) u.Role = role;
     }
@@ -1468,7 +1483,7 @@ async function hapusUser(nama){
   if(!confirm(`Hapus user "${nama}"?`)) return;
 
   try{
-    await deleteDoc(doc(colUser, nama));
+    await denganBatasWaktu(deleteDoc(doc(colUser, nama)));
     DAFTAR_USER = DAFTAR_USER.filter(u => u.Nama !== nama);
     renderPengaturanList();
     showToast("User dihapus");
