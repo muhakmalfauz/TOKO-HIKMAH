@@ -325,6 +325,7 @@
   <button class="nav-btn drawer-item" data-view="kasir"><span class="nav-icon">🛒</span>Kasir</button>
   <button class="nav-btn drawer-item" data-view="produk"><span class="nav-icon">📦</span>Produk</button>
   <button class="nav-btn drawer-item" data-view="stok"><span class="nav-icon">📊</span>Stok</button>
+  <button class="nav-btn drawer-item" data-view="pesanan"><span class="nav-icon">🛍️</span>Daftar Pesanan</button>
   <button class="nav-btn drawer-item" data-view="laporan"><span class="nav-icon">🧾</span>Laporan</button>
   <button class="nav-btn drawer-item" data-view="pengaturan"><span class="nav-icon">⚙️</span>Pengaturan</button>
 </div>
@@ -366,6 +367,7 @@
       <button class="dash-tile" data-view="kasir"><span class="dt-icon">🛒</span><span class="dt-label">Kasir</span></button>
       <button class="dash-tile" data-view="produk"><span class="dt-icon">📦</span><span class="dt-label">Produk</span></button>
       <button class="dash-tile" data-view="stok"><span class="dt-icon">📊</span><span class="dt-label">Stok</span></button>
+      <button class="dash-tile" data-view="pesanan"><span class="dt-icon">🛍️</span><span class="dt-label">Daftar Pesanan</span></button>
       <button class="dash-tile" data-view="laporan"><span class="dt-icon">🧾</span><span class="dt-label">Laporan</span></button>
       <button class="dash-tile" data-view="pengaturan"><span class="dt-icon">⚙️</span><span class="dt-label">Pengaturan</span></button>
     </div>
@@ -408,6 +410,17 @@
       <input type="text" id="searchStok" placeholder="Cari produk..." />
     </div>
     <div class="list-panel" id="stokList"></div>
+  </div>
+
+  <!-- ===== VIEW: DAFTAR PESANAN (produk stok habis) ===== -->
+  <div id="viewPesanan" style="display:none;">
+    <div class="page-head">
+      <h2>Daftar Pesanan</h2>
+    </div>
+    <div style="padding:0 16px 4px;font-size:12.5px;color:var(--ink-soft);">
+      Produk yang stoknya habis muncul otomatis di sini — restock atau hapus kalau sudah tidak dijual lagi.
+    </div>
+    <div class="list-panel" id="pesananList"></div>
   </div>
 
   <!-- ===== VIEW: LAPORAN ===== -->
@@ -855,6 +868,7 @@ async function muatProduk(){
     setStatus(true, "Tersambung ke Firebase");
     renderKategori();
     renderGrid();
+    renderPesanan();
   }catch(err){
     const cache = localStorage.getItem("th_produk_cache");
     if(cache){
@@ -862,6 +876,7 @@ async function muatProduk(){
       setStatus(false, "Offline — pakai data tersimpan");
       renderKategori();
       renderGrid();
+      renderPesanan();
     }else{
       setStatus(false, "Gagal memuat. Cek koneksi internet.");
     }
@@ -921,12 +936,14 @@ function switchView(view){
   $("viewKasir").style.display = view === "kasir" ? "" : "none";
   $("viewProduk").style.display = view === "produk" ? "" : "none";
   $("viewStok").style.display = view === "stok" ? "" : "none";
+  $("viewPesanan").style.display = view === "pesanan" ? "" : "none";
   $("viewLaporan").style.display = view === "laporan" ? "" : "none";
   $("viewPengaturan").style.display = view === "pengaturan" ? "" : "none";
   renderCartBar();
   if(view === "beranda") renderBeranda();
   if(view === "produk"){ renderKategoriProduk(); renderProdukList(); }
   if(view === "stok") renderStokList();
+  if(view === "pesanan") renderPesanan();
   if(view === "laporan") renderLaporan();
   if(view === "pengaturan") renderPengaturanList();
 }
@@ -1111,6 +1128,7 @@ async function simpanProduk(){
     renderProdukList();
     renderKategori();
     renderGrid();
+    renderPesanan();
     showToast(produkFormMode === "tambah" ? "Produk ditambahkan" : "Produk diperbarui");
   }catch(err){
     showToast("Gagal simpan: " + err.message);
@@ -1183,6 +1201,7 @@ async function simpanStokMasuk(){
     tutupSheet("sheetStokForm", "overlayStokForm");
     renderStokList();
     renderGrid();
+    renderPesanan();
     showToast("Stok berhasil ditambahkan");
   }catch(err){
     showToast("Gagal simpan: " + err.message);
@@ -1192,6 +1211,54 @@ async function simpanStokMasuk(){
   }
 }
 $("btnSimpanStok").onclick = simpanStokMasuk;
+
+/* ============================================================
+   HALAMAN DAFTAR PESANAN — produk yang stoknya habis (stok <= 0)
+   ============================================================ */
+function renderPesanan(){
+  const list = PRODUK.filter(p => p.stok <= 0);
+  $("pesananList").innerHTML = list.map(p => `
+    <div class="list-row">
+      <div class="lr-main">
+        <div class="lr-name">${p.nama}</div>
+        <div class="lr-sub">${p.kategori} · ${rupiah(p.harga)}</div>
+      </div>
+      <div class="lr-actions">
+        <button class="lr-btn" data-restock="${p.id}">+ Stok</button>
+        <button class="lr-btn danger" data-hapus-produk="${p.id}">Hapus</button>
+      </div>
+    </div>
+  `).join("") || `<p style="color:var(--ink-soft);font-size:13.5px;padding:16px 0;">🎉 Semua produk masih ada stoknya.</p>`;
+
+  $("pesananList").querySelectorAll("[data-restock]").forEach(btn=>{
+    btn.onclick = () => bukaFormStok(btn.dataset.restock);
+  });
+  $("pesananList").querySelectorAll("[data-hapus-produk]").forEach(btn=>{
+    btn.onclick = () => hapusProduk(btn.dataset.hapusProduk);
+  });
+}
+
+async function hapusProduk(id){
+  const p = PRODUK.find(x => x.id === id);
+  if(!p) return;
+  if(!confirm(`Hapus produk "${p.nama}" secara permanen?\n\nRiwayat transaksi lama tetap aman, tapi produk ini tidak akan muncul lagi di Kasir/Produk/Stok.`)) return;
+
+  try{
+    await denganBatasWaktu(deleteDoc(doc(colProduk, id)));
+    PRODUK = PRODUK.filter(x => x.id !== id);
+    localStorage.setItem("th_produk_cache", JSON.stringify(PRODUK));
+    delete cart[id];
+    renderKategori();
+    renderGrid();
+    renderProdukList();
+    renderStokList();
+    renderPesanan();
+    renderCartBar();
+    showToast("Produk dihapus");
+  }catch(err){
+    showToast("Gagal hapus: " + err.message);
+  }
+}
 
 /* ============================================================
    HALAMAN LAPORAN — riwayat hari ini, mingguan/bulanan & tutup kasir
@@ -1720,6 +1787,7 @@ function simpanTransaksi(){
   cart = {};
   renderCartBar();
   renderGrid();
+  renderPesanan();
   tutupSheetBayar();
   $("inputDiskon").value = 0;
   $("inputBayar").value = "";
