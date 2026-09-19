@@ -528,6 +528,16 @@
       <button class="btn-add" id="btnTambahUser">+ User</button>
     </div>
     <div class="list-panel" id="pengaturanList"></div>
+
+    <div class="page-head" style="padding-top:6px;">
+      <h2 style="font-size:14.5px;">Backup Data</h2>
+    </div>
+    <div style="padding:0 16px 16px;">
+      <div style="font-size:12.5px;color:var(--ink-soft);margin-bottom:10px;">
+        Unduh semua data toko (Produk, Transaksi, Stok Masuk, Rekap Harian, User) sebagai 1 file Excel — buat jaga-jaga kalau sewaktu-waktu diperlukan.
+      </div>
+      <button class="btn-secondary" id="btnExportData" style="border-color:var(--line);">⬇️ Export Data ke Excel</button>
+    </div>
   </div>
 
 </div>
@@ -777,6 +787,9 @@
 <div class="toast" id="toast"></div>
 
 </div><!-- /appContainer -->
+
+<!-- Untuk fitur Export Data ke Excel (Pengaturan) -->
+<script src="https://cdn.sheetjs.com/xlsx-latest/package/dist/xlsx.full.min.js"></script>
 
 <script type="module">
 /* ============================================================
@@ -1741,6 +1754,87 @@ async function hapusUser(nama){
     showToast("Gagal hapus: " + err.message);
   }
 }
+
+/* ============================================================
+   BACKUP DATA — export semua koleksi Firestore ke 1 file Excel
+   ============================================================ */
+async function exportDataExcel(){
+  if(typeof XLSX === "undefined"){
+    showToast("Gagal memuat modul Excel. Cek koneksi internet, lalu coba lagi.");
+    return;
+  }
+
+  const tombol = $("btnExportData");
+  tombol.disabled = true;
+  tombol.textContent = "Menyiapkan data...";
+
+  try{
+    const [produkSnap, transaksiSnap, stokSnap, rekapSnap, userSnap] = await denganBatasWaktu(
+      Promise.all([
+        getDocs(colProduk), getDocs(colTransaksi), getDocs(colStokMasuk),
+        getDocs(colRekapHarian), getDocs(colUser)
+      ]),
+      25
+    );
+
+    const produkRows = produkSnap.docs.map(d => {
+      const p = d.data();
+      return {
+        "ID Produk": d.id, "Nama Produk": p.nama, "Kategori": p.kategori,
+        "Barcode": p.barcode || "", "Satuan": p.satuan, "Harga Beli": p.hargaBeli,
+        "Harga Jual": p.hargaJual, "Stok": p.stok, "Stok Minimum": p.stokMin
+      };
+    });
+
+    const transaksiRows = [];
+    transaksiSnap.docs.forEach(d => {
+      const t = d.data();
+      (t.items || []).forEach(it => {
+        transaksiRows.push({
+          "ID Transaksi": t.idTransaksi, "Tanggal": t.tanggal, "Jam": t.jam, "Kasir": t.kasir,
+          "ID Produk": it.idProduk, "Nama Produk": it.namaProduk, "Qty": it.qty,
+          "Harga Satuan": it.hargaSatuan, "Subtotal Item": it.qty * it.hargaSatuan,
+          "Diskon": t.diskon, "Total Transaksi": t.total, "Metode Bayar": t.metodeBayar,
+          "Nominal Dibayar": t.nominalDibayar, "Kembalian": t.kembalian, "Status": t.status
+        });
+      });
+    });
+
+    const stokRows = stokSnap.docs.map(d => {
+      const s = d.data();
+      return {
+        "Tanggal": s.tanggal, "ID Produk": s.idProduk, "Nama Produk": s.namaProduk,
+        "Jumlah Masuk": s.jumlahMasuk, "Supplier": s.supplier || "", "Keterangan": s.keterangan || ""
+      };
+    });
+
+    const rekapRows = rekapSnap.docs.map(d => {
+      const r = d.data();
+      return {
+        "Tanggal": r.tanggal, "Total Penjualan": r.totalPenjualan, "Jumlah Transaksi": r.jumlahTransaksi,
+        "Modal Awal": r.modalAwal, "Setoran Akhir": r.setoranAkhir, "Selisih": r.selisih, "Kasir": r.kasir
+      };
+    });
+
+    const userRows = userSnap.docs.map(d => ({ "Nama": d.id, "Role": d.data().role }));
+
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(produkRows), "Produk");
+    XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(transaksiRows), "Transaksi");
+    XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(stokRows), "Stok_Masuk");
+    XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(rekapRows), "Rekap_Harian");
+    XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(userRows), "User");
+
+    XLSX.writeFile(wb, `TOKO_HIKMAH_Backup_${formatTanggal(new Date())}.xlsx`);
+    showToast("Backup berhasil diunduh");
+  }catch(err){
+    showToast("Gagal export: " + err.message);
+  }finally{
+    tombol.disabled = false;
+    tombol.textContent = "⬇️ Export Data ke Excel";
+  }
+}
+$("btnExportData").onclick = exportDataExcel;
 
 /* ============================================================
    KERANJANG
