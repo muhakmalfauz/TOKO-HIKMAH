@@ -126,6 +126,7 @@
   }
   .list-row .lr-main{flex:1;min-width:0;}
   .list-row .lr-name{font-size:14px;font-weight:600;}
+  .dot-peringatan{display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--red);margin-left:3px;vertical-align:middle;}
   .list-row .lr-sub{font-size:12px;color:var(--ink-soft);margin-top:2px;}
   .list-row .lr-stok{font-size:15px;font-weight:700;min-width:26px;text-align:center;}
   .list-row .lr-stok.low{color:var(--red);}
@@ -217,6 +218,24 @@
   }
   .drawer-item .nav-icon{font-size:19px;line-height:1;flex:none;width:22px;text-align:center;}
   .drawer-item .nav-icon svg{width:20px;height:20px;display:block;margin:0 auto;}
+  .drawer-badge{
+    margin-left:auto;background:var(--red);color:#fff;font-size:11px;font-weight:700;
+    min-width:19px;height:19px;border-radius:999px;display:flex;align-items:center;justify-content:center;
+    padding:0 5px;flex:none;
+  }
+  .drawer-dot{
+    margin-left:auto;width:9px;height:9px;border-radius:50%;background:var(--red);flex:none;
+  }
+  .dt-icon-wrap{position:relative;display:inline-flex;}
+  .dt-badge{
+    position:absolute;top:-6px;right:-9px;background:var(--red);color:#fff;font-size:10px;font-weight:700;
+    min-width:16px;height:16px;border-radius:999px;display:flex;align-items:center;justify-content:center;
+    padding:0 4px;border:2px solid var(--paper);
+  }
+  .dt-dot{
+    position:absolute;top:-2px;right:-4px;width:10px;height:10px;border-radius:50%;
+    background:var(--red);border:2px solid var(--paper);
+  }
   .drawer-item.active{background:#EEEDFE;color:var(--amber-dark);font-weight:700;}
 
   /* ===== Bottom cart bar ===== */
@@ -348,9 +367,9 @@
   <div class="drawer-title">TOKO HIKMAH</div>
   <button class="nav-btn drawer-item active" data-view="beranda"><span class="nav-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11l9-8 9 8"/><path d="M5 10v10a1 1 0 0 0 1 1h4v-6h4v6h4a1 1 0 0 0 1-1V10"/></svg></span>Beranda</button>
   <button class="nav-btn drawer-item" data-view="kasir"><span class="nav-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="21" r="1"/><circle cx="18" cy="21" r="1"/><path d="M2.5 3h2l2.4 12.2a2 2 0 0 0 2 1.6h7.7a2 2 0 0 0 2-1.6L20.5 8H6"/></svg></span>Kasir</button>
-  <button class="nav-btn drawer-item" data-view="produk"><span class="nav-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 7.5l-9-5-9 5 9 5 9-5z"/><path d="M3 7.5v9l9 5 9-5v-9"/><path d="M12 12.5v9"/></svg></span>Produk</button>
+  <button class="nav-btn drawer-item" data-view="produk"><span class="nav-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 7.5l-9-5-9 5 9 5 9-5z"/><path d="M3 7.5v9l9 5 9-5v-9"/><path d="M12 12.5v9"/></svg></span>Produk<span class="drawer-dot" data-badge="produk" style="display:none;"></span></button>
   <button class="nav-btn drawer-item" data-view="riwayat"><span class="nav-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 17 9 11 13 15 21 6"/><polyline points="15 6 21 6 21 12"/></svg></span>Riwayat Penjualan</button>
-  <button class="nav-btn drawer-item" data-view="pesanan"><span class="nav-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="20" x2="5" y2="11"/><line x1="12" y1="20" x2="12" y2="5"/><line x1="19" y1="20" x2="19" y2="14"/></svg></span>Daftar Pesanan</button>
+  <button class="nav-btn drawer-item" data-view="pesanan"><span class="nav-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="20" x2="5" y2="11"/><line x1="12" y1="20" x2="12" y2="5"/><line x1="19" y1="20" x2="19" y2="14"/></svg></span>Daftar Pesanan<span class="drawer-badge" data-badge="pesanan" style="display:none;">0</span></button>
   <button class="nav-btn drawer-item" data-view="laporan"><span class="nav-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3h12v18l-3-2-3 2-3-2-3 2V3z"/><line x1="9" y1="8" x2="15" y2="8"/><line x1="9" y1="12" x2="15" y2="12"/></svg></span>Laporan</button>
   <button class="nav-btn drawer-item" data-view="pengaturan"><span class="nav-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3.2"/><path d="M12 2.5v3M12 18.5v3M4.6 4.6l2.1 2.1M17.3 17.3l2.1 2.1M2.5 12h3M18.5 12h3M4.6 19.4l2.1-2.1M17.3 6.7l2.1-2.1"/></svg></span>Pengaturan</button>
 </div>
@@ -360,7 +379,7 @@
     <div class="row">
       <span class="header-left">
         <button class="hamburger-btn" id="btnBukaDrawer"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg></button>
-        <h1>TOKO HIKMAH</h1>
+        <h1 id="btnLogoBeranda" style="cursor:pointer;">TOKO HIKMAH</h1>
       </span>
       <span class="header-right">
         <button class="icon-btn" id="btnRefresh" title="Muat ulang" aria-label="Muat ulang">
@@ -387,9 +406,9 @@
     </div>
     <div class="dash-grid">
       <button class="dash-tile" data-view="kasir"><span class="dt-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="21" r="1"/><circle cx="18" cy="21" r="1"/><path d="M2.5 3h2l2.4 12.2a2 2 0 0 0 2 1.6h7.7a2 2 0 0 0 2-1.6L20.5 8H6"/></svg></span><span class="dt-label">Kasir</span></button>
-      <button class="dash-tile" data-view="produk"><span class="dt-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 7.5l-9-5-9 5 9 5 9-5z"/><path d="M3 7.5v9l9 5 9-5v-9"/><path d="M12 12.5v9"/></svg></span><span class="dt-label">Produk</span></button>
+      <button class="dash-tile" data-view="produk"><span class="dt-icon-wrap"><span class="dt-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 7.5l-9-5-9 5 9 5 9-5z"/><path d="M3 7.5v9l9 5 9-5v-9"/><path d="M12 12.5v9"/></svg></span><span class="dt-dot" data-badge="produk" style="display:none;"></span></span><span class="dt-label">Produk</span></button>
       <button class="dash-tile" data-view="riwayat"><span class="dt-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 17 9 11 13 15 21 6"/><polyline points="15 6 21 6 21 12"/></svg></span><span class="dt-label">Riwayat Penjualan</span></button>
-      <button class="dash-tile" data-view="pesanan"><span class="dt-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="20" x2="5" y2="11"/><line x1="12" y1="20" x2="12" y2="5"/><line x1="19" y1="20" x2="19" y2="14"/></svg></span><span class="dt-label">Daftar Pesanan</span></button>
+      <button class="dash-tile" data-view="pesanan"><span class="dt-icon-wrap"><span class="dt-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="20" x2="5" y2="11"/><line x1="12" y1="20" x2="12" y2="5"/><line x1="19" y1="20" x2="19" y2="14"/></svg></span><span class="dt-badge" data-badge="pesanan" style="display:none;">0</span></span><span class="dt-label">Daftar Pesanan</span></button>
       <button class="dash-tile" data-view="laporan"><span class="dt-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3h12v18l-3-2-3 2-3-2-3 2V3z"/><line x1="9" y1="8" x2="15" y2="8"/><line x1="9" y1="12" x2="15" y2="12"/></svg></span><span class="dt-label">Laporan</span></button>
       <button class="dash-tile" data-view="pengaturan"><span class="dt-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3.2"/><path d="M12 2.5v3M12 18.5v3M4.6 4.6l2.1 2.1M17.3 17.3l2.1 2.1M2.5 12h3M18.5 12h3M4.6 19.4l2.1-2.1M17.3 6.7l2.1-2.1"/></svg></span><span class="dt-label">Pengaturan</span></button>
     </div>
@@ -1064,6 +1083,9 @@ function tutupDrawer(){
   $("drawerPanel").classList.remove("show");
 }
 $("btnBukaDrawer").onclick = bukaDrawer;
+$("btnLogoBeranda").onclick = () => {
+  if(ROLE_KASIR.toLowerCase() === "owner") switchView("beranda");
+};
 $("drawerOverlay").onclick = tutupDrawer;
 
 /* ============================================================
@@ -1142,19 +1164,26 @@ function renderKategoriProduk(){
   });
 }
 
+function produkBermasalah(p){
+  return p.hargaBeli > 0 && p.harga > 0 && p.hargaBeli > p.harga;
+}
+
 function renderProdukList(){
   const q = $("searchProduk").value.trim().toLowerCase();
   let list = PRODUK.filter(p => p.nama.toLowerCase().includes(q));
   if(activeCategoryProduk !== "Semua") list = list.filter(p => p.kategori === activeCategoryProduk);
-  $("produkList").innerHTML = list.map(p => `
+  $("produkList").innerHTML = list.map(p => {
+    const bermasalah = produkBermasalah(p);
+    return `
     <div class="list-row">
       <div class="lr-main">
-        <div class="lr-name">${p.nama}</div>
+        <div class="lr-name">${p.nama}${bermasalah ? ' <span class="dot-peringatan" title="Harga jual lebih rendah dari harga beli"></span>' : ''}</div>
         <div class="lr-sub">${p.kategori} · ${rupiah(p.harga)} · Stok: ${p.stok}</div>
       </div>
       <button class="lr-btn" data-edit="${p.id}">Edit</button>
     </div>
-  `).join("") || `<p style="color:var(--ink-soft);font-size:13.5px;padding:16px 0;">Belum ada produk. Tap "+ Produk" untuk tambah.</p>`;
+  `;
+  }).join("") || `<p style="color:var(--ink-soft);font-size:13.5px;padding:16px 0;">Belum ada produk. Tap "+ Produk" untuk tambah.</p>`;
 
   $("produkList").querySelectorAll("[data-edit]").forEach(btn=>{
     btn.onclick = () => bukaFormEditProduk(btn.dataset.edit);
@@ -1348,6 +1377,23 @@ function renderPesanan(){
   });
   $("pesananList").querySelectorAll("[data-hapus-produk]").forEach(btn=>{
     btn.onclick = () => hapusProduk(btn.dataset.hapusProduk);
+  });
+
+  updateBadgeNav();
+}
+
+function updateBadgeNav(){
+  // Daftar Pesanan: jumlah produk yang stoknya habis
+  const jumlahHabis = PRODUK.filter(p => p.stok <= 0).length;
+  document.querySelectorAll('[data-badge="pesanan"]').forEach(el => {
+    el.textContent = jumlahHabis;
+    el.style.display = jumlahHabis > 0 ? "flex" : "none";
+  });
+
+  // Produk: ada yang harga jual lebih rendah dari harga beli?
+  const adaBermasalah = PRODUK.some(p => produkBermasalah(p));
+  document.querySelectorAll('[data-badge="produk"]').forEach(el => {
+    el.style.display = adaBermasalah ? "block" : "none";
   });
 }
 
