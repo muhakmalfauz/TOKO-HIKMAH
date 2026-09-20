@@ -161,6 +161,13 @@
   .kat-bar-wrap{background:var(--line);border-radius:6px;height:8px;overflow:hidden;}
   .kat-bar{height:100%;background:var(--amber);border-radius:6px;}
   .kat-row-omset{font-size:11.5px;color:var(--ink-soft);margin-top:4px;}
+
+  /* ===== Stok Opname ===== */
+  .opname-row{display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid var(--line);gap:10px;}
+  .opname-nama{flex:1;font-size:13px;font-weight:600;min-width:0;}
+  .opname-inputs{display:flex;align-items:center;gap:8px;flex:none;}
+  .opname-sistem{font-size:11px;color:var(--ink-soft);white-space:nowrap;}
+  .opname-fisik{width:64px;padding:8px;border-radius:8px;border:1px solid var(--line);text-align:center;font-size:13px;}
   .summary-card{
     flex:1 1 45%;background:var(--paper);border:none;box-shadow:var(--shadow-card);border-radius:14px;padding:12px 14px;
   }
@@ -378,6 +385,7 @@
   <button class="nav-btn drawer-item" data-view="produk"><span class="nav-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 7.5l-9-5-9 5 9 5 9-5z"/><path d="M3 7.5v9l9 5 9-5v-9"/><path d="M12 12.5v9"/></svg></span>Produk<span class="drawer-dot" data-badge="produk" style="display:none;"></span></button>
   <button class="nav-btn drawer-item" data-view="riwayat"><span class="nav-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 17 9 11 13 15 21 6"/><polyline points="15 6 21 6 21 12"/></svg></span>Riwayat Penjualan</button>
   <button class="nav-btn drawer-item" data-view="pesanan"><span class="nav-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="20" x2="5" y2="11"/><line x1="12" y1="20" x2="12" y2="5"/><line x1="19" y1="20" x2="19" y2="14"/></svg></span>Daftar Pesanan<span class="drawer-badge" data-badge="pesanan" style="display:none;">0</span></button>
+  <button class="nav-btn drawer-item" data-view="pelanggan"><span class="nav-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="3.5"/><path d="M4.5 20c1-4 4-6 7.5-6s6.5 2 7.5 6"/></svg></span>Pelanggan</button>
   <button class="nav-btn drawer-item" data-view="laporan"><span class="nav-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3h12v18l-3-2-3 2-3-2-3 2V3z"/><line x1="9" y1="8" x2="15" y2="8"/><line x1="9" y1="12" x2="15" y2="12"/></svg></span>Laporan</button>
   <button class="nav-btn drawer-item" data-view="pengaturan"><span class="nav-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3.2"/><path d="M12 2.5v3M12 18.5v3M4.6 4.6l2.1 2.1M17.3 17.3l2.1 2.1M2.5 12h3M18.5 12h3M4.6 19.4l2.1-2.1M17.3 6.7l2.1-2.1"/></svg></span>Pengaturan</button>
 </div>
@@ -417,6 +425,7 @@
       <button class="dash-tile" data-view="produk"><span class="dt-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 7.5l-9-5-9 5 9 5 9-5z"/><path d="M3 7.5v9l9 5 9-5v-9"/><path d="M12 12.5v9"/></svg></span><span class="dt-label">Produk</span><span class="dt-dot" data-badge="produk" style="display:none;"></span></button>
       <button class="dash-tile" data-view="riwayat"><span class="dt-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 17 9 11 13 15 21 6"/><polyline points="15 6 21 6 21 12"/></svg></span><span class="dt-label">Riwayat Penjualan</span></button>
       <button class="dash-tile" data-view="pesanan"><span class="dt-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="20" x2="5" y2="11"/><line x1="12" y1="20" x2="12" y2="5"/><line x1="19" y1="20" x2="19" y2="14"/></svg></span><span class="dt-label">Daftar Pesanan</span><span class="dt-badge" data-badge="pesanan" style="display:none;">0</span></button>
+      <button class="dash-tile" data-view="pelanggan"><span class="dt-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="3.5"/><path d="M4.5 20c1-4 4-6 7.5-6s6.5 2 7.5 6"/></svg></span><span class="dt-label">Pelanggan</span></button>
       <button class="dash-tile" data-view="laporan"><span class="dt-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3h12v18l-3-2-3 2-3-2-3 2V3z"/><line x1="9" y1="8" x2="15" y2="8"/><line x1="9" y1="12" x2="15" y2="12"/></svg></span><span class="dt-label">Laporan</span></button>
       <button class="dash-tile" data-view="pengaturan"><span class="dt-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3.2"/><path d="M12 2.5v3M12 18.5v3M4.6 4.6l2.1 2.1M17.3 17.3l2.1 2.1M2.5 12h3M18.5 12h3M4.6 19.4l2.1-2.1M17.3 6.7l2.1-2.1"/></svg></span><span class="dt-label">Pengaturan</span></button>
     </div>
@@ -503,6 +512,18 @@
     <div class="list-panel" id="pesananList"></div>
   </div>
 
+  <!-- ===== VIEW: PELANGGAN ===== -->
+  <div id="viewPelanggan" style="display:none;">
+    <div class="page-head">
+      <h2>Pelanggan</h2>
+      <button class="btn-add" id="btnTambahPelanggan">+ Pelanggan</button>
+    </div>
+    <div class="search-box">
+      <input type="text" id="searchPelanggan" placeholder="Cari nama atau no. HP..." />
+    </div>
+    <div class="list-panel" id="pelangganList"></div>
+  </div>
+
   <!-- ===== VIEW: LAPORAN ===== -->
   <div id="viewLaporan" style="display:none;">
     <div class="page-head">
@@ -563,11 +584,27 @@
     <div class="list-panel" id="promoList"></div>
 
     <div class="page-head" style="padding-top:6px;">
+      <h2 style="font-size:14.5px;">Kelola Supplier</h2>
+      <button class="btn-add" id="btnTambahSupplier">+ Supplier</button>
+    </div>
+    <div class="list-panel" id="supplierList"></div>
+
+    <div class="page-head" style="padding-top:6px;">
+      <h2 style="font-size:14.5px;">Stok Opname</h2>
+    </div>
+    <div style="padding:0 16px 16px;">
+      <div style="font-size:12.5px;color:var(--ink-soft);margin-bottom:10px;">
+        Hitung stok fisik toko lalu cocokkan ke sistem — otomatis menyesuaikan stok kalau ada selisih (susut, rusak, salah hitung).
+      </div>
+      <button class="btn-secondary" id="btnMulaiOpname" style="border-color:var(--line);">📋 Mulai Stok Opname</button>
+    </div>
+
+    <div class="page-head" style="padding-top:6px;">
       <h2 style="font-size:14.5px;">Backup Data</h2>
     </div>
     <div style="padding:0 16px 16px;">
       <div style="font-size:12.5px;color:var(--ink-soft);margin-bottom:10px;">
-        Unduh semua data toko (Produk, Transaksi, Stok Masuk, Rekap Harian, User) sebagai 1 file Excel — buat jaga-jaga kalau sewaktu-waktu diperlukan.
+        Unduh semua data toko (Produk, Transaksi, Stok Masuk, Rekap Harian, User, Promo, Pelanggan, Supplier) sebagai 1 file Excel — buat jaga-jaga kalau sewaktu-waktu diperlukan.
       </div>
       <button class="btn-secondary" id="btnExportData" style="border-color:var(--line);">⬇️ Export Data ke Excel</button>
     </div>
@@ -602,6 +639,23 @@
     </div>
 
     <div class="field">
+      <label>Pelanggan (opsional)</label>
+      <div id="pelangganTerpilihWrap" style="display:none;background:var(--cream);border-radius:10px;padding:10px 12px;justify-content:space-between;align-items:center;margin-bottom:8px;">
+        <div>
+          <div style="font-size:13.5px;font-weight:600;" id="pelangganTerpilihNama"></div>
+          <div style="font-size:11.5px;color:var(--ink-soft);" id="pelangganTerpilihPoin"></div>
+        </div>
+        <button type="button" id="btnHapusPelangganTerpilih" style="background:none;border:none;color:var(--red);font-size:12px;">Hapus</button>
+      </div>
+      <button type="button" id="btnPilihPelanggan" class="btn-secondary" style="border-color:var(--line);margin-top:0;">+ Pilih Pelanggan</button>
+    </div>
+
+    <div class="field" id="fieldPakaiPoin" style="display:none;">
+      <label>Pakai Poin (1 poin = Rp100)</label>
+      <input type="number" id="inputPakaiPoin" min="0" value="0" inputmode="numeric" />
+    </div>
+
+    <div class="field">
       <label>Diskon Tambahan (Rp)</label>
       <input type="number" id="inputDiskon" value="0" min="0" inputmode="numeric" />
     </div>
@@ -615,10 +669,12 @@
     <div style="margin-top:16px;">
       <div class="summary-line"><span>Subtotal</span><span id="sumSubtotal">Rp 0</span></div>
       <div class="summary-line" id="barisPromoLine" style="display:none;"><span>Diskon Promo</span><span id="sumDiskonPromo">-Rp 0</span></div>
+      <div class="summary-line" id="barisPoinLine" style="display:none;"><span>Diskon Poin</span><span id="sumDiskonPoin">-Rp 0</span></div>
       <div class="summary-line"><span>Diskon Tambahan</span><span id="sumDiskon">Rp 0</span></div>
       <div class="summary-line total"><span>Total</span><span id="sumTotal">Rp 0</span></div>
       <div class="summary-line"><span>Total Dibayar</span><span id="sumTotalDibayar">Rp 0</span></div>
       <div class="summary-line kembalian"><span>Kembalian</span><span id="sumKembalian">Rp 0</span></div>
+      <div class="summary-line" id="barisPoinDidapat" style="display:none;"><span>Poin Didapat</span><span id="sumPoinDidapat">+0</span></div>
     </div>
 
     <button class="btn-primary" id="btnSimpan">Simpan Transaksi</button>
@@ -731,7 +787,8 @@
     </div>
     <div class="field">
       <label>Supplier (opsional)</label>
-      <input type="text" id="sfSupplier" />
+      <input type="text" id="sfSupplier" list="daftarSupplierDatalist" />
+      <datalist id="daftarSupplierDatalist"></datalist>
     </div>
     <div class="field">
       <label>Keterangan (opsional)</label>
@@ -806,6 +863,94 @@
   </div>
   <div class="sheet-body">
     <div class="list-panel" id="rwKategoriProdukList" style="padding:0;"></div>
+  </div>
+</div>
+
+<!-- SHEET: TAMBAH/EDIT PELANGGAN -->
+<div class="sheet-overlay" id="overlayPelangganForm"></div>
+<div class="sheet" id="sheetPelangganForm">
+  <div class="sheet-handle"></div>
+  <div class="sheet-head">
+    <h2 id="pelangganFormTitle">Tambah Pelanggan</h2>
+    <button id="btnClosePelangganForm">✕</button>
+  </div>
+  <div class="sheet-body">
+    <div class="field">
+      <label>Nama</label>
+      <input type="text" id="plNama" placeholder="misal Budi Santoso" />
+    </div>
+    <div class="field">
+      <label>No. HP</label>
+      <input type="text" id="plNoHp" inputmode="tel" placeholder="08xxxxxxxxxx" />
+    </div>
+    <div class="field">
+      <label>Alamat (opsional)</label>
+      <input type="text" id="plAlamat" />
+    </div>
+    <div class="field">
+      <label>Poin</label>
+      <input type="number" id="plPoin" inputmode="numeric" value="0" />
+    </div>
+    <div style="font-size:11.5px;color:var(--ink-soft);margin-top:4px;" id="plTotalBelanjaInfo"></div>
+    <button class="btn-primary" id="btnSimpanPelanggan">Simpan Pelanggan</button>
+  </div>
+</div>
+
+<!-- SHEET: PILIH PELANGGAN (dari Kasir) -->
+<div class="sheet-overlay" id="overlayPilihPelanggan"></div>
+<div class="sheet" id="sheetPilihPelanggan">
+  <div class="sheet-handle"></div>
+  <div class="sheet-head">
+    <h2>Pilih Pelanggan</h2>
+    <button id="btnClosePilihPelanggan">✕</button>
+  </div>
+  <div class="sheet-body">
+    <div class="field">
+      <input type="text" id="searchPilihPelanggan" placeholder="Cari nama atau no. HP..." />
+    </div>
+    <div class="list-panel" id="pilihPelangganList" style="padding:0;"></div>
+  </div>
+</div>
+
+<!-- SHEET: TAMBAH/EDIT SUPPLIER -->
+<div class="sheet-overlay" id="overlaySupplierForm"></div>
+<div class="sheet" id="sheetSupplierForm">
+  <div class="sheet-handle"></div>
+  <div class="sheet-head">
+    <h2 id="supplierFormTitle">Tambah Supplier</h2>
+    <button id="btnCloseSupplierForm">✕</button>
+  </div>
+  <div class="sheet-body">
+    <div class="field">
+      <label>Nama Supplier</label>
+      <input type="text" id="spNama" placeholder="misal Agen Sembako Jaya" />
+    </div>
+    <div class="field">
+      <label>No. HP (opsional)</label>
+      <input type="text" id="spNoHp" inputmode="tel" />
+    </div>
+    <div class="field">
+      <label>Alamat (opsional)</label>
+      <input type="text" id="spAlamat" />
+    </div>
+    <button class="btn-primary" id="btnSimpanSupplier">Simpan Supplier</button>
+  </div>
+</div>
+
+<!-- SHEET: STOK OPNAME -->
+<div class="sheet-overlay" id="overlayOpname"></div>
+<div class="sheet" id="sheetOpname">
+  <div class="sheet-handle"></div>
+  <div class="sheet-head">
+    <h2>Stok Opname</h2>
+    <button id="btnCloseOpname">✕</button>
+  </div>
+  <div class="sheet-body">
+    <div style="font-size:12px;color:var(--ink-soft);margin-bottom:10px;">
+      Isi "Stok Fisik" sesuai hasil hitung manual. Biarkan sama kalau stoknya memang sudah sesuai.
+    </div>
+    <div id="opnameList"></div>
+    <button class="btn-primary" id="btnSimpanOpname">Simpan Stok Opname</button>
   </div>
 </div>
 
@@ -941,6 +1086,12 @@ const colTransaksi = collection(db, "transaksi");
 const colStokMasuk = collection(db, "stokMasuk");
 const colRekapHarian = collection(db, "rekapHarian");
 const colPromo = collection(db, "promo");
+const colPelanggan = collection(db, "pelanggan");
+const colSupplier = collection(db, "supplier");
+const colStokOpname = collection(db, "stokOpname");
+
+const POIN_PER_RUPIAH = 10000; // 1 poin didapat tiap kelipatan Rp10.000 belanja
+const RUPIAH_PER_POIN = 100;   // 1 poin setara Rp100 saat ditukar
 
 const PRINTER_LEBAR_KARAKTER = 32; // 32 = printer thermal 58mm (paling umum), ganti ke 48 kalau pakai printer 80mm
 
@@ -979,6 +1130,8 @@ function setStatus(online, text){
    ============================================================ */
 let DAFTAR_USER = [];
 let DAFTAR_PROMO = [];
+let DAFTAR_PELANGGAN = [];
+let pelangganTerpilih = null; // {id, nama, noHp, poin} — dipilih saat transaksi di Kasir
 
 async function muatDaftarUser(){
   try{
@@ -1018,6 +1171,8 @@ function masuk(nama, role){
   muatProduk();
   muatDaftarUser();
   muatPromo();
+  muatPelanggan();
+  muatSupplier();
 }
 
 function terapkanBatasanRole(){
@@ -1137,6 +1292,7 @@ function switchView(view){
   $("viewProduk").style.display = view === "produk" ? "" : "none";
   $("viewRiwayat").style.display = view === "riwayat" ? "" : "none";
   $("viewPesanan").style.display = view === "pesanan" ? "" : "none";
+  $("viewPelanggan").style.display = view === "pelanggan" ? "" : "none";
   $("viewLaporan").style.display = view === "laporan" ? "" : "none";
   $("viewPengaturan").style.display = view === "pengaturan" ? "" : "none";
   renderCartBar();
@@ -1144,6 +1300,7 @@ function switchView(view){
   if(view === "produk"){ renderKategoriProduk(); renderProdukList(); }
   if(view === "riwayat") renderRiwayatPenjualan();
   if(view === "pesanan") renderPesanan();
+  if(view === "pelanggan") renderPelangganList();
   if(view === "laporan") renderLaporan();
   if(view === "pengaturan") renderPengaturanList();
 }
@@ -1504,6 +1661,188 @@ async function hapusProduk(id){
     showToast("Gagal hapus: " + err.message);
   }
 }
+
+/* ============================================================
+   HALAMAN PELANGGAN — data pelanggan & poin loyalitas
+   ============================================================ */
+let pelangganFormMode = "tambah";
+let pelangganEditId = null;
+
+async function muatPelanggan(){
+  try{
+    const snap = await denganBatasWaktu(getDocs(colPelanggan));
+    DAFTAR_PELANGGAN = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+    renderPelangganList();
+  }catch(err){
+    // gagal diam-diam; fitur pelanggan tidak menghalangi transaksi normal
+  }
+}
+
+function renderPelangganList(){
+  const q = $("searchPelanggan").value.trim().toLowerCase();
+  const list = DAFTAR_PELANGGAN.filter(p => p.nama.toLowerCase().includes(q) || (p.noHp||"").includes(q));
+  $("pelangganList").innerHTML = list.map(p => `
+    <div class="list-row">
+      <div class="lr-main">
+        <div class="lr-name">${p.nama}</div>
+        <div class="lr-sub">${p.noHp || '-'} · ${p.poin || 0} poin · Total belanja: ${rupiah(p.totalBelanja || 0)}</div>
+      </div>
+      <div class="lr-actions">
+        <button class="lr-btn" data-edit-pelanggan="${p.id}">Edit</button>
+        <button class="lr-btn danger" data-hapus-pelanggan="${p.id}">Hapus</button>
+      </div>
+    </div>
+  `).join("") || `<p style="color:var(--ink-soft);font-size:13.5px;padding:16px 0;">Belum ada pelanggan. Tap "+ Pelanggan" untuk tambah.</p>`;
+
+  $("pelangganList").querySelectorAll("[data-edit-pelanggan]").forEach(btn=>{
+    btn.onclick = () => bukaFormEditPelanggan(btn.dataset.editPelanggan);
+  });
+  $("pelangganList").querySelectorAll("[data-hapus-pelanggan]").forEach(btn=>{
+    btn.onclick = () => hapusPelanggan(btn.dataset.hapusPelanggan);
+  });
+}
+$("searchPelanggan").addEventListener("input", renderPelangganList);
+
+function bukaFormTambahPelanggan(){
+  pelangganFormMode = "tambah";
+  pelangganEditId = null;
+  $("pelangganFormTitle").textContent = "Tambah Pelanggan";
+  $("plNama").value = "";
+  $("plNoHp").value = "";
+  $("plAlamat").value = "";
+  $("plPoin").value = 0;
+  $("plTotalBelanjaInfo").textContent = "";
+  bukaSheet("sheetPelangganForm", "overlayPelangganForm");
+}
+$("btnTambahPelanggan").onclick = bukaFormTambahPelanggan;
+
+function bukaFormEditPelanggan(id){
+  const p = DAFTAR_PELANGGAN.find(x => x.id === id);
+  if(!p) return;
+  pelangganFormMode = "edit";
+  pelangganEditId = id;
+  $("pelangganFormTitle").textContent = "Edit Pelanggan";
+  $("plNama").value = p.nama;
+  $("plNoHp").value = p.noHp || "";
+  $("plAlamat").value = p.alamat || "";
+  $("plPoin").value = p.poin || 0;
+  $("plTotalBelanjaInfo").textContent = "Total belanja sepanjang waktu: " + rupiah(p.totalBelanja || 0);
+  bukaSheet("sheetPelangganForm", "overlayPelangganForm");
+}
+$("btnClosePelangganForm").onclick = () => tutupSheet("sheetPelangganForm", "overlayPelangganForm");
+$("overlayPelangganForm").onclick = () => tutupSheet("sheetPelangganForm", "overlayPelangganForm");
+
+async function simpanPelanggan(){
+  const nama = $("plNama").value.trim();
+  const noHp = $("plNoHp").value.trim();
+  const alamat = $("plAlamat").value.trim();
+  const poin = Number($("plPoin").value) || 0;
+  if(!nama){ showToast("Isi nama pelanggan dulu"); return; }
+
+  $("btnSimpanPelanggan").disabled = true;
+  $("btnSimpanPelanggan").textContent = "Menyimpan...";
+  try{
+    if(pelangganFormMode === "tambah"){
+      const dataBaru = { nama, noHp, alamat, poin, totalBelanja: 0, tanggalDaftar: formatTanggal(new Date()) };
+      const ref = doc(colPelanggan);
+      await denganBatasWaktu(setDoc(ref, dataBaru));
+      DAFTAR_PELANGGAN.push({ id: ref.id, ...dataBaru });
+    }else{
+      await denganBatasWaktu(updateDoc(doc(colPelanggan, pelangganEditId), { nama, noHp, alamat, poin }));
+      const idx = DAFTAR_PELANGGAN.findIndex(x => x.id === pelangganEditId);
+      if(idx !== -1) Object.assign(DAFTAR_PELANGGAN[idx], { nama, noHp, alamat, poin });
+      if(pelangganTerpilih && pelangganTerpilih.id === pelangganEditId){
+        pelangganTerpilih = DAFTAR_PELANGGAN[idx];
+        tampilkanPelangganTerpilih();
+        hitungTotal();
+      }
+    }
+    tutupSheet("sheetPelangganForm", "overlayPelangganForm");
+    renderPelangganList();
+    showToast(pelangganFormMode === "tambah" ? "Pelanggan ditambahkan" : "Pelanggan diperbarui");
+  }catch(err){
+    showToast("Gagal simpan: " + err.message);
+  }finally{
+    $("btnSimpanPelanggan").disabled = false;
+    $("btnSimpanPelanggan").textContent = "Simpan Pelanggan";
+  }
+}
+$("btnSimpanPelanggan").onclick = simpanPelanggan;
+
+async function hapusPelanggan(id){
+  const p = DAFTAR_PELANGGAN.find(x => x.id === id);
+  if(!p) return;
+  if(!(await konfirmasi("Riwayat transaksi lama tetap aman, hanya data pelanggan & poinnya yang terhapus.", { judul: `Hapus pelanggan "${p.nama}"?`, labelYa: "Ya, Hapus", bahaya: true }))) return;
+  try{
+    await denganBatasWaktu(deleteDoc(doc(colPelanggan, id)));
+    DAFTAR_PELANGGAN = DAFTAR_PELANGGAN.filter(x => x.id !== id);
+    if(pelangganTerpilih && pelangganTerpilih.id === id){ pelangganTerpilih = null; tampilkanPelangganTerpilih(); hitungTotal(); }
+    renderPelangganList();
+    showToast("Pelanggan dihapus");
+  }catch(err){
+    showToast("Gagal hapus: " + err.message);
+  }
+}
+
+/* ============================================================
+   PILIH PELANGGAN — dipakai dari sheet Bayar di Kasir
+   ============================================================ */
+function bukaPilihPelanggan(){
+  $("searchPilihPelanggan").value = "";
+  renderPilihPelangganList();
+  bukaSheet("sheetPilihPelanggan", "overlayPilihPelanggan");
+}
+$("btnPilihPelanggan").onclick = bukaPilihPelanggan;
+$("btnClosePilihPelanggan").onclick = () => tutupSheet("sheetPilihPelanggan", "overlayPilihPelanggan");
+$("overlayPilihPelanggan").onclick = () => tutupSheet("sheetPilihPelanggan", "overlayPilihPelanggan");
+
+function renderPilihPelangganList(){
+  const q = $("searchPilihPelanggan").value.trim().toLowerCase();
+  const list = DAFTAR_PELANGGAN.filter(p => p.nama.toLowerCase().includes(q) || (p.noHp||"").includes(q));
+  $("pilihPelangganList").innerHTML = list.map(p => `
+    <div class="list-row" data-pilih-pelanggan="${p.id}" style="cursor:pointer;">
+      <div class="lr-main">
+        <div class="lr-name">${p.nama}</div>
+        <div class="lr-sub">${p.noHp || '-'} · ${p.poin || 0} poin</div>
+      </div>
+    </div>
+  `).join("") || `<p style="color:var(--ink-soft);font-size:13.5px;padding:16px 0;">Tidak ditemukan. Tambahkan dulu lewat menu Pelanggan.</p>`;
+
+  $("pilihPelangganList").querySelectorAll("[data-pilih-pelanggan]").forEach(row=>{
+    row.onclick = () => pilihPelangganUntukTransaksi(row.dataset.pilihPelanggan);
+  });
+}
+$("searchPilihPelanggan").addEventListener("input", renderPilihPelangganList);
+
+function pilihPelangganUntukTransaksi(id){
+  const p = DAFTAR_PELANGGAN.find(x => x.id === id);
+  if(!p) return;
+  pelangganTerpilih = p;
+  tampilkanPelangganTerpilih();
+  tutupSheet("sheetPilihPelanggan", "overlayPilihPelanggan");
+  hitungTotal();
+}
+
+function tampilkanPelangganTerpilih(){
+  if(pelangganTerpilih){
+    $("pelangganTerpilihWrap").style.display = "flex";
+    $("btnPilihPelanggan").style.display = "none";
+    $("pelangganTerpilihNama").textContent = pelangganTerpilih.nama;
+    $("pelangganTerpilihPoin").textContent = (pelangganTerpilih.poin || 0) + " poin dimiliki";
+    $("inputPakaiPoin").value = 0;
+    $("fieldPakaiPoin").style.display = pelangganTerpilih.poin > 0 ? "block" : "none";
+  }else{
+    $("pelangganTerpilihWrap").style.display = "none";
+    $("btnPilihPelanggan").style.display = "block";
+    $("fieldPakaiPoin").style.display = "none";
+    $("inputPakaiPoin").value = 0;
+  }
+}
+$("btnHapusPelangganTerpilih").onclick = () => {
+  pelangganTerpilih = null;
+  tampilkanPelangganTerpilih();
+  hitungTotal();
+};
 
 /* ============================================================
    HALAMAN RIWAYAT PENJUALAN — analitik penjualan per kategori
@@ -2112,6 +2451,195 @@ async function hapusPromo(id){
 }
 
 /* ============================================================
+   KELOLA SUPPLIER
+   ============================================================ */
+let DAFTAR_SUPPLIER = [];
+let supplierFormMode = "tambah";
+let supplierEditId = null;
+
+async function muatSupplier(){
+  try{
+    const snap = await denganBatasWaktu(getDocs(colSupplier));
+    DAFTAR_SUPPLIER = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+    renderSupplierList();
+    isiDatalistSupplier();
+  }catch(err){
+    // gagal diam-diam; supplier bukan jalur kritis
+  }
+}
+
+function isiDatalistSupplier(){
+  const dl = $("daftarSupplierDatalist");
+  if(dl) dl.innerHTML = DAFTAR_SUPPLIER.map(s => `<option value="${s.nama}">`).join("");
+}
+
+function renderSupplierList(){
+  $("supplierList").innerHTML = DAFTAR_SUPPLIER.map(s => `
+    <div class="list-row">
+      <div class="lr-main">
+        <div class="lr-name">${s.nama}</div>
+        <div class="lr-sub">${s.noHp || '-'}</div>
+      </div>
+      <div class="lr-actions">
+        <button class="lr-btn" data-edit-supplier="${s.id}">Edit</button>
+        <button class="lr-btn danger" data-hapus-supplier="${s.id}">Hapus</button>
+      </div>
+    </div>
+  `).join("") || `<p style="color:var(--ink-soft);font-size:13.5px;padding:16px 0;">Belum ada supplier.</p>`;
+
+  $("supplierList").querySelectorAll("[data-edit-supplier]").forEach(btn=>{
+    btn.onclick = () => bukaFormEditSupplier(btn.dataset.editSupplier);
+  });
+  $("supplierList").querySelectorAll("[data-hapus-supplier]").forEach(btn=>{
+    btn.onclick = () => hapusSupplier(btn.dataset.hapusSupplier);
+  });
+}
+
+function bukaFormTambahSupplier(){
+  supplierFormMode = "tambah";
+  supplierEditId = null;
+  $("supplierFormTitle").textContent = "Tambah Supplier";
+  $("spNama").value = "";
+  $("spNoHp").value = "";
+  $("spAlamat").value = "";
+  bukaSheet("sheetSupplierForm", "overlaySupplierForm");
+}
+$("btnTambahSupplier").onclick = bukaFormTambahSupplier;
+
+function bukaFormEditSupplier(id){
+  const s = DAFTAR_SUPPLIER.find(x => x.id === id);
+  if(!s) return;
+  supplierFormMode = "edit";
+  supplierEditId = id;
+  $("supplierFormTitle").textContent = "Edit Supplier";
+  $("spNama").value = s.nama;
+  $("spNoHp").value = s.noHp || "";
+  $("spAlamat").value = s.alamat || "";
+  bukaSheet("sheetSupplierForm", "overlaySupplierForm");
+}
+$("btnCloseSupplierForm").onclick = () => tutupSheet("sheetSupplierForm", "overlaySupplierForm");
+$("overlaySupplierForm").onclick = () => tutupSheet("sheetSupplierForm", "overlaySupplierForm");
+
+async function simpanSupplier(){
+  const nama = $("spNama").value.trim();
+  if(!nama){ showToast("Isi nama supplier dulu"); return; }
+  const noHp = $("spNoHp").value.trim();
+  const alamat = $("spAlamat").value.trim();
+
+  $("btnSimpanSupplier").disabled = true;
+  $("btnSimpanSupplier").textContent = "Menyimpan...";
+  try{
+    if(supplierFormMode === "tambah"){
+      const ref = doc(colSupplier);
+      await denganBatasWaktu(setDoc(ref, { nama, noHp, alamat }));
+      DAFTAR_SUPPLIER.push({ id: ref.id, nama, noHp, alamat });
+    }else{
+      await denganBatasWaktu(updateDoc(doc(colSupplier, supplierEditId), { nama, noHp, alamat }));
+      const idx = DAFTAR_SUPPLIER.findIndex(x => x.id === supplierEditId);
+      if(idx !== -1) Object.assign(DAFTAR_SUPPLIER[idx], { nama, noHp, alamat });
+    }
+    tutupSheet("sheetSupplierForm", "overlaySupplierForm");
+    renderSupplierList();
+    isiDatalistSupplier();
+    showToast(supplierFormMode === "tambah" ? "Supplier ditambahkan" : "Supplier diperbarui");
+  }catch(err){
+    showToast("Gagal simpan: " + err.message);
+  }finally{
+    $("btnSimpanSupplier").disabled = false;
+    $("btnSimpanSupplier").textContent = "Simpan Supplier";
+  }
+}
+$("btnSimpanSupplier").onclick = simpanSupplier;
+
+async function hapusSupplier(id){
+  const s = DAFTAR_SUPPLIER.find(x => x.id === id);
+  if(!s) return;
+  if(!(await konfirmasi("Data stok masuk lama tetap aman.", { judul: `Hapus supplier "${s.nama}"?`, labelYa: "Ya, Hapus", bahaya: true }))) return;
+  try{
+    await denganBatasWaktu(deleteDoc(doc(colSupplier, id)));
+    DAFTAR_SUPPLIER = DAFTAR_SUPPLIER.filter(x => x.id !== id);
+    renderSupplierList();
+    isiDatalistSupplier();
+    showToast("Supplier dihapus");
+  }catch(err){
+    showToast("Gagal hapus: " + err.message);
+  }
+}
+
+/* ============================================================
+   STOK OPNAME — cocokkan stok fisik vs sistem
+   ============================================================ */
+function bukaOpname(){
+  $("opnameList").innerHTML = PRODUK.map(p => `
+    <div class="opname-row" data-id="${p.id}">
+      <div class="opname-nama">${p.nama}</div>
+      <div class="opname-inputs">
+        <div class="opname-sistem">Sistem: ${p.stok}</div>
+        <input type="number" class="opname-fisik" value="${p.stok}" inputmode="numeric" />
+      </div>
+    </div>
+  `).join("") || `<p style="color:var(--ink-soft);font-size:13.5px;padding:16px 0;">Belum ada produk.</p>`;
+  bukaSheet("sheetOpname", "overlayOpname");
+}
+$("btnMulaiOpname").onclick = bukaOpname;
+$("btnCloseOpname").onclick = () => tutupSheet("sheetOpname", "overlayOpname");
+$("overlayOpname").onclick = () => tutupSheet("sheetOpname", "overlayOpname");
+
+async function simpanOpname(){
+  const baris = Array.from(document.querySelectorAll("#opnameList .opname-row"));
+  const perubahan = [];
+  baris.forEach(row => {
+    const id = row.dataset.id;
+    const p = PRODUK.find(x => x.id === id);
+    const stokFisik = Number(row.querySelector(".opname-fisik").value);
+    if(p && !isNaN(stokFisik) && stokFisik !== p.stok){
+      perubahan.push({ idProduk: id, namaProduk: p.nama, stokSistem: p.stok, stokFisik, selisih: stokFisik - p.stok });
+    }
+  });
+
+  if(perubahan.length === 0){
+    showToast("Tidak ada perubahan stok");
+    tutupSheet("sheetOpname", "overlayOpname");
+    return;
+  }
+  if(!(await konfirmasi(`${perubahan.length} produk akan disesuaikan stoknya sesuai hasil hitung fisik.`, { judul: "Simpan Stok Opname?", labelYa: "Ya, Simpan" }))) return;
+
+  $("btnSimpanOpname").disabled = true;
+  $("btnSimpanOpname").textContent = "Menyimpan...";
+  try{
+    const batch = writeBatch(db);
+    const now = new Date();
+    batch.set(doc(colStokOpname), {
+      tanggal: formatTanggal(now),
+      jam: String(now.getHours()).padStart(2,"0") + ":" + String(now.getMinutes()).padStart(2,"0"),
+      owner: NAMA_KASIR, items: perubahan
+    });
+    perubahan.forEach(it => {
+      batch.update(doc(colProduk, it.idProduk), { stok: it.stokFisik });
+    });
+    await denganBatasWaktu(batch.commit());
+
+    perubahan.forEach(it => {
+      const p = PRODUK.find(x => x.id === it.idProduk);
+      if(p) p.stok = it.stokFisik;
+    });
+    localStorage.setItem("th_produk_cache", JSON.stringify(PRODUK));
+
+    tutupSheet("sheetOpname", "overlayOpname");
+    renderGrid();
+    renderProdukList();
+    renderPesanan();
+    showToast(`Stok opname tersimpan, ${perubahan.length} produk disesuaikan`);
+  }catch(err){
+    showToast("Gagal simpan: " + err.message);
+  }finally{
+    $("btnSimpanOpname").disabled = false;
+    $("btnSimpanOpname").textContent = "Simpan Stok Opname";
+  }
+}
+$("btnSimpanOpname").onclick = simpanOpname;
+
+/* ============================================================
    BACKUP DATA — export semua koleksi Firestore ke 1 file Excel
    ============================================================ */
 async function exportDataExcel(){
@@ -2125,10 +2653,11 @@ async function exportDataExcel(){
   tombol.textContent = "Menyiapkan data...";
 
   try{
-    const [produkSnap, transaksiSnap, stokSnap, rekapSnap, userSnap, promoSnap] = await denganBatasWaktu(
+    const [produkSnap, transaksiSnap, stokSnap, rekapSnap, userSnap, promoSnap, pelangganSnap, supplierSnap] = await denganBatasWaktu(
       Promise.all([
         getDocs(colProduk), getDocs(colTransaksi), getDocs(colStokMasuk),
-        getDocs(colRekapHarian), getDocs(colUser), getDocs(colPromo)
+        getDocs(colRekapHarian), getDocs(colUser), getDocs(colPromo),
+        getDocs(colPelanggan), getDocs(colSupplier)
       ]),
       25
     );
@@ -2148,11 +2677,12 @@ async function exportDataExcel(){
       (t.items || []).forEach(it => {
         transaksiRows.push({
           "ID Transaksi": t.idTransaksi, "Tanggal": t.tanggal, "Jam": t.jam, "Kasir": t.kasir,
-          "ID Produk": it.idProduk, "Nama Produk": it.namaProduk, "Qty": it.qty,
+          "Pelanggan": t.pelangganNama || "", "ID Produk": it.idProduk, "Nama Produk": it.namaProduk, "Qty": it.qty,
           "Harga Satuan": it.hargaSatuan, "Subtotal Item": it.qty * it.hargaSatuan,
-          "Diskon Promo": t.diskonPromo || 0, "Diskon Tambahan": t.diskon || 0,
+          "Diskon Promo": t.diskonPromo || 0, "Diskon Poin": t.diskonPoin || 0, "Diskon Tambahan": t.diskon || 0,
           "Total Transaksi": t.total, "Metode Bayar": t.metodeBayarText || t.metodeBayar || "",
-          "Nominal Dibayar": t.nominalDibayar, "Kembalian": t.kembalian, "Status": t.status
+          "Nominal Dibayar": t.nominalDibayar, "Kembalian": t.kembalian,
+          "Poin Dipakai": t.poinDipakai || 0, "Poin Didapat": t.poinDidapat || 0, "Status": t.status
         });
       });
     });
@@ -2185,6 +2715,19 @@ async function exportDataExcel(){
       };
     });
 
+    const pelangganRows = pelangganSnap.docs.map(d => {
+      const pl = d.data();
+      return {
+        "Nama": pl.nama, "No HP": pl.noHp || "", "Alamat": pl.alamat || "",
+        "Poin": pl.poin || 0, "Total Belanja": pl.totalBelanja || 0, "Tanggal Daftar": pl.tanggalDaftar || ""
+      };
+    });
+
+    const supplierRows = supplierSnap.docs.map(d => {
+      const s = d.data();
+      return { "Nama": s.nama, "No HP": s.noHp || "", "Alamat": s.alamat || "" };
+    });
+
     const wb = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(produkRows), "Produk");
     XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(transaksiRows), "Transaksi");
@@ -2192,6 +2735,8 @@ async function exportDataExcel(){
     XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(rekapRows), "Rekap_Harian");
     XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(userRows), "User");
     XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(promoRows), "Promo");
+    XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(pelangganRows), "Pelanggan");
+    XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(supplierRows), "Supplier");
 
     XLSX.writeFile(wb, `TOKO_HIKMAH_Backup_${formatTanggal(new Date())}.xlsx`);
     showToast("Backup berhasil diunduh");
@@ -2392,10 +2937,18 @@ function hitungTotal(){
   const promoResult = hitungDiskonPromo(items);
   const diskonPromo = promoResult.totalDiskon;
   const diskonManual = Number($("inputDiskon").value) || 0;
-  const total = Math.max(subtotal - diskonPromo - diskonManual, 0);
+
+  let poinDipakai = 0;
+  if(pelangganTerpilih && pelangganTerpilih.poin > 0){
+    poinDipakai = Math.max(0, Math.min(Number($("inputPakaiPoin").value) || 0, pelangganTerpilih.poin));
+  }
+  const diskonPoin = poinDipakai * RUPIAH_PER_POIN;
+
+  const total = Math.max(subtotal - diskonPromo - diskonManual - diskonPoin, 0);
 
   const totalDibayar = daftarPembayaranState.reduce((s, b) => s + (Number(b.nominal) || 0), 0);
   const kembalian = totalDibayar - total;
+  const poinDidapat = Math.floor(total / POIN_PER_RUPIAH);
 
   $("sumSubtotal").textContent = rupiah(subtotal);
   if(diskonPromo > 0){
@@ -2404,11 +2957,24 @@ function hitungTotal(){
   }else{
     $("barisPromoLine").style.display = "none";
   }
+  if(diskonPoin > 0){
+    $("barisPoinLine").style.display = "flex";
+    $("sumDiskonPoin").textContent = "-" + rupiah(diskonPoin);
+  }else{
+    $("barisPoinLine").style.display = "none";
+  }
   $("sumDiskon").textContent = rupiah(diskonManual);
   $("sumTotal").textContent = rupiah(total);
   $("sumTotalDibayar").textContent = rupiah(totalDibayar);
   $("sumKembalian").textContent = rupiah(kembalian);
   $("sumKembalian").parentElement.classList.toggle("minus", kembalian < 0);
+
+  if(pelangganTerpilih && poinDidapat > 0){
+    $("barisPoinDidapat").style.display = "flex";
+    $("sumPoinDidapat").textContent = "+" + poinDidapat;
+  }else{
+    $("barisPoinDidapat").style.display = "none";
+  }
 
   if(promoResult.diterapkan.length){
     $("promoDiterapkanWrap").style.display = "block";
@@ -2418,9 +2984,13 @@ function hitungTotal(){
   }
 
   $("btnSimpan").disabled = items.length === 0 || totalDibayar < total;
-  return { subtotal, diskonPromo, diskonManual, total, totalDibayar, kembalian, promoDiterapkan: promoResult.diterapkan };
+  return {
+    subtotal, diskonPromo, diskonManual, diskonPoin, poinDipakai, poinDidapat,
+    total, totalDibayar, kembalian, promoDiterapkan: promoResult.diterapkan
+  };
 }
 $("inputDiskon").addEventListener("input", hitungTotal);
+$("inputPakaiPoin").addEventListener("input", hitungTotal);
 
 /* ============================================================
    PEMBAYARAN SPLIT — beberapa metode bayar dalam 1 transaksi
@@ -2502,7 +3072,7 @@ function buatIdTransaksi(){
 }
 
 function simpanTransaksi(){
-  const { subtotal, diskonPromo, diskonManual, total, totalDibayar, kembalian, promoDiterapkan } = hitungTotal();
+  const { subtotal, diskonPromo, diskonManual, diskonPoin, poinDipakai, poinDidapat, total, totalDibayar, kembalian, promoDiterapkan } = hitungTotal();
   const items = Object.values(cart).map(i => ({
     idProduk: i.id, namaProduk: i.nama, qty: i.qty, hargaSatuan: i.harga
   }));
@@ -2513,6 +3083,8 @@ function simpanTransaksi(){
     .map(b => ({ metode: b.metode, nominal: Number(b.nominal) }));
   const metodeBayarText = pembayaran.map(b => b.metode).join(" + ") || "Tunai";
 
+  const pelangganUntukTransaksi = pelangganTerpilih; // simpan referensi, karena state akan direset
+
   const now = new Date();
   const idTransaksi = buatIdTransaksi();
   const dataTransaksi = {
@@ -2520,6 +3092,9 @@ function simpanTransaksi(){
     jam: String(now.getHours()).padStart(2,"0") + ":" + String(now.getMinutes()).padStart(2,"0"),
     kasir: NAMA_KASIR, items, subtotal,
     diskonPromo, diskon: diskonManual, promoDiterapkan,
+    diskonPoin, poinDipakai, poinDidapat,
+    pelangganId: pelangganUntukTransaksi ? pelangganUntukTransaksi.id : null,
+    pelangganNama: pelangganUntukTransaksi ? pelangganUntukTransaksi.nama : null,
     total, pembayaran, metodeBayarText, nominalDibayar: totalDibayar, kembalian,
     status: "Selesai"
   };
@@ -2533,11 +3108,24 @@ function simpanTransaksi(){
     if(p) p.stok -= it.qty;
   });
   localStorage.setItem("th_produk_cache", JSON.stringify(PRODUK));
-  tampilkanStruk(idTransaksi, items, subtotal, diskonPromo, diskonManual, total, pembayaran, totalDibayar, kembalian, promoDiterapkan);
+
+  // update poin pelanggan secara lokal juga, biar langsung kelihatan di aplikasi
+  if(pelangganUntukTransaksi){
+    const pl = DAFTAR_PELANGGAN.find(x => x.id === pelangganUntukTransaksi.id);
+    if(pl){
+      pl.poin = (pl.poin || 0) - poinDipakai + poinDidapat;
+      pl.totalBelanja = (pl.totalBelanja || 0) + total;
+    }
+  }
+
+  tampilkanStruk(idTransaksi, items, subtotal, diskonPromo, diskonManual, diskonPoin, total, pembayaran, totalDibayar, kembalian, promoDiterapkan, pelangganUntukTransaksi, poinDidapat);
   cart = {};
+  pelangganTerpilih = null;
+  tampilkanPelangganTerpilih();
   renderCartBar();
   renderGrid();
   renderPesanan();
+  renderPelangganList();
   tutupSheetBayar();
   $("inputDiskon").value = 0;
   $("btnSimpan").disabled = false;
@@ -2549,6 +3137,12 @@ function simpanTransaksi(){
   items.forEach(it => {
     batch.update(doc(colProduk, it.idProduk), { stok: increment(-it.qty) });
   });
+  if(pelangganUntukTransaksi){
+    batch.update(doc(colPelanggan, pelangganUntukTransaksi.id), {
+      poin: increment(poinDidapat - poinDipakai),
+      totalBelanja: increment(total)
+    });
+  }
   batch.commit().catch(err => {
     showToast("Perhatian: transaksi " + idTransaksi + " gagal tersimpan (" + err.message + ")");
   });
@@ -2560,16 +3154,17 @@ $("btnSimpan").onclick = simpanTransaksi;
    ============================================================ */
 let strukTerakhir = null;
 
-function tampilkanStruk(idTrx, items, subtotal, diskonPromo, diskonManual, total, pembayaran, totalDibayar, kembalian, promoDiterapkan){
-  strukTerakhir = { idTrx, items, subtotal, diskonPromo, diskonManual, total, pembayaran, totalDibayar, kembalian, promoDiterapkan };
+function tampilkanStruk(idTrx, items, subtotal, diskonPromo, diskonManual, diskonPoin, total, pembayaran, totalDibayar, kembalian, promoDiterapkan, pelanggan, poinDidapat){
+  strukTerakhir = { idTrx, items, subtotal, diskonPromo, diskonManual, diskonPoin, total, pembayaran, totalDibayar, kembalian, promoDiterapkan, pelanggan, poinDidapat };
 
   const waktu = new Date().toLocaleString("id-ID");
   let html = `
     <div class="t-center"><strong>TOKO HIKMAH</strong><br/>${waktu}</div>
     <hr/>
     <div>ID: ${idTrx}</div>
-    <div>Kasir: ${NAMA_KASIR}</div>
-    <hr/>`;
+    <div>Kasir: ${NAMA_KASIR}</div>`;
+  if(pelanggan){ html += `<div>Pelanggan: ${pelanggan.nama}</div>`; }
+  html += `<hr/>`;
   items.forEach(i=>{
     html += `<div class="line"><span>${i.namaProduk} x${i.qty}</span><span>${rupiah(i.qty*i.hargaSatuan)}</span></div>`;
   });
@@ -2577,6 +3172,9 @@ function tampilkanStruk(idTrx, items, subtotal, diskonPromo, diskonManual, total
   (promoDiterapkan || []).forEach(p => {
     html += `<div class="line"><span>🏷️ ${p.nama}</span><span>-${rupiah(p.jumlah)}</span></div>`;
   });
+  if(diskonPoin > 0){
+    html += `<div class="line"><span>Diskon Poin</span><span>-${rupiah(diskonPoin)}</span></div>`;
+  }
   if(diskonManual > 0){
     html += `<div class="line"><span>Diskon Tambahan</span><span>-${rupiah(diskonManual)}</span></div>`;
   }
@@ -2584,8 +3182,11 @@ function tampilkanStruk(idTrx, items, subtotal, diskonPromo, diskonManual, total
   (pembayaran || []).forEach(b => {
     html += `<div class="line"><span>${b.metode}</span><span>${rupiah(b.nominal)}</span></div>`;
   });
+  html += `<div class="line"><span>Kembali</span><span>${rupiah(kembalian)}</span></div>`;
+  if(pelanggan && poinDidapat > 0){
+    html += `<hr/><div class="line"><span>Poin Didapat</span><span>+${poinDidapat}</span></div>`;
+  }
   html += `
-    <div class="line"><span>Kembali</span><span>${rupiah(kembalian)}</span></div>
     <hr/>
     <div class="t-center">Terima kasih</div>
   `;
@@ -2638,7 +3239,7 @@ function formatBaris(kiri, kanan, W){
 
 function cetakViaRawBT(){
   if(!strukTerakhir){ showToast("Belum ada transaksi untuk dicetak"); return; }
-  const { idTrx, items, subtotal, diskonPromo, diskonManual, total, pembayaran, kembalian, promoDiterapkan } = strukTerakhir;
+  const { idTrx, items, subtotal, diskonPromo, diskonManual, diskonPoin, total, pembayaran, kembalian, promoDiterapkan, pelanggan, poinDidapat } = strukTerakhir;
   const W = PRINTER_LEBAR_KARAKTER;
   const garis = "-".repeat(W);
   const waktu = new Date().toLocaleString("id-ID");
@@ -2651,6 +3252,7 @@ function cetakViaRawBT(){
   p.left();
   p.line("ID: " + idTrx);
   p.line("Kasir: " + NAMA_KASIR);
+  if(pelanggan){ p.line("Pelanggan: " + pelanggan.nama); }
   p.line(garis);
   items.forEach(i => {
     p.line(formatBaris(`${i.namaProduk} x${i.qty}`, rupiahPolos(i.qty * i.hargaSatuan), W));
@@ -2660,6 +3262,9 @@ function cetakViaRawBT(){
   (promoDiterapkan || []).forEach(pr => {
     p.line(formatBaris(pr.nama, "-" + rupiahPolos(pr.jumlah), W));
   });
+  if(diskonPoin > 0){
+    p.line(formatBaris("Diskon Poin", "-" + rupiahPolos(diskonPoin), W));
+  }
   if(diskonManual > 0){
     p.line(formatBaris("Diskon Tambahan", "-" + rupiahPolos(diskonManual), W));
   }
@@ -2669,6 +3274,10 @@ function cetakViaRawBT(){
     p.line(formatBaris(b.metode, rupiahPolos(b.nominal), W));
   });
   p.line(formatBaris("Kembali", rupiahPolos(kembalian), W));
+  if(pelanggan && poinDidapat > 0){
+    p.line(garis);
+    p.line(formatBaris("Poin Didapat", "+" + poinDidapat, W));
+  }
   p.line(garis);
   p.center().line("Terima kasih");
   p.feed(3);
