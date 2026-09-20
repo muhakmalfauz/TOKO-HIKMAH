@@ -490,7 +490,7 @@
       <h2>Daftar Pesanan</h2>
     </div>
     <div style="padding:0 16px 4px;font-size:12.5px;color:var(--ink-soft);">
-      Produk yang stoknya habis muncul otomatis di sini — restock atau hapus kalau sudah tidak dijual lagi.
+      Produk yang stoknya menipis (di bawah stok minimum) atau habis muncul otomatis di sini — restock atau hapus kalau sudah tidak dijual lagi.
     </div>
     <div class="list-panel" id="pesananList"></div>
   </div>
@@ -1358,19 +1358,22 @@ $("btnSimpanStok").onclick = simpanStokMasuk;
    HALAMAN DAFTAR PESANAN — produk yang stoknya habis (stok <= 0)
    ============================================================ */
 function renderPesanan(){
-  const list = PRODUK.filter(p => p.stok <= 0);
-  $("pesananList").innerHTML = list.map(p => `
+  const list = PRODUK.filter(p => p.stok <= p.stokMin).sort((a,b) => a.stok - b.stok);
+  $("pesananList").innerHTML = list.map(p => {
+    const habis = p.stok <= 0;
+    return `
     <div class="list-row">
       <div class="lr-main">
         <div class="lr-name">${p.nama}</div>
-        <div class="lr-sub">${p.kategori} · ${rupiah(p.harga)}</div>
+        <div class="lr-sub">${p.kategori} · ${rupiah(p.harga)} · Stok: ${p.stok} <span style="color:${habis ? 'var(--red)' : '#B5721A'};font-weight:700;">(${habis ? 'Habis' : 'Menipis'})</span></div>
       </div>
       <div class="lr-actions">
         <button class="lr-btn" data-restock="${p.id}">+ Stok</button>
         <button class="lr-btn danger" data-hapus-produk="${p.id}">Hapus</button>
       </div>
     </div>
-  `).join("") || `<p style="color:var(--ink-soft);font-size:13.5px;padding:16px 0;">🎉 Semua produk masih ada stoknya.</p>`;
+  `;
+  }).join("") || `<p style="color:var(--ink-soft);font-size:13.5px;padding:16px 0;">🎉 Semua stok produk masih aman.</p>`;
 
   $("pesananList").querySelectorAll("[data-restock]").forEach(btn=>{
     btn.onclick = () => bukaFormStok(btn.dataset.restock);
@@ -1383,11 +1386,11 @@ function renderPesanan(){
 }
 
 function updateBadgeNav(){
-  // Daftar Pesanan: jumlah produk yang stoknya habis
-  const jumlahHabis = PRODUK.filter(p => p.stok <= 0).length;
+  // Daftar Pesanan: jumlah produk yang stoknya habis atau di bawah stok minimum
+  const jumlahPerluRestock = PRODUK.filter(p => p.stok <= p.stokMin).length;
   document.querySelectorAll('[data-badge="pesanan"]').forEach(el => {
-    el.textContent = jumlahHabis;
-    el.style.display = jumlahHabis > 0 ? "flex" : "none";
+    el.textContent = jumlahPerluRestock;
+    el.style.display = jumlahPerluRestock > 0 ? "flex" : "none";
   });
 
   // Produk: ada yang harga jual lebih rendah dari harga beli?
