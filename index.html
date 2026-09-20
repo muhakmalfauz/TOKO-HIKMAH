@@ -706,6 +706,20 @@
   </div>
 </div>
 
+<!-- SHEET: KONFIRMASI (pengganti confirm() bawaan browser, lebih stabil) -->
+<div class="sheet-overlay" id="overlayKonfirmasi"></div>
+<div class="sheet" id="sheetKonfirmasi">
+  <div class="sheet-handle"></div>
+  <div class="sheet-head">
+    <h2 id="konfirmasiJudul">Konfirmasi</h2>
+  </div>
+  <div class="sheet-body">
+    <div id="konfirmasiPesan" style="font-size:14px;color:var(--ink-soft);line-height:1.6;white-space:pre-line;margin-bottom:6px;"></div>
+    <button class="btn-primary" id="btnKonfirmasiYa">Ya</button>
+    <button class="btn-secondary" id="btnKonfirmasiTidak">Batal</button>
+  </div>
+</div>
+
 <!-- SHEET: TUTUP KASIR -->
 <div class="sheet-overlay" id="overlayTutupKasir"></div>
 <div class="sheet" id="sheetTutupKasir">
@@ -1084,6 +1098,33 @@ function tutupSheet(sheetId, overlayId){
 }
 
 /* ============================================================
+   KONFIRMASI KUSTOM — pengganti confirm() bawaan browser.
+   Dialog bawaan browser kadang tidak stabil di beberapa Android
+   WebView (bisa terlihat "freeze" tanpa pesan error). Versi ini
+   pakai sheet biasa, jadi lebih bisa diandalkan.
+   Pemakaian: if(!(await konfirmasi("Hapus produk ini?"))) return;
+   ============================================================ */
+let _resolveKonfirmasi = null;
+
+function konfirmasi(pesan, opsi){
+  opsi = opsi || {};
+  $("konfirmasiJudul").textContent = opsi.judul || "Konfirmasi";
+  $("konfirmasiPesan").textContent = pesan;
+  $("btnKonfirmasiYa").textContent = opsi.labelYa || "Ya";
+  $("btnKonfirmasiYa").style.background = opsi.bahaya ? "var(--red)" : "";
+  bukaSheet("sheetKonfirmasi", "overlayKonfirmasi");
+  return new Promise(resolve => { _resolveKonfirmasi = resolve; });
+}
+
+function _selesaiKonfirmasi(hasil){
+  tutupSheet("sheetKonfirmasi", "overlayKonfirmasi");
+  if(_resolveKonfirmasi){ _resolveKonfirmasi(hasil); _resolveKonfirmasi = null; }
+}
+$("btnKonfirmasiYa").onclick = () => _selesaiKonfirmasi(true);
+$("btnKonfirmasiTidak").onclick = () => _selesaiKonfirmasi(false);
+$("overlayKonfirmasi").onclick = () => _selesaiKonfirmasi(false);
+
+/* ============================================================
    HALAMAN PRODUK — daftar & form tambah/edit
    ============================================================ */
 let produkFormMode = "tambah";
@@ -1298,7 +1339,7 @@ function renderPesanan(){
 async function hapusProduk(id){
   const p = PRODUK.find(x => x.id === id);
   if(!p) return;
-  if(!confirm(`Hapus produk "${p.nama}" secara permanen?\n\nRiwayat transaksi lama tetap aman, tapi produk ini tidak akan muncul lagi di Kasir/Produk.`)) return;
+  if(!(await konfirmasi(`Riwayat transaksi lama tetap aman, tapi produk ini tidak akan muncul lagi di Kasir/Produk.`, { judul: `Hapus produk "${p.nama}"?`, labelYa: "Ya, Hapus", bahaya: true }))) return;
 
   try{
     await denganBatasWaktu(deleteDoc(doc(colProduk, id)));
@@ -1572,7 +1613,7 @@ async function renderLaporan(){
 }
 
 async function batalkanTransaksi(idTrx){
-  if(!confirm(`Batalkan transaksi ${idTrx}?\n\nStok akan otomatis dikembalikan.`)) return;
+  if(!(await konfirmasi(`Stok akan otomatis dikembalikan.`, { judul: `Batalkan transaksi ${idTrx}?`, labelYa: "Ya, Batalkan", bahaya: true }))) return;
 
   const tombol = document.querySelector(`[data-batal="${idTrx}"]`);
   if(tombol){ tombol.disabled = true; tombol.textContent = "Memproses..."; }
@@ -1743,7 +1784,7 @@ $("btnSimpanUser").onclick = simpanUser;
 
 async function hapusUser(nama){
   if(nama === NAMA_KASIR){ showToast("Tidak bisa hapus akun yang sedang login"); return; }
-  if(!confirm(`Hapus user "${nama}"?`)) return;
+  if(!(await konfirmasi(`Tindakan ini tidak bisa dibatalkan.`, { judul: `Hapus user "${nama}"?`, labelYa: "Ya, Hapus", bahaya: true }))) return;
 
   try{
     await denganBatasWaktu(deleteDoc(doc(colUser, nama)));
@@ -1910,7 +1951,7 @@ function tutupScan(){
 $("btnCloseScan").onclick = tutupScan;
 $("overlayScan").onclick = tutupScan;
 
-function prosesHasilScan(kode){
+async function prosesHasilScan(kode){
   if(scanMode === "produk"){
     $("pfBarcode").value = kode;
     tutupScan();
@@ -1925,7 +1966,8 @@ function prosesHasilScan(kode){
     tambahKeKeranjang(p.id);
     showToast("Ditambahkan: " + p.nama);
   }else{
-    if(confirm("Barcode tidak dikenal: " + kode + "\n\nTambah sebagai produk baru?")){
+    const mau = await konfirmasi("Tambah sebagai produk baru?", { judul: "Barcode tidak dikenal: " + kode, labelYa: "Ya, Tambah" });
+    if(mau){
       switchView("produk");
       bukaFormTambahProduk();
       $("pfBarcode").value = kode;
