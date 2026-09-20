@@ -820,34 +820,28 @@
   <div class="sheet-body">
     <div class="field">
       <label>Nama Promo</label>
-      <input type="text" id="pmNama" placeholder="misal Diskon Minuman 10%" />
+      <input type="text" id="pmNama" placeholder="misal Diskon Indomie 10%" />
     </div>
     <div class="field">
       <label>Tipe Promo</label>
       <select id="pmTipe">
-        <option value="kategori">Diskon Kategori</option>
+        <option value="produk">Diskon Produk</option>
         <option value="beli_gratis">Beli X Gratis Y</option>
       </select>
     </div>
+    <div class="field">
+      <label>Produk</label>
+      <select id="pmProduk"></select>
+    </div>
 
-    <div id="pmBlokKategori">
-      <div class="pay-row">
-        <div class="field">
-          <label>Kategori</label>
-          <select id="pmKategori"></select>
-        </div>
-        <div class="field">
-          <label>Diskon (%)</label>
-          <input type="number" id="pmPersenDiskon" inputmode="numeric" placeholder="10" />
-        </div>
+    <div id="pmBlokDiskon">
+      <div class="field">
+        <label>Diskon (%)</label>
+        <input type="number" id="pmPersenDiskon" inputmode="numeric" placeholder="10" />
       </div>
     </div>
 
     <div id="pmBlokBeliGratis" style="display:none;">
-      <div class="field">
-        <label>Produk</label>
-        <select id="pmProduk"></select>
-      </div>
       <div class="pay-row">
         <div class="field">
           <label>Beli (Qty)</label>
@@ -1967,8 +1961,8 @@ async function muatPromo(){
 }
 
 function deskripsiPromo(p){
-  let teks = p.tipe === "kategori"
-    ? `Diskon ${p.persenDiskon}% · ${p.kategori}`
+  let teks = p.tipe === "produk"
+    ? `Diskon ${p.persenDiskon}% · ${p.namaProduk}`
     : `Beli ${p.qtyBeli} Gratis ${p.qtyGratis} · ${p.namaProduk}`;
   if(p.tanggalMulai || p.tanggalSelesai){
     teks += ` · ${p.tanggalMulai || '...'} s/d ${p.tanggalSelesai || '...'}`;
@@ -1998,15 +1992,12 @@ function renderPromoList(){
   });
 }
 
-function isiSelectKategoriPromo(){
-  $("pmKategori").innerHTML = DAFTAR_KATEGORI.filter(k => k !== "Semua").map(k => `<option value="${k}">${k}</option>`).join("");
-}
 function isiSelectProdukPromo(){
   $("pmProduk").innerHTML = PRODUK.map(p => `<option value="${p.id}">${p.nama}</option>`).join("");
 }
 $("pmTipe").addEventListener("change", () => {
   const tipe = $("pmTipe").value;
-  $("pmBlokKategori").style.display = tipe === "kategori" ? "block" : "none";
+  $("pmBlokDiskon").style.display = tipe === "produk" ? "block" : "none";
   $("pmBlokBeliGratis").style.display = tipe === "beli_gratis" ? "block" : "none";
 });
 
@@ -2015,8 +2006,7 @@ function bukaFormTambahPromo(){
   promoEditId = null;
   $("promoFormTitle").textContent = "Tambah Promo";
   $("pmNama").value = "";
-  $("pmTipe").value = "kategori";
-  isiSelectKategoriPromo();
+  $("pmTipe").value = "produk";
   isiSelectProdukPromo();
   $("pmPersenDiskon").value = "";
   $("pmQtyBeli").value = "";
@@ -2024,7 +2014,7 @@ function bukaFormTambahPromo(){
   $("pmTanggalMulai").value = "";
   $("pmTanggalSelesai").value = "";
   $("pmAktif").checked = true;
-  $("pmBlokKategori").style.display = "block";
+  $("pmBlokDiskon").style.display = "block";
   $("pmBlokBeliGratis").style.display = "none";
   bukaSheet("sheetPromoForm", "overlayPromoForm");
 }
@@ -2038,20 +2028,18 @@ function bukaFormEditPromo(id){
   $("promoFormTitle").textContent = "Edit Promo";
   $("pmNama").value = p.nama;
   $("pmTipe").value = p.tipe;
-  isiSelectKategoriPromo();
   isiSelectProdukPromo();
-  if(p.tipe === "kategori"){
-    $("pmKategori").value = p.kategori;
+  $("pmProduk").value = p.idProduk;
+  if(p.tipe === "produk"){
     $("pmPersenDiskon").value = p.persenDiskon;
   }else{
-    $("pmProduk").value = p.idProduk;
     $("pmQtyBeli").value = p.qtyBeli;
     $("pmQtyGratis").value = p.qtyGratis;
   }
   $("pmTanggalMulai").value = p.tanggalMulai || "";
   $("pmTanggalSelesai").value = p.tanggalSelesai || "";
   $("pmAktif").checked = !!p.aktif;
-  $("pmBlokKategori").style.display = p.tipe === "kategori" ? "block" : "none";
+  $("pmBlokDiskon").style.display = p.tipe === "produk" ? "block" : "none";
   $("pmBlokBeliGratis").style.display = p.tipe === "beli_gratis" ? "block" : "none";
   bukaSheet("sheetPromoForm", "overlayPromoForm");
 }
@@ -2063,25 +2051,24 @@ async function simpanPromo(){
   const tipe = $("pmTipe").value;
   if(!nama){ showToast("Isi nama promo dulu"); return; }
 
+  const produkTerpilih = PRODUK.find(p => p.id === $("pmProduk").value);
+  if(!produkTerpilih){ showToast("Pilih produk dulu"); return; }
+
   const dataPromo = {
     nama, tipe, aktif: $("pmAktif").checked,
     tanggalMulai: $("pmTanggalMulai").value || "",
-    tanggalSelesai: $("pmTanggalSelesai").value || ""
+    tanggalSelesai: $("pmTanggalSelesai").value || "",
+    idProduk: produkTerpilih.id, namaProduk: produkTerpilih.nama
   };
 
-  if(tipe === "kategori"){
+  if(tipe === "produk"){
     const persen = Number($("pmPersenDiskon").value);
     if(!persen || persen <= 0){ showToast("Isi persen diskon dengan benar"); return; }
-    dataPromo.kategori = $("pmKategori").value;
     dataPromo.persenDiskon = persen;
   }else{
     const qtyBeli = Number($("pmQtyBeli").value);
     const qtyGratis = Number($("pmQtyGratis").value);
     if(!qtyBeli || !qtyGratis){ showToast("Isi qty beli & gratis dengan benar"); return; }
-    const produkTerpilih = PRODUK.find(p => p.id === $("pmProduk").value);
-    if(!produkTerpilih){ showToast("Pilih produk dulu"); return; }
-    dataPromo.idProduk = produkTerpilih.id;
-    dataPromo.namaProduk = produkTerpilih.nama;
     dataPromo.qtyBeli = qtyBeli;
     dataPromo.qtyGratis = qtyGratis;
   }
@@ -2191,9 +2178,9 @@ async function exportDataExcel(){
     const promoRows = promoSnap.docs.map(d => {
       const pr = d.data();
       return {
-        "Nama Promo": pr.nama, "Tipe": pr.tipe === "kategori" ? "Diskon Kategori" : "Beli X Gratis Y",
-        "Kategori": pr.kategori || "", "Persen Diskon": pr.persenDiskon || "",
-        "Produk": pr.namaProduk || "", "Qty Beli": pr.qtyBeli || "", "Qty Gratis": pr.qtyGratis || "",
+        "Nama Promo": pr.nama, "Tipe": pr.tipe === "produk" ? "Diskon Produk" : "Beli X Gratis Y",
+        "Produk": pr.namaProduk || "", "Persen Diskon": pr.persenDiskon || "",
+        "Qty Beli": pr.qtyBeli || "", "Qty Gratis": pr.qtyGratis || "",
         "Mulai": pr.tanggalMulai || "", "Selesai": pr.tanggalSelesai || "", "Aktif": pr.aktif ? "Ya" : "Tidak"
       };
     });
@@ -2378,23 +2365,19 @@ function hitungDiskonPromo(items){
   const diterapkan = [];
 
   DAFTAR_PROMO.filter(promoAktifSekarang).forEach(p => {
-    if(p.tipe === "kategori"){
-      let subtotalKategori = 0;
-      items.forEach(it => { if(it.kategori === p.kategori) subtotalKategori += it.qty * it.harga; });
-      if(subtotalKategori > 0){
-        const diskon = Math.round(subtotalKategori * (Number(p.persenDiskon) / 100));
-        if(diskon > 0){ totalDiskon += diskon; diterapkan.push({ nama: p.nama, jumlah: diskon }); }
-      }
+    const it = items.find(x => x.id === p.idProduk);
+    if(!it) return;
+
+    if(p.tipe === "produk"){
+      const diskon = Math.round(it.qty * it.harga * (Number(p.persenDiskon) / 100));
+      if(diskon > 0){ totalDiskon += diskon; diterapkan.push({ nama: p.nama, jumlah: diskon }); }
     }else if(p.tipe === "beli_gratis"){
-      const it = items.find(x => x.id === p.idProduk);
-      if(it){
-        const groupSize = Number(p.qtyBeli) + Number(p.qtyGratis);
-        const grupTerpenuhi = groupSize > 0 ? Math.floor(it.qty / groupSize) : 0;
-        const unitGratis = grupTerpenuhi * Number(p.qtyGratis);
-        if(unitGratis > 0){
-          const diskon = unitGratis * it.harga;
-          totalDiskon += diskon; diterapkan.push({ nama: p.nama, jumlah: diskon });
-        }
+      const groupSize = Number(p.qtyBeli) + Number(p.qtyGratis);
+      const grupTerpenuhi = groupSize > 0 ? Math.floor(it.qty / groupSize) : 0;
+      const unitGratis = grupTerpenuhi * Number(p.qtyGratis);
+      if(unitGratis > 0){
+        const diskon = unitGratis * it.harga;
+        totalDiskon += diskon; diterapkan.push({ nama: p.nama, jumlah: diskon });
       }
     }
   });
