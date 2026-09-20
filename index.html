@@ -168,6 +168,16 @@
   .opname-inputs{display:flex;align-items:center;gap:8px;flex:none;}
   .opname-sistem{font-size:11px;color:var(--ink-soft);white-space:nowrap;}
   .opname-fisik{width:64px;padding:8px;border-radius:8px;border:1px solid var(--line);text-align:center;font-size:13px;}
+
+  /* ===== Purchase Order ===== */
+  .po-item-row{display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--line);}
+  .po-item-nama{flex:1;font-size:13px;font-weight:600;min-width:0;}
+  .po-item-qty{width:64px;padding:8px;border-radius:8px;border:1px solid var(--line);text-align:center;font-size:13px;flex:none;}
+  .pesanan-checkbox{width:18px;height:18px;flex:none;margin-right:2px;}
+  .po-status-pill{font-size:10.5px;font-weight:700;padding:3px 9px;border-radius:999px;flex:none;}
+  .po-status-draft{background:#F0F1F5;color:var(--ink-soft);}
+  .po-status-dikirim{background:#FDF0D9;color:var(--amber-dark);}
+  .po-status-diterima{background:#E1F5EE;color:var(--green);}
   .summary-card{
     flex:1 1 45%;background:var(--paper);border:none;box-shadow:var(--shadow-card);border-radius:14px;padding:12px 14px;
   }
@@ -450,10 +460,18 @@
   <div id="viewProduk" style="display:none;">
     <div class="page-head">
       <h2>Kelola Produk</h2>
-      <button class="btn-add" id="btnTambahProduk">+ Produk</button>
+      <div style="display:flex;gap:6px;">
+        <button class="btn-secondary" id="btnImportExcel" style="margin-top:0;border-color:var(--line);padding:8px 12px;font-size:12.5px;">⬆️ Import</button>
+        <button class="btn-add" id="btnTambahProduk">+ Produk</button>
+      </div>
     </div>
+    <input type="file" id="inputImportExcel" accept=".xlsx,.xls" style="display:none;" />
     <div class="search-box">
       <input type="text" id="searchProduk" placeholder="Cari produk..." />
+    </div>
+    <div class="cat-row" id="statusRowProduk">
+      <button class="cat-chip active" data-status="aktif">Aktif</button>
+      <button class="cat-chip" data-status="nonaktif">Nonaktif</button>
     </div>
     <div class="cat-row" id="catRowProduk"></div>
     <div class="list-panel" id="produkList"></div>
@@ -505,11 +523,15 @@
   <div id="viewPesanan" style="display:none;">
     <div class="page-head">
       <h2>Daftar Pesanan</h2>
+      <button class="btn-secondary" id="btnBagikanPesanan" style="margin-top:0;border-color:var(--line);padding:8px 12px;font-size:12.5px;">📤 Bagikan</button>
     </div>
     <div style="padding:0 16px 4px;font-size:12.5px;color:var(--ink-soft);">
-      Produk yang stoknya menipis (di bawah stok minimum) atau habis muncul otomatis di sini — restock atau hapus kalau sudah tidak dijual lagi.
+      Produk yang stoknya menipis (di bawah stok minimum) atau habis muncul otomatis di sini — restock atau hapus kalau sudah tidak dijual lagi. Saran jumlah beli dihitung dari rata-rata penjualan 30 hari terakhir.
     </div>
     <div class="list-panel" id="pesananList"></div>
+    <div style="padding:0 16px 16px;display:none;" id="buatPoWrap">
+      <button class="btn-primary" id="btnBuatPO" style="margin-top:0;">Buat Purchase Order (<span id="jumlahDipilihPO">0</span> produk)</button>
+    </div>
   </div>
 
   <!-- ===== VIEW: PELANGGAN ===== -->
@@ -598,6 +620,11 @@
       </div>
       <button class="btn-secondary" id="btnMulaiOpname" style="border-color:var(--line);">📋 Mulai Stok Opname</button>
     </div>
+
+    <div class="page-head" style="padding-top:6px;">
+      <h2 style="font-size:14.5px;">Purchase Order</h2>
+    </div>
+    <div class="list-panel" id="poList"></div>
 
     <div class="page-head" style="padding-top:6px;">
       <h2 style="font-size:14.5px;">Backup Data</h2>
@@ -758,6 +785,13 @@
       <span>Harga jual lebih rendah dari harga beli — produk ini akan dijual rugi.</span>
     </div>
     <div class="pay-row">
+      <div class="field"><label>Harga Grosir (opsional)</label><input type="number" id="pfHargaGrosir" inputmode="numeric" placeholder="0 = tidak dipakai" /></div>
+      <div class="field"><label>Min. Qty Grosir</label><input type="number" id="pfMinQtyGrosir" inputmode="numeric" placeholder="misal 12" /></div>
+    </div>
+    <div style="font-size:11.5px;color:var(--ink-soft);margin-top:2px;">
+      Kalau diisi, pembeli otomatis dapat Harga Grosir saat beli sejumlah Min. Qty Grosir atau lebih dalam 1 transaksi.
+    </div>
+    <div class="pay-row">
       <div class="field"><label>Stok Awal</label><input type="number" id="pfStok" inputmode="numeric" /></div>
       <div class="field"><label>Stok Minimum</label><input type="number" id="pfStokMin" value="5" inputmode="numeric" /></div>
     </div>
@@ -909,6 +943,62 @@
       <input type="text" id="searchPilihPelanggan" placeholder="Cari nama atau no. HP..." />
     </div>
     <div class="list-panel" id="pilihPelangganList" style="padding:0;"></div>
+  </div>
+</div>
+
+<!-- SHEET: BUAT PURCHASE ORDER -->
+<div class="sheet-overlay" id="overlayBuatPO"></div>
+<div class="sheet" id="sheetBuatPO">
+  <div class="sheet-handle"></div>
+  <div class="sheet-head">
+    <h2>Buat Purchase Order</h2>
+    <button id="btnCloseBuatPO">✕</button>
+  </div>
+  <div class="sheet-body">
+    <div class="field">
+      <label>Supplier</label>
+      <select id="poSupplier"></select>
+    </div>
+    <div class="field">
+      <label>Item Pesanan</label>
+      <div id="poItemList"></div>
+    </div>
+    <div class="field">
+      <label>Catatan (opsional)</label>
+      <input type="text" id="poCatatan" placeholder="misal: antar sebelum Jumat" />
+    </div>
+    <button class="btn-primary" id="btnSimpanPO">Simpan sebagai Draft</button>
+  </div>
+</div>
+
+<!-- SHEET: DETAIL PURCHASE ORDER -->
+<div class="sheet-overlay" id="overlayDetailPO"></div>
+<div class="sheet" id="sheetDetailPO">
+  <div class="sheet-handle"></div>
+  <div class="sheet-head">
+    <h2 id="detailPOJudul">Purchase Order</h2>
+    <button id="btnCloseDetailPO">✕</button>
+  </div>
+  <div class="sheet-body">
+    <div id="detailPOInfo" style="font-size:12.5px;color:var(--ink-soft);margin-bottom:10px;"></div>
+    <div id="detailPOItemList" style="margin-bottom:14px;"></div>
+    <button class="btn-primary" id="btnTandaiDikirim" style="display:none;">Tandai Sudah Dikirim</button>
+    <button class="btn-primary" id="btnTandaiDiterima" style="display:none;">Tandai Diterima (Stok Otomatis Masuk)</button>
+  </div>
+</div>
+
+<!-- SHEET: KONFIRMASI IMPORT EXCEL -->
+<div class="sheet-overlay" id="overlayImportPreview"></div>
+<div class="sheet" id="sheetImportPreview">
+  <div class="sheet-handle"></div>
+  <div class="sheet-head">
+    <h2>Konfirmasi Import</h2>
+    <button id="btnCloseImportPreview">✕</button>
+  </div>
+  <div class="sheet-body">
+    <div id="importPreviewRingkasan" style="font-size:13.5px;margin-bottom:10px;color:var(--ink-soft);"></div>
+    <div id="importPreviewList" style="max-height:320px;overflow-y:auto;"></div>
+    <button class="btn-primary" id="btnKonfirmasiImport">Ya, Import Sekarang</button>
   </div>
 </div>
 
@@ -1089,6 +1179,7 @@ const colPromo = collection(db, "promo");
 const colPelanggan = collection(db, "pelanggan");
 const colSupplier = collection(db, "supplier");
 const colStokOpname = collection(db, "stokOpname");
+const colPurchaseOrder = collection(db, "purchaseOrder");
 
 const POIN_PER_RUPIAH = 10000; // 1 poin didapat tiap kelipatan Rp10.000 belanja
 const RUPIAH_PER_POIN = 100;   // 1 poin setara Rp100 saat ditukar
@@ -1173,6 +1264,7 @@ function masuk(nama, role){
   muatPromo();
   muatPelanggan();
   muatSupplier();
+  muatPurchaseOrder();
 }
 
 function terapkanBatasanRole(){
@@ -1214,7 +1306,9 @@ async function muatProduk(){
         id: d.id, nama: p.nama, kategori: p.kategori || "Lainnya",
         barcode: p.barcode || "", satuan: p.satuan || "pcs",
         hargaBeli: Number(p.hargaBeli) || 0,
-        harga: Number(p.hargaJual), stok: Number(p.stok), stokMin: Number(p.stokMin)
+        harga: Number(p.hargaJual), stok: Number(p.stok), stokMin: Number(p.stokMin),
+        aktif: p.aktif !== false,
+        hargaGrosir: Number(p.hargaGrosir) || 0, minQtyGrosir: Number(p.minQtyGrosir) || 0
       };
     });
     localStorage.setItem("th_produk_cache", JSON.stringify(PRODUK));
@@ -1252,7 +1346,7 @@ function renderKategori(){
 
 function renderGrid(){
   const q = $("searchInput").value.trim().toLowerCase();
-  let list = PRODUK.filter(p => p.nama.toLowerCase().includes(q));
+  let list = PRODUK.filter(p => p.aktif !== false && p.nama.toLowerCase().includes(q));
   if(activeCategory !== "Semua") list = list.filter(p => p.kategori === activeCategory);
 
   $("emptyMsg").style.display = list.length ? "none" : "block";
@@ -1299,7 +1393,7 @@ function switchView(view){
   if(view === "beranda") renderBeranda();
   if(view === "produk"){ renderKategoriProduk(); renderProdukList(); }
   if(view === "riwayat") renderRiwayatPenjualan();
-  if(view === "pesanan") renderPesanan();
+  if(view === "pesanan"){ renderPesanan(); muatKecepatanJual(); }
   if(view === "pelanggan") renderPelangganList();
   if(view === "laporan") renderLaporan();
   if(view === "pengaturan") renderPengaturanList();
@@ -1408,29 +1502,87 @@ function produkBermasalah(p){
   return p.hargaBeli > 0 && p.harga > 0 && p.hargaBeli > p.harga;
 }
 
+let statusFilterProduk = "aktif";
+document.querySelectorAll("#statusRowProduk .cat-chip").forEach(btn=>{
+  btn.onclick = () => {
+    statusFilterProduk = btn.dataset.status;
+    document.querySelectorAll("#statusRowProduk .cat-chip").forEach(b => b.classList.toggle("active", b === btn));
+    renderProdukList();
+  };
+});
+
 function renderProdukList(){
   const q = $("searchProduk").value.trim().toLowerCase();
   let list = PRODUK.filter(p => p.nama.toLowerCase().includes(q));
   if(activeCategoryProduk !== "Semua") list = list.filter(p => p.kategori === activeCategoryProduk);
+  list = list.filter(p => statusFilterProduk === "aktif" ? p.aktif !== false : p.aktif === false);
   list.sort((a, b) => (produkBermasalah(b) ? 1 : 0) - (produkBermasalah(a) ? 1 : 0));
   $("produkList").innerHTML = list.map(p => {
     const bermasalah = produkBermasalah(p);
+    const grosirInfo = p.hargaGrosir > 0 ? ` · Grosir ${rupiah(p.hargaGrosir)}/min ${p.minQtyGrosir}` : "";
+    const tombolAksi = statusFilterProduk === "aktif"
+      ? `<button class="lr-btn" data-edit="${p.id}">Edit</button><button class="lr-btn danger" data-nonaktifkan="${p.id}">Nonaktifkan</button>`
+      : `<button class="lr-btn" data-edit="${p.id}">Edit</button><button class="lr-btn" data-aktifkan="${p.id}">Aktifkan</button><button class="lr-btn danger" data-hapus-permanen="${p.id}">Hapus</button>`;
     return `
     <div class="list-row">
       <div class="lr-main">
         <div class="lr-name">${p.nama}${bermasalah ? ' <span class="dot-peringatan" title="Harga jual lebih rendah dari harga beli"></span>' : ''}</div>
-        <div class="lr-sub">${p.kategori} · ${rupiah(p.harga)} · Stok: ${p.stok}</div>
+        <div class="lr-sub">${p.kategori} · ${rupiah(p.harga)} · Stok: ${p.stok}${grosirInfo}</div>
       </div>
-      <button class="lr-btn" data-edit="${p.id}">Edit</button>
+      <div class="lr-actions">${tombolAksi}</div>
     </div>
   `;
-  }).join("") || `<p style="color:var(--ink-soft);font-size:13.5px;padding:16px 0;">Belum ada produk. Tap "+ Produk" untuk tambah.</p>`;
+  }).join("") || `<p style="color:var(--ink-soft);font-size:13.5px;padding:16px 0;">${statusFilterProduk === "aktif" ? 'Belum ada produk. Tap "+ Produk" untuk tambah.' : 'Tidak ada produk nonaktif.'}</p>`;
 
   $("produkList").querySelectorAll("[data-edit]").forEach(btn=>{
     btn.onclick = () => bukaFormEditProduk(btn.dataset.edit);
   });
+  $("produkList").querySelectorAll("[data-nonaktifkan]").forEach(btn=>{
+    btn.onclick = () => nonaktifkanProduk(btn.dataset.nonaktifkan);
+  });
+  $("produkList").querySelectorAll("[data-aktifkan]").forEach(btn=>{
+    btn.onclick = () => aktifkanProduk(btn.dataset.aktifkan);
+  });
+  $("produkList").querySelectorAll("[data-hapus-permanen]").forEach(btn=>{
+    btn.onclick = () => hapusProduk(btn.dataset.hapusPermanen);
+  });
 }
 $("searchProduk").addEventListener("input", renderProdukList);
+
+async function nonaktifkanProduk(id){
+  const p = PRODUK.find(x => x.id === id);
+  if(!p) return;
+  if(!(await konfirmasi("Produk tidak akan muncul lagi di Kasir & Daftar Pesanan, tapi riwayat transaksi tetap aman. Bisa diaktifkan lagi kapan saja.", { judul: `Nonaktifkan "${p.nama}"?`, labelYa: "Ya, Nonaktifkan" }))) return;
+  try{
+    await denganBatasWaktu(updateDoc(doc(colProduk, id), { aktif: false }));
+    p.aktif = false;
+    localStorage.setItem("th_produk_cache", JSON.stringify(PRODUK));
+    renderProdukList();
+    renderGrid();
+    renderKategori();
+    renderPesanan();
+    showToast("Produk dinonaktifkan");
+  }catch(err){
+    showToast("Gagal: " + err.message);
+  }
+}
+
+async function aktifkanProduk(id){
+  const p = PRODUK.find(x => x.id === id);
+  if(!p) return;
+  try{
+    await denganBatasWaktu(updateDoc(doc(colProduk, id), { aktif: true }));
+    p.aktif = true;
+    localStorage.setItem("th_produk_cache", JSON.stringify(PRODUK));
+    renderProdukList();
+    renderGrid();
+    renderKategori();
+    renderPesanan();
+    showToast("Produk diaktifkan kembali");
+  }catch(err){
+    showToast("Gagal: " + err.message);
+  }
+}
 
 function saranIdProduk(){
   const nums = PRODUK.map(p => {
@@ -1452,6 +1604,8 @@ function bukaFormTambahProduk(){
   $("pfBarcode").value = "";
   $("pfHargaBeli").value = "";
   $("pfHargaJual").value = "";
+  $("pfHargaGrosir").value = "";
+  $("pfMinQtyGrosir").value = "";
   $("pfStok").value = 0;
   $("pfStokMin").value = 5;
   cekPeringatanRugi();
@@ -1493,6 +1647,8 @@ function bukaFormEditProduk(id){
   $("pfBarcode").value = p.barcode || "";
   $("pfHargaBeli").value = p.hargaBeli || "";
   $("pfHargaJual").value = p.harga;
+  $("pfHargaGrosir").value = p.hargaGrosir || "";
+  $("pfMinQtyGrosir").value = p.minQtyGrosir || "";
   $("pfStok").value = p.stok;
   $("pfStokMin").value = p.stokMin;
   cekPeringatanRugi();
@@ -1510,24 +1666,27 @@ async function simpanProduk(){
   const barcode = $("pfBarcode").value.trim();
   const hargaBeli = Number($("pfHargaBeli").value) || 0;
   const hargaJual = Number($("pfHargaJual").value) || 0;
+  const hargaGrosir = Number($("pfHargaGrosir").value) || 0;
+  const minQtyGrosir = Number($("pfMinQtyGrosir").value) || 0;
   const stok = Number($("pfStok").value) || 0;
   const stokMin = Number($("pfStokMin").value) || 5;
 
   if(!id || !nama || !hargaJual){ showToast("Lengkapi ID, Nama, dan Harga Jual"); return; }
   if(produkFormMode === "tambah" && PRODUK.find(p => p.id === id)){ showToast("ID Produk sudah dipakai"); return; }
 
-  const dataProduk = { nama, kategori, satuan, barcode, hargaBeli, hargaJual, stok, stokMin };
+  const dataProduk = { nama, kategori, satuan, barcode, hargaBeli, hargaJual, hargaGrosir, minQtyGrosir, stok, stokMin };
 
   $("btnSimpanProduk").disabled = true;
   $("btnSimpanProduk").textContent = "Menyimpan...";
   try{
-    await denganBatasWaktu(setDoc(doc(colProduk, id), dataProduk));
-
     if(produkFormMode === "tambah"){
-      PRODUK.push({ id, nama, kategori, satuan, barcode, hargaBeli, harga: hargaJual, stok, stokMin });
+      dataProduk.aktif = true;
+      await denganBatasWaktu(setDoc(doc(colProduk, id), dataProduk));
+      PRODUK.push({ id, nama, kategori, satuan, barcode, hargaBeli, harga: hargaJual, hargaGrosir, minQtyGrosir, stok, stokMin, aktif: true });
     }else{
+      await denganBatasWaktu(updateDoc(doc(colProduk, id), dataProduk));
       const p = PRODUK.find(x => x.id === id);
-      if(p) Object.assign(p, { nama, kategori, satuan, barcode, hargaBeli, harga: hargaJual, stok, stokMin });
+      if(p) Object.assign(p, { nama, kategori, satuan, barcode, hargaBeli, harga: hargaJual, hargaGrosir, minQtyGrosir, stok, stokMin });
     }
     localStorage.setItem("th_produk_cache", JSON.stringify(PRODUK));
     tutupSheet("sheetProdukForm", "overlayProdukForm");
@@ -1544,6 +1703,121 @@ async function simpanProduk(){
   }
 }
 $("btnSimpanProduk").onclick = simpanProduk;
+
+/* ============================================================
+   IMPORT PRODUK MASSAL DARI EXCEL
+   ============================================================ */
+let dataImportSiap = [];
+
+function normalisasiBarisImport(row){
+  const get = (...keys) => {
+    for(const k of keys){
+      for(const rowKey in row){
+        if(rowKey.trim().toLowerCase() === k.toLowerCase()) return row[rowKey];
+      }
+    }
+    return undefined;
+  };
+  const id = String(get("ID Produk", "ID", "Kode") || "").trim();
+  const nama = String(get("Nama Produk", "Nama") || "").trim();
+  if(!id || !nama) return null;
+  return {
+    id, nama,
+    kategori: String(get("Kategori") || "Lainnya").trim() || "Lainnya",
+    barcode: String(get("Barcode") || "").trim(),
+    satuan: String(get("Satuan") || "pcs").trim() || "pcs",
+    hargaBeli: Number(get("Harga Beli")) || 0,
+    hargaJual: Number(get("Harga Jual")) || 0,
+    hargaGrosir: Number(get("Harga Grosir")) || 0,
+    minQtyGrosir: Number(get("Min Qty Grosir", "Min. Qty Grosir")) || 0,
+    stok: Number(get("Stok")) || 0,
+    stokMin: Number(get("Stok Minimum")) || 5
+  };
+}
+
+$("btnImportExcel").onclick = () => $("inputImportExcel").click();
+
+$("inputImportExcel").addEventListener("change", (e) => {
+  const file = e.target.files[0];
+  if(!file) return;
+  if(typeof XLSX === "undefined"){ showToast("Modul Excel belum siap, coba lagi sebentar."); return; }
+
+  const reader = new FileReader();
+  reader.onload = (ev) => {
+    try{
+      const wb = XLSX.read(ev.target.result, { type: "array" });
+      const wsName = wb.SheetNames.includes("Produk") ? "Produk" : wb.SheetNames[0];
+      const ws = wb.Sheets[wsName];
+      const rows = XLSX.utils.sheet_to_json(ws, { defval: "" });
+
+      dataImportSiap = rows.map(normalisasiBarisImport).filter(r => r !== null);
+      if(dataImportSiap.length === 0){
+        showToast("Tidak ada baris produk valid ditemukan (pastikan ada kolom ID Produk & Nama Produk)");
+        return;
+      }
+      tampilkanPreviewImport();
+    }catch(err){
+      showToast("Gagal baca file: " + err.message);
+    }finally{
+      $("inputImportExcel").value = "";
+    }
+  };
+  reader.readAsArrayBuffer(file);
+});
+
+function tampilkanPreviewImport(){
+  const baru = dataImportSiap.filter(r => !PRODUK.find(p => p.id === r.id)).length;
+  const update = dataImportSiap.length - baru;
+  $("importPreviewRingkasan").textContent = `${dataImportSiap.length} baris terbaca — ${baru} produk baru, ${update} produk akan diperbarui.`;
+  $("importPreviewList").innerHTML = dataImportSiap.map(r => {
+    const ada = PRODUK.find(p => p.id === r.id);
+    return `
+      <div class="list-row" style="padding:8px 0;">
+        <div class="lr-main">
+          <div class="lr-name">${r.nama}</div>
+          <div class="lr-sub">${r.id} · ${r.kategori} · ${rupiah(r.hargaJual)}</div>
+        </div>
+        <div style="font-size:11px;font-weight:700;color:${ada ? 'var(--amber-dark)' : 'var(--green)'};flex:none;">${ada ? 'UPDATE' : 'BARU'}</div>
+      </div>
+    `;
+  }).join("");
+  bukaSheet("sheetImportPreview", "overlayImportPreview");
+}
+$("btnCloseImportPreview").onclick = () => tutupSheet("sheetImportPreview", "overlayImportPreview");
+$("overlayImportPreview").onclick = () => tutupSheet("sheetImportPreview", "overlayImportPreview");
+
+async function konfirmasiImport(){
+  $("btnKonfirmasiImport").disabled = true;
+  $("btnKonfirmasiImport").textContent = "Mengimpor...";
+  try{
+    const potongan = [];
+    for(let i = 0; i < dataImportSiap.length; i += 400){
+      potongan.push(dataImportSiap.slice(i, i + 400));
+    }
+    for(const grup of potongan){
+      const batch = writeBatch(db);
+      grup.forEach(r => {
+        batch.set(doc(colProduk, r.id), {
+          nama: r.nama, kategori: r.kategori, barcode: r.barcode, satuan: r.satuan,
+          hargaBeli: r.hargaBeli, hargaJual: r.hargaJual,
+          hargaGrosir: r.hargaGrosir, minQtyGrosir: r.minQtyGrosir,
+          stok: r.stok, stokMin: r.stokMin, aktif: true
+        }, { merge: true });
+      });
+      await denganBatasWaktu(batch.commit(), 30);
+    }
+    tutupSheet("sheetImportPreview", "overlayImportPreview");
+    showToast(`${dataImportSiap.length} produk berhasil diimport`);
+    dataImportSiap = [];
+    muatProduk();
+  }catch(err){
+    showToast("Gagal import: " + err.message);
+  }finally{
+    $("btnKonfirmasiImport").disabled = false;
+    $("btnKonfirmasiImport").textContent = "Ya, Import Sekarang";
+  }
+}
+$("btnKonfirmasiImport").onclick = konfirmasiImport;
 
 /* ============================================================
    FORM STOK MASUK (dipakai dari halaman Daftar Pesanan)
@@ -1598,15 +1872,50 @@ $("btnSimpanStok").onclick = simpanStokMasuk;
 /* ============================================================
    HALAMAN DAFTAR PESANAN — produk yang stoknya habis (stok <= 0)
    ============================================================ */
+let dataKecepatanJual = {}; // { idProduk: rata-rata terjual per hari, 30 hari terakhir }
+let produkDipilihPO = new Set();
+
+function saranRestock(idProduk){
+  const rata = dataKecepatanJual[idProduk] || 0;
+  if(rata <= 0) return null;
+  return Math.max(1, Math.ceil(rata * 14)); // saran cukup buat ~2 minggu
+}
+
+async function muatKecepatanJual(){
+  try{
+    const now = new Date();
+    const mulai = new Date(now); mulai.setDate(mulai.getDate() - 30);
+    const q = query(colTransaksi, where("tanggal", ">=", formatTanggal(mulai)), where("tanggal", "<=", formatTanggal(now)));
+    const snap = await denganBatasWaktu(getDocs(q), 20);
+    const totalQty = {};
+    snap.docs.forEach(d => {
+      const t = d.data();
+      if(t.status === "Dibatalkan") return;
+      (t.items || []).forEach(it => { totalQty[it.idProduk] = (totalQty[it.idProduk] || 0) + Number(it.qty); });
+    });
+    dataKecepatanJual = {};
+    Object.keys(totalQty).forEach(id => { dataKecepatanJual[id] = totalQty[id] / 30; });
+    renderPesanan();
+  }catch(err){
+    // gagal diam-diam; saran restock cuma info tambahan, tidak menghalangi apa pun
+  }
+}
+
 function renderPesanan(){
-  const list = PRODUK.filter(p => p.stok <= p.stokMin).sort((a,b) => a.stok - b.stok);
+  const list = PRODUK.filter(p => p.aktif !== false && p.stok <= p.stokMin).sort((a,b) => a.stok - b.stok);
+  const idDalamDaftar = new Set(list.map(p => p.id));
+  Array.from(produkDipilihPO).forEach(id => { if(!idDalamDaftar.has(id)) produkDipilihPO.delete(id); });
+
   $("pesananList").innerHTML = list.map(p => {
     const habis = p.stok <= 0;
+    const saran = saranRestock(p.id);
+    const dicentang = produkDipilihPO.has(p.id);
     return `
     <div class="list-row">
+      <input type="checkbox" class="pesanan-checkbox" data-pilih-po="${p.id}" ${dicentang ? "checked" : ""} />
       <div class="lr-main">
         <div class="lr-name">${p.nama}</div>
-        <div class="lr-sub">${p.kategori} · ${rupiah(p.harga)} · Stok: ${p.stok} <span style="color:${habis ? 'var(--red)' : '#B5721A'};font-weight:700;">(${habis ? 'Habis' : 'Menipis'})</span></div>
+        <div class="lr-sub">${p.kategori} · Stok: ${p.stok} <span style="color:${habis ? 'var(--red)' : '#B5721A'};font-weight:700;">(${habis ? 'Habis' : 'Menipis'})</span>${saran ? ` · Saran beli: ${saran} ${p.satuan}` : ''}</div>
       </div>
       <div class="lr-actions">
         <button class="lr-btn" data-restock="${p.id}">+ Stok</button>
@@ -1622,9 +1931,209 @@ function renderPesanan(){
   $("pesananList").querySelectorAll("[data-hapus-produk]").forEach(btn=>{
     btn.onclick = () => hapusProduk(btn.dataset.hapusProduk);
   });
+  $("pesananList").querySelectorAll("[data-pilih-po]").forEach(cb=>{
+    cb.onchange = () => {
+      const id = cb.dataset.pilihPo;
+      if(cb.checked) produkDipilihPO.add(id); else produkDipilihPO.delete(id);
+      updateTombolBuatPO();
+    };
+  });
 
+  updateTombolBuatPO();
   updateBadgeNav();
 }
+
+function updateTombolBuatPO(){
+  $("jumlahDipilihPO").textContent = produkDipilihPO.size;
+  $("buatPoWrap").style.display = produkDipilihPO.size > 0 ? "block" : "none";
+}
+
+function bagikanDaftarPesanan(){
+  const list = PRODUK.filter(p => p.aktif !== false && p.stok <= p.stokMin).sort((a,b) => a.stok - b.stok);
+  if(list.length === 0){ showToast("Tidak ada produk yang perlu direstock"); return; }
+
+  let teks = `Daftar Pesanan - TOKO HIKMAH\n${new Date().toLocaleDateString("id-ID")}\n\n`;
+  list.forEach(p => {
+    const saran = saranRestock(p.id);
+    teks += `- ${p.nama}: stok ${p.stok}${saran ? `, saran beli ${saran} ${p.satuan}` : ''}\n`;
+  });
+
+  if(navigator.share){
+    navigator.share({ title: "Daftar Pesanan TOKO HIKMAH", text: teks }).catch(() => {});
+  }else if(navigator.clipboard){
+    navigator.clipboard.writeText(teks).then(() => showToast("Daftar pesanan disalin, tinggal tempel ke WhatsApp"))
+      .catch(() => showToast("Gagal menyalin, coba lagi"));
+  }else{
+    showToast("Browser tidak mendukung fitur ini");
+  }
+}
+$("btnBagikanPesanan").onclick = bagikanDaftarPesanan;
+
+/* ============================================================
+   PURCHASE ORDER — buat pesanan resmi ke supplier
+   ============================================================ */
+let DAFTAR_PO = [];
+let poDetailId = null;
+
+async function muatPurchaseOrder(){
+  try{
+    const snap = await denganBatasWaktu(getDocs(colPurchaseOrder));
+    DAFTAR_PO = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+    DAFTAR_PO.sort((a,b) => (b.tanggal + b.jam).localeCompare(a.tanggal + a.jam));
+    renderPOList();
+  }catch(err){
+    // gagal diam-diam
+  }
+}
+
+function renderPOList(){
+  $("poList").innerHTML = DAFTAR_PO.map(po => {
+    const kelas = po.status === "Draft" ? "po-status-draft" : po.status === "Dikirim" ? "po-status-dikirim" : "po-status-diterima";
+    return `
+    <div class="list-row" data-lihat-po="${po.id}" style="cursor:pointer;">
+      <div class="lr-main">
+        <div class="lr-name">${po.supplierNama}</div>
+        <div class="lr-sub">${po.tanggal} · ${(po.items||[]).length} item</div>
+      </div>
+      <div class="po-status-pill ${kelas}">${po.status}</div>
+    </div>
+  `;
+  }).join("") || `<p style="color:var(--ink-soft);font-size:13.5px;padding:16px 0;">Belum ada Purchase Order.</p>`;
+
+  $("poList").querySelectorAll("[data-lihat-po]").forEach(row=>{
+    row.onclick = () => bukaDetailPO(row.dataset.lihatPo);
+  });
+}
+
+function bukaFormBuatPO(){
+  $("poSupplier").innerHTML = DAFTAR_SUPPLIER.map(s => `<option value="${s.id}">${s.nama}</option>`).join("") || `<option value="">Belum ada supplier — tambah dulu di Pengaturan</option>`;
+  const items = Array.from(produkDipilihPO).map(id => PRODUK.find(p => p.id === id)).filter(Boolean);
+  $("poItemList").innerHTML = items.map(p => {
+    const saran = saranRestock(p.id) || Math.max(1, p.stokMin - p.stok) || 1;
+    return `
+      <div class="po-item-row" data-id="${p.id}">
+        <div class="po-item-nama">${p.nama}</div>
+        <input type="number" class="po-item-qty" value="${saran}" min="1" inputmode="numeric" />
+      </div>
+    `;
+  }).join("");
+  $("poCatatan").value = "";
+  bukaSheet("sheetBuatPO", "overlayBuatPO");
+}
+$("btnBuatPO").onclick = bukaFormBuatPO;
+$("btnCloseBuatPO").onclick = () => tutupSheet("sheetBuatPO", "overlayBuatPO");
+$("overlayBuatPO").onclick = () => tutupSheet("sheetBuatPO", "overlayBuatPO");
+
+async function simpanPO(){
+  const supplierId = $("poSupplier").value;
+  const supplier = DAFTAR_SUPPLIER.find(s => s.id === supplierId);
+  if(!supplier){ showToast("Pilih supplier dulu (tambahkan lewat Kelola Supplier kalau belum ada)"); return; }
+
+  const baris = Array.from(document.querySelectorAll("#poItemList .po-item-row"));
+  const items = baris.map(row => {
+    const p = PRODUK.find(x => x.id === row.dataset.id);
+    const qty = Number(row.querySelector(".po-item-qty").value) || 0;
+    return (p && qty > 0) ? { idProduk: p.id, namaProduk: p.nama, qtyPesan: qty } : null;
+  }).filter(Boolean);
+  if(items.length === 0){ showToast("Tidak ada item valid"); return; }
+
+  $("btnSimpanPO").disabled = true;
+  $("btnSimpanPO").textContent = "Menyimpan...";
+  try{
+    const now = new Date();
+    const ref = doc(colPurchaseOrder);
+    const dataPO = {
+      supplierId: supplier.id, supplierNama: supplier.nama, items,
+      catatan: $("poCatatan").value.trim(), status: "Draft",
+      tanggal: formatTanggal(now),
+      jam: String(now.getHours()).padStart(2,"0") + ":" + String(now.getMinutes()).padStart(2,"0"),
+      owner: NAMA_KASIR
+    };
+    await denganBatasWaktu(setDoc(ref, dataPO));
+    DAFTAR_PO.unshift({ id: ref.id, ...dataPO });
+    produkDipilihPO.clear();
+    tutupSheet("sheetBuatPO", "overlayBuatPO");
+    renderPesanan();
+    renderPOList();
+    showToast("Purchase Order tersimpan sebagai Draft");
+  }catch(err){
+    showToast("Gagal simpan: " + err.message);
+  }finally{
+    $("btnSimpanPO").disabled = false;
+    $("btnSimpanPO").textContent = "Simpan sebagai Draft";
+  }
+}
+$("btnSimpanPO").onclick = simpanPO;
+
+function bukaDetailPO(id){
+  const po = DAFTAR_PO.find(x => x.id === id);
+  if(!po) return;
+  poDetailId = id;
+  $("detailPOJudul").textContent = "PO — " + po.supplierNama;
+  $("detailPOInfo").textContent = `${po.tanggal} ${po.jam} · Status: ${po.status}${po.catatan ? " · Catatan: " + po.catatan : ""}`;
+  $("detailPOItemList").innerHTML = (po.items || []).map(it => `
+    <div class="po-item-row">
+      <div class="po-item-nama">${it.namaProduk}</div>
+      <div style="font-size:13px;font-weight:600;flex:none;">${it.qtyPesan} pcs</div>
+    </div>
+  `).join("");
+  $("btnTandaiDikirim").style.display = po.status === "Draft" ? "block" : "none";
+  $("btnTandaiDiterima").style.display = po.status === "Dikirim" ? "block" : "none";
+  bukaSheet("sheetDetailPO", "overlayDetailPO");
+}
+$("btnCloseDetailPO").onclick = () => tutupSheet("sheetDetailPO", "overlayDetailPO");
+$("overlayDetailPO").onclick = () => tutupSheet("sheetDetailPO", "overlayDetailPO");
+
+$("btnTandaiDikirim").onclick = async () => {
+  if(!poDetailId) return;
+  try{
+    await denganBatasWaktu(updateDoc(doc(colPurchaseOrder, poDetailId), { status: "Dikirim" }));
+    const po = DAFTAR_PO.find(x => x.id === poDetailId);
+    if(po) po.status = "Dikirim";
+    tutupSheet("sheetDetailPO", "overlayDetailPO");
+    renderPOList();
+    showToast("PO ditandai sudah dikirim");
+  }catch(err){
+    showToast("Gagal: " + err.message);
+  }
+};
+
+$("btnTandaiDiterima").onclick = async () => {
+  if(!poDetailId) return;
+  const po = DAFTAR_PO.find(x => x.id === poDetailId);
+  if(!po) return;
+  if(!(await konfirmasi(`Stok ${(po.items||[]).length} produk akan otomatis ditambah sesuai jumlah pesanan.`, { judul: "Tandai PO Diterima?", labelYa: "Ya, Tandai Diterima" }))) return;
+
+  try{
+    const batch = writeBatch(db);
+    batch.update(doc(colPurchaseOrder, poDetailId), { status: "Diterima" });
+    const now = new Date();
+    (po.items || []).forEach(it => {
+      batch.update(doc(colProduk, it.idProduk), { stok: increment(it.qtyPesan) });
+      batch.set(doc(colStokMasuk), {
+        tanggal: formatTanggal(now), idProduk: it.idProduk, namaProduk: it.namaProduk,
+        jumlahMasuk: it.qtyPesan, supplier: po.supplierNama, keterangan: "Dari Purchase Order"
+      });
+    });
+    await denganBatasWaktu(batch.commit(), 25);
+
+    po.status = "Diterima";
+    (po.items || []).forEach(it => {
+      const p = PRODUK.find(x => x.id === it.idProduk);
+      if(p) p.stok += it.qtyPesan;
+    });
+    localStorage.setItem("th_produk_cache", JSON.stringify(PRODUK));
+
+    tutupSheet("sheetDetailPO", "overlayDetailPO");
+    renderPOList();
+    renderGrid();
+    renderProdukList();
+    renderPesanan();
+    showToast("PO diterima, stok otomatis ditambahkan");
+  }catch(err){
+    showToast("Gagal: " + err.message);
+  }
+};
 
 function updateBadgeNav(){
   // Daftar Pesanan: jumlah produk yang stoknya habis atau di bawah stok minimum
@@ -2863,10 +3372,17 @@ function ubahQty(id, delta){
   hitungTotal();
 }
 
+function hargaBerlaku(item){
+  if(item.hargaGrosir > 0 && item.minQtyGrosir > 0 && item.qty >= item.minQtyGrosir){
+    return item.hargaGrosir;
+  }
+  return item.harga;
+}
+
 function renderCartBar(){
   const items = Object.values(cart);
   const totalItem = items.reduce((s,i)=>s+i.qty,0);
-  const totalHarga = items.reduce((s,i)=>s+i.qty*i.harga,0);
+  const totalHarga = items.reduce((s,i)=>s+i.qty*hargaBerlaku(i),0);
   $("cartBar").style.display = (totalItem && currentView === "kasir") ? "flex" : "none";
   $("cartCount").textContent = totalItem + " item";
   $("cartTotal").textContent = rupiah(totalHarga);
@@ -2874,20 +3390,24 @@ function renderCartBar(){
 
 function renderCartList(){
   const items = Object.values(cart);
-  $("cartList").innerHTML = items.map(i => `
+  $("cartList").innerHTML = items.map(i => {
+    const hargaAktif = hargaBerlaku(i);
+    const pakaiGrosir = hargaAktif < i.harga;
+    return `
     <div class="cart-item">
       <div style="flex:1;">
-        <div class="ci-name">${i.nama}</div>
-        <div class="ci-price">${rupiah(i.harga)} / ${i.satuan||'pcs'}</div>
+        <div class="ci-name">${i.nama}${pakaiGrosir ? ' <span style="color:var(--green);font-weight:700;font-size:11px;">GROSIR</span>' : ''}</div>
+        <div class="ci-price">${rupiah(hargaAktif)} / ${i.satuan||'pcs'}${(i.hargaGrosir > 0 && !pakaiGrosir) ? ` · grosir mulai ${i.minQtyGrosir}pcs` : ''}</div>
       </div>
       <div class="stepper">
         <button data-id="${i.id}" data-d="-1">−</button>
         <span>${i.qty}</span>
         <button data-id="${i.id}" data-d="1">+</button>
       </div>
-      <div class="ci-subtotal">${rupiah(i.qty*i.harga)}</div>
+      <div class="ci-subtotal">${rupiah(i.qty*hargaAktif)}</div>
     </div>
-  `).join("") || `<p style="color:var(--ink-soft);font-size:13.5px;padding:16px 0;">Keranjang masih kosong.</p>`;
+  `;
+  }).join("") || `<p style="color:var(--ink-soft);font-size:13.5px;padding:16px 0;">Keranjang masih kosong.</p>`;
 
   $("cartList").querySelectorAll("button[data-id]").forEach(btn=>{
     btn.onclick = () => ubahQty(btn.dataset.id, Number(btn.dataset.d));
@@ -2912,16 +3432,17 @@ function hitungDiskonPromo(items){
   DAFTAR_PROMO.filter(promoAktifSekarang).forEach(p => {
     const it = items.find(x => x.id === p.idProduk);
     if(!it) return;
+    const hargaAktif = hargaBerlaku(it);
 
     if(p.tipe === "produk"){
-      const diskon = Math.round(it.qty * it.harga * (Number(p.persenDiskon) / 100));
+      const diskon = Math.round(it.qty * hargaAktif * (Number(p.persenDiskon) / 100));
       if(diskon > 0){ totalDiskon += diskon; diterapkan.push({ nama: p.nama, jumlah: diskon }); }
     }else if(p.tipe === "beli_gratis"){
       const groupSize = Number(p.qtyBeli) + Number(p.qtyGratis);
       const grupTerpenuhi = groupSize > 0 ? Math.floor(it.qty / groupSize) : 0;
       const unitGratis = grupTerpenuhi * Number(p.qtyGratis);
       if(unitGratis > 0){
-        const diskon = unitGratis * it.harga;
+        const diskon = unitGratis * hargaAktif;
         totalDiskon += diskon; diterapkan.push({ nama: p.nama, jumlah: diskon });
       }
     }
@@ -2932,7 +3453,7 @@ function hitungDiskonPromo(items){
 
 function hitungTotal(){
   const items = Object.values(cart);
-  const subtotal = items.reduce((s,i)=>s+i.qty*i.harga,0);
+  const subtotal = items.reduce((s,i)=>s+i.qty*hargaBerlaku(i),0);
 
   const promoResult = hitungDiskonPromo(items);
   const diskonPromo = promoResult.totalDiskon;
@@ -3074,7 +3595,7 @@ function buatIdTransaksi(){
 function simpanTransaksi(){
   const { subtotal, diskonPromo, diskonManual, diskonPoin, poinDipakai, poinDidapat, total, totalDibayar, kembalian, promoDiterapkan } = hitungTotal();
   const items = Object.values(cart).map(i => ({
-    idProduk: i.id, namaProduk: i.nama, qty: i.qty, hargaSatuan: i.harga
+    idProduk: i.id, namaProduk: i.nama, qty: i.qty, hargaSatuan: hargaBerlaku(i)
   }));
   if(items.length === 0) return;
 
