@@ -296,6 +296,14 @@
   .summary-line.kembalian{font-weight:700;color:var(--green);}
   .summary-line.kembalian.minus{color:var(--red);}
 
+  .bayar-row{display:flex;gap:8px;align-items:flex-end;margin-bottom:8px;}
+  .bayar-row .field{margin-top:0;}
+  .bayar-row .field label{font-size:11px;}
+  .bayar-row-hapus{
+    flex:none;width:38px;height:38px;border-radius:10px;border:1px solid var(--line);
+    background:var(--paper);color:var(--red);font-size:16px;
+  }
+
   .btn-primary{
     width:100%;background:var(--amber);color:#fff;border:none;padding:14px;border-radius:12px;
     font-size:15px;font-weight:700;margin-top:18px;
@@ -549,6 +557,12 @@
     <div class="list-panel" id="pengaturanList"></div>
 
     <div class="page-head" style="padding-top:6px;">
+      <h2 style="font-size:14.5px;">Kelola Promo</h2>
+      <button class="btn-add" id="btnTambahPromo">+ Promo</button>
+    </div>
+    <div class="list-panel" id="promoList"></div>
+
+    <div class="page-head" style="padding-top:6px;">
       <h2 style="font-size:14.5px;">Backup Data</h2>
     </div>
     <div style="padding:0 16px 16px;">
@@ -582,30 +596,28 @@
   <div class="sheet-body">
     <div id="cartList"></div>
 
+    <div id="promoDiterapkanWrap" style="display:none;margin-top:10px;background:#E9F5F0;border-radius:10px;padding:10px 12px;">
+      <div style="font-size:11.5px;color:var(--green);font-weight:700;margin-bottom:4px;">🏷️ Promo diterapkan</div>
+      <div id="promoDiterapkanList" style="font-size:12.5px;color:var(--green);line-height:1.6;"></div>
+    </div>
+
     <div class="field">
-      <label>Diskon (Rp)</label>
+      <label>Diskon Tambahan (Rp)</label>
       <input type="number" id="inputDiskon" value="0" min="0" inputmode="numeric" />
     </div>
 
-    <div class="pay-row">
-      <div class="field">
-        <label>Metode Bayar</label>
-        <select id="metodeBayar">
-          <option value="Tunai">Tunai</option>
-          <option value="QRIS">QRIS</option>
-          <option value="Transfer">Transfer</option>
-        </select>
-      </div>
-      <div class="field">
-        <label>Nominal Dibayar</label>
-        <input type="number" id="inputBayar" placeholder="0" min="0" inputmode="numeric" />
-      </div>
+    <div class="field" style="margin-top:14px;">
+      <label>Pembayaran</label>
+      <div id="daftarPembayaran"></div>
+      <button type="button" id="btnTambahMetodeBayar" class="btn-secondary" style="margin-top:8px;border-color:var(--line);">+ Tambah Metode Bayar (Split)</button>
     </div>
 
     <div style="margin-top:16px;">
       <div class="summary-line"><span>Subtotal</span><span id="sumSubtotal">Rp 0</span></div>
-      <div class="summary-line"><span>Diskon</span><span id="sumDiskon">Rp 0</span></div>
+      <div class="summary-line" id="barisPromoLine" style="display:none;"><span>Diskon Promo</span><span id="sumDiskonPromo">-Rp 0</span></div>
+      <div class="summary-line"><span>Diskon Tambahan</span><span id="sumDiskon">Rp 0</span></div>
       <div class="summary-line total"><span>Total</span><span id="sumTotal">Rp 0</span></div>
+      <div class="summary-line"><span>Total Dibayar</span><span id="sumTotalDibayar">Rp 0</span></div>
       <div class="summary-line kembalian"><span>Kembalian</span><span id="sumKembalian">Rp 0</span></div>
     </div>
 
@@ -797,6 +809,80 @@
   </div>
 </div>
 
+<!-- SHEET: TAMBAH/EDIT PROMO -->
+<div class="sheet-overlay" id="overlayPromoForm"></div>
+<div class="sheet" id="sheetPromoForm">
+  <div class="sheet-handle"></div>
+  <div class="sheet-head">
+    <h2 id="promoFormTitle">Tambah Promo</h2>
+    <button id="btnClosePromoForm">✕</button>
+  </div>
+  <div class="sheet-body">
+    <div class="field">
+      <label>Nama Promo</label>
+      <input type="text" id="pmNama" placeholder="misal Diskon Minuman 10%" />
+    </div>
+    <div class="field">
+      <label>Tipe Promo</label>
+      <select id="pmTipe">
+        <option value="kategori">Diskon Kategori</option>
+        <option value="beli_gratis">Beli X Gratis Y</option>
+      </select>
+    </div>
+
+    <div id="pmBlokKategori">
+      <div class="pay-row">
+        <div class="field">
+          <label>Kategori</label>
+          <select id="pmKategori"></select>
+        </div>
+        <div class="field">
+          <label>Diskon (%)</label>
+          <input type="number" id="pmPersenDiskon" inputmode="numeric" placeholder="10" />
+        </div>
+      </div>
+    </div>
+
+    <div id="pmBlokBeliGratis" style="display:none;">
+      <div class="field">
+        <label>Produk</label>
+        <select id="pmProduk"></select>
+      </div>
+      <div class="pay-row">
+        <div class="field">
+          <label>Beli (Qty)</label>
+          <input type="number" id="pmQtyBeli" inputmode="numeric" placeholder="2" />
+        </div>
+        <div class="field">
+          <label>Gratis (Qty)</label>
+          <input type="number" id="pmQtyGratis" inputmode="numeric" placeholder="1" />
+        </div>
+      </div>
+    </div>
+
+    <div class="pay-row">
+      <div class="field">
+        <label>Mulai (opsional)</label>
+        <input type="date" id="pmTanggalMulai" />
+      </div>
+      <div class="field">
+        <label>Selesai (opsional)</label>
+        <input type="date" id="pmTanggalSelesai" />
+      </div>
+    </div>
+    <div style="font-size:11.5px;color:var(--ink-soft);margin-top:2px;">
+      Kosongkan tanggal kalau promo berlaku terus-menerus (tidak ada batas waktu).
+    </div>
+
+    <label style="display:flex;align-items:center;gap:8px;margin-top:14px;font-size:13.5px;color:var(--ink);">
+      <input type="checkbox" id="pmAktif" checked style="width:17px;height:17px;" />
+      Promo aktif sekarang
+    </label>
+
+    <button class="btn-primary" id="btnSimpanPromo">Simpan Promo</button>
+  </div>
+</div>
+
 <!-- SHEET: TAMBAH/EDIT USER -->
 <div class="sheet-overlay" id="overlayUserForm"></div>
 <div class="sheet" id="sheetUserForm">
@@ -860,6 +946,7 @@ const colUser = collection(db, "user");
 const colTransaksi = collection(db, "transaksi");
 const colStokMasuk = collection(db, "stokMasuk");
 const colRekapHarian = collection(db, "rekapHarian");
+const colPromo = collection(db, "promo");
 
 const PRINTER_LEBAR_KARAKTER = 32; // 32 = printer thermal 58mm (paling umum), ganti ke 48 kalau pakai printer 80mm
 
@@ -897,6 +984,7 @@ function setStatus(online, text){
    LOGIN — pilih user dari daftar (tanpa PIN)
    ============================================================ */
 let DAFTAR_USER = [];
+let DAFTAR_PROMO = [];
 
 async function muatDaftarUser(){
   try{
@@ -935,6 +1023,7 @@ function masuk(nama, role){
   switchView(role.toLowerCase() === "owner" ? "beranda" : "kasir");
   muatProduk();
   muatDaftarUser();
+  muatPromo();
 }
 
 function terapkanBatasanRole(){
@@ -1659,7 +1748,7 @@ async function renderLaporan(){
         <div class="list-row" style="${batal ? 'opacity:.55;' : ''}">
           <div class="lr-main">
             <div class="lr-name">${t.id}${batal ? ' <span style="color:var(--red);font-weight:700;">(Dibatalkan)</span>' : ''}</div>
-            <div class="lr-sub">${t.jam} · ${jumlahItem} item · ${t.metodeBayar} · ${t.kasir}</div>
+            <div class="lr-sub">${t.jam} · ${jumlahItem} item · ${t.metodeBayarText || t.metodeBayar || '-'} · ${t.kasir}</div>
           </div>
           <div style="display:flex;flex-direction:column;align-items:flex-end;gap:5px;flex:none;">
             <div style="font-weight:700;font-size:13.5px;${batal ? 'text-decoration:line-through;' : ''}">${rupiah(t.total)}</div>
@@ -1862,6 +1951,180 @@ async function hapusUser(nama){
 }
 
 /* ============================================================
+   KELOLA PROMO — diskon kategori & beli X gratis Y
+   ============================================================ */
+let promoFormMode = "tambah";
+let promoEditId = null;
+
+async function muatPromo(){
+  try{
+    const snap = await denganBatasWaktu(getDocs(colPromo));
+    DAFTAR_PROMO = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+    renderPromoList();
+  }catch(err){
+    // gagal diam-diam; promo bukan jalur kritis, Kasir tetap bisa jalan tanpa promo
+  }
+}
+
+function deskripsiPromo(p){
+  let teks = p.tipe === "kategori"
+    ? `Diskon ${p.persenDiskon}% · ${p.kategori}`
+    : `Beli ${p.qtyBeli} Gratis ${p.qtyGratis} · ${p.namaProduk}`;
+  if(p.tanggalMulai || p.tanggalSelesai){
+    teks += ` · ${p.tanggalMulai || '...'} s/d ${p.tanggalSelesai || '...'}`;
+  }
+  return teks;
+}
+
+function renderPromoList(){
+  $("promoList").innerHTML = DAFTAR_PROMO.map(p => `
+    <div class="list-row">
+      <div class="lr-main">
+        <div class="lr-name">${p.nama}${!p.aktif ? ' <span style="color:var(--ink-soft);font-weight:400;font-size:11px;">(nonaktif)</span>' : ''}</div>
+        <div class="lr-sub">${deskripsiPromo(p)}</div>
+      </div>
+      <div class="lr-actions">
+        <button class="lr-btn" data-edit-promo="${p.id}">Edit</button>
+        <button class="lr-btn danger" data-hapus-promo="${p.id}">Hapus</button>
+      </div>
+    </div>
+  `).join("") || `<p style="color:var(--ink-soft);font-size:13.5px;padding:16px 0;">Belum ada promo.</p>`;
+
+  $("promoList").querySelectorAll("[data-edit-promo]").forEach(btn=>{
+    btn.onclick = () => bukaFormEditPromo(btn.dataset.editPromo);
+  });
+  $("promoList").querySelectorAll("[data-hapus-promo]").forEach(btn=>{
+    btn.onclick = () => hapusPromo(btn.dataset.hapusPromo);
+  });
+}
+
+function isiSelectKategoriPromo(){
+  $("pmKategori").innerHTML = DAFTAR_KATEGORI.filter(k => k !== "Semua").map(k => `<option value="${k}">${k}</option>`).join("");
+}
+function isiSelectProdukPromo(){
+  $("pmProduk").innerHTML = PRODUK.map(p => `<option value="${p.id}">${p.nama}</option>`).join("");
+}
+$("pmTipe").addEventListener("change", () => {
+  const tipe = $("pmTipe").value;
+  $("pmBlokKategori").style.display = tipe === "kategori" ? "block" : "none";
+  $("pmBlokBeliGratis").style.display = tipe === "beli_gratis" ? "block" : "none";
+});
+
+function bukaFormTambahPromo(){
+  promoFormMode = "tambah";
+  promoEditId = null;
+  $("promoFormTitle").textContent = "Tambah Promo";
+  $("pmNama").value = "";
+  $("pmTipe").value = "kategori";
+  isiSelectKategoriPromo();
+  isiSelectProdukPromo();
+  $("pmPersenDiskon").value = "";
+  $("pmQtyBeli").value = "";
+  $("pmQtyGratis").value = "";
+  $("pmTanggalMulai").value = "";
+  $("pmTanggalSelesai").value = "";
+  $("pmAktif").checked = true;
+  $("pmBlokKategori").style.display = "block";
+  $("pmBlokBeliGratis").style.display = "none";
+  bukaSheet("sheetPromoForm", "overlayPromoForm");
+}
+$("btnTambahPromo").onclick = bukaFormTambahPromo;
+
+function bukaFormEditPromo(id){
+  const p = DAFTAR_PROMO.find(x => x.id === id);
+  if(!p) return;
+  promoFormMode = "edit";
+  promoEditId = id;
+  $("promoFormTitle").textContent = "Edit Promo";
+  $("pmNama").value = p.nama;
+  $("pmTipe").value = p.tipe;
+  isiSelectKategoriPromo();
+  isiSelectProdukPromo();
+  if(p.tipe === "kategori"){
+    $("pmKategori").value = p.kategori;
+    $("pmPersenDiskon").value = p.persenDiskon;
+  }else{
+    $("pmProduk").value = p.idProduk;
+    $("pmQtyBeli").value = p.qtyBeli;
+    $("pmQtyGratis").value = p.qtyGratis;
+  }
+  $("pmTanggalMulai").value = p.tanggalMulai || "";
+  $("pmTanggalSelesai").value = p.tanggalSelesai || "";
+  $("pmAktif").checked = !!p.aktif;
+  $("pmBlokKategori").style.display = p.tipe === "kategori" ? "block" : "none";
+  $("pmBlokBeliGratis").style.display = p.tipe === "beli_gratis" ? "block" : "none";
+  bukaSheet("sheetPromoForm", "overlayPromoForm");
+}
+$("btnClosePromoForm").onclick = () => tutupSheet("sheetPromoForm", "overlayPromoForm");
+$("overlayPromoForm").onclick = () => tutupSheet("sheetPromoForm", "overlayPromoForm");
+
+async function simpanPromo(){
+  const nama = $("pmNama").value.trim();
+  const tipe = $("pmTipe").value;
+  if(!nama){ showToast("Isi nama promo dulu"); return; }
+
+  const dataPromo = {
+    nama, tipe, aktif: $("pmAktif").checked,
+    tanggalMulai: $("pmTanggalMulai").value || "",
+    tanggalSelesai: $("pmTanggalSelesai").value || ""
+  };
+
+  if(tipe === "kategori"){
+    const persen = Number($("pmPersenDiskon").value);
+    if(!persen || persen <= 0){ showToast("Isi persen diskon dengan benar"); return; }
+    dataPromo.kategori = $("pmKategori").value;
+    dataPromo.persenDiskon = persen;
+  }else{
+    const qtyBeli = Number($("pmQtyBeli").value);
+    const qtyGratis = Number($("pmQtyGratis").value);
+    if(!qtyBeli || !qtyGratis){ showToast("Isi qty beli & gratis dengan benar"); return; }
+    const produkTerpilih = PRODUK.find(p => p.id === $("pmProduk").value);
+    if(!produkTerpilih){ showToast("Pilih produk dulu"); return; }
+    dataPromo.idProduk = produkTerpilih.id;
+    dataPromo.namaProduk = produkTerpilih.nama;
+    dataPromo.qtyBeli = qtyBeli;
+    dataPromo.qtyGratis = qtyGratis;
+  }
+
+  $("btnSimpanPromo").disabled = true;
+  $("btnSimpanPromo").textContent = "Menyimpan...";
+  try{
+    if(promoFormMode === "tambah"){
+      const ref = doc(colPromo);
+      await denganBatasWaktu(setDoc(ref, dataPromo));
+      DAFTAR_PROMO.push({ id: ref.id, ...dataPromo });
+    }else{
+      await denganBatasWaktu(updateDoc(doc(colPromo, promoEditId), dataPromo));
+      const idx = DAFTAR_PROMO.findIndex(x => x.id === promoEditId);
+      if(idx !== -1) DAFTAR_PROMO[idx] = { id: promoEditId, ...dataPromo };
+    }
+    tutupSheet("sheetPromoForm", "overlayPromoForm");
+    renderPromoList();
+    showToast(promoFormMode === "tambah" ? "Promo ditambahkan" : "Promo diperbarui");
+  }catch(err){
+    showToast("Gagal simpan: " + err.message);
+  }finally{
+    $("btnSimpanPromo").disabled = false;
+    $("btnSimpanPromo").textContent = "Simpan Promo";
+  }
+}
+$("btnSimpanPromo").onclick = simpanPromo;
+
+async function hapusPromo(id){
+  const p = DAFTAR_PROMO.find(x => x.id === id);
+  if(!p) return;
+  if(!(await konfirmasi("Promo ini tidak akan berlaku lagi.", { judul: `Hapus promo "${p.nama}"?`, labelYa: "Ya, Hapus", bahaya: true }))) return;
+  try{
+    await denganBatasWaktu(deleteDoc(doc(colPromo, id)));
+    DAFTAR_PROMO = DAFTAR_PROMO.filter(x => x.id !== id);
+    renderPromoList();
+    showToast("Promo dihapus");
+  }catch(err){
+    showToast("Gagal hapus: " + err.message);
+  }
+}
+
+/* ============================================================
    BACKUP DATA — export semua koleksi Firestore ke 1 file Excel
    ============================================================ */
 async function exportDataExcel(){
@@ -1875,10 +2138,10 @@ async function exportDataExcel(){
   tombol.textContent = "Menyiapkan data...";
 
   try{
-    const [produkSnap, transaksiSnap, stokSnap, rekapSnap, userSnap] = await denganBatasWaktu(
+    const [produkSnap, transaksiSnap, stokSnap, rekapSnap, userSnap, promoSnap] = await denganBatasWaktu(
       Promise.all([
         getDocs(colProduk), getDocs(colTransaksi), getDocs(colStokMasuk),
-        getDocs(colRekapHarian), getDocs(colUser)
+        getDocs(colRekapHarian), getDocs(colUser), getDocs(colPromo)
       ]),
       25
     );
@@ -1900,7 +2163,8 @@ async function exportDataExcel(){
           "ID Transaksi": t.idTransaksi, "Tanggal": t.tanggal, "Jam": t.jam, "Kasir": t.kasir,
           "ID Produk": it.idProduk, "Nama Produk": it.namaProduk, "Qty": it.qty,
           "Harga Satuan": it.hargaSatuan, "Subtotal Item": it.qty * it.hargaSatuan,
-          "Diskon": t.diskon, "Total Transaksi": t.total, "Metode Bayar": t.metodeBayar,
+          "Diskon Promo": t.diskonPromo || 0, "Diskon Tambahan": t.diskon || 0,
+          "Total Transaksi": t.total, "Metode Bayar": t.metodeBayarText || t.metodeBayar || "",
           "Nominal Dibayar": t.nominalDibayar, "Kembalian": t.kembalian, "Status": t.status
         });
       });
@@ -1924,12 +2188,23 @@ async function exportDataExcel(){
 
     const userRows = userSnap.docs.map(d => ({ "Nama": d.id, "Role": d.data().role }));
 
+    const promoRows = promoSnap.docs.map(d => {
+      const pr = d.data();
+      return {
+        "Nama Promo": pr.nama, "Tipe": pr.tipe === "kategori" ? "Diskon Kategori" : "Beli X Gratis Y",
+        "Kategori": pr.kategori || "", "Persen Diskon": pr.persenDiskon || "",
+        "Produk": pr.namaProduk || "", "Qty Beli": pr.qtyBeli || "", "Qty Gratis": pr.qtyGratis || "",
+        "Mulai": pr.tanggalMulai || "", "Selesai": pr.tanggalSelesai || "", "Aktif": pr.aktif ? "Ya" : "Tidak"
+      };
+    });
+
     const wb = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(produkRows), "Produk");
     XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(transaksiRows), "Transaksi");
     XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(stokRows), "Stok_Masuk");
     XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(rekapRows), "Rekap_Harian");
     XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(userRows), "User");
+    XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(promoRows), "Promo");
 
     XLSX.writeFile(wb, `TOKO_HIKMAH_Backup_${formatTanggal(new Date())}.xlsx`);
     showToast("Backup berhasil diunduh");
@@ -2090,31 +2365,133 @@ function renderCartList(){
 /* ============================================================
    HITUNG TOTAL & KEMBALIAN
    ============================================================ */
+function promoAktifSekarang(p){
+  if(!p.aktif) return false;
+  const hariIni = formatTanggal(new Date());
+  if(p.tanggalMulai && hariIni < p.tanggalMulai) return false;
+  if(p.tanggalSelesai && hariIni > p.tanggalSelesai) return false;
+  return true;
+}
+
+function hitungDiskonPromo(items){
+  let totalDiskon = 0;
+  const diterapkan = [];
+
+  DAFTAR_PROMO.filter(promoAktifSekarang).forEach(p => {
+    if(p.tipe === "kategori"){
+      let subtotalKategori = 0;
+      items.forEach(it => { if(it.kategori === p.kategori) subtotalKategori += it.qty * it.harga; });
+      if(subtotalKategori > 0){
+        const diskon = Math.round(subtotalKategori * (Number(p.persenDiskon) / 100));
+        if(diskon > 0){ totalDiskon += diskon; diterapkan.push({ nama: p.nama, jumlah: diskon }); }
+      }
+    }else if(p.tipe === "beli_gratis"){
+      const it = items.find(x => x.id === p.idProduk);
+      if(it){
+        const groupSize = Number(p.qtyBeli) + Number(p.qtyGratis);
+        const grupTerpenuhi = groupSize > 0 ? Math.floor(it.qty / groupSize) : 0;
+        const unitGratis = grupTerpenuhi * Number(p.qtyGratis);
+        if(unitGratis > 0){
+          const diskon = unitGratis * it.harga;
+          totalDiskon += diskon; diterapkan.push({ nama: p.nama, jumlah: diskon });
+        }
+      }
+    }
+  });
+
+  return { totalDiskon, diterapkan };
+}
+
 function hitungTotal(){
   const items = Object.values(cart);
   const subtotal = items.reduce((s,i)=>s+i.qty*i.harga,0);
-  const diskon = Number($("inputDiskon").value) || 0;
-  const total = Math.max(subtotal - diskon, 0);
-  const dibayar = Number($("inputBayar").value) || 0;
-  const kembalian = dibayar - total;
+
+  const promoResult = hitungDiskonPromo(items);
+  const diskonPromo = promoResult.totalDiskon;
+  const diskonManual = Number($("inputDiskon").value) || 0;
+  const total = Math.max(subtotal - diskonPromo - diskonManual, 0);
+
+  const totalDibayar = daftarPembayaranState.reduce((s, b) => s + (Number(b.nominal) || 0), 0);
+  const kembalian = totalDibayar - total;
 
   $("sumSubtotal").textContent = rupiah(subtotal);
-  $("sumDiskon").textContent = rupiah(diskon);
+  if(diskonPromo > 0){
+    $("barisPromoLine").style.display = "flex";
+    $("sumDiskonPromo").textContent = "-" + rupiah(diskonPromo);
+  }else{
+    $("barisPromoLine").style.display = "none";
+  }
+  $("sumDiskon").textContent = rupiah(diskonManual);
   $("sumTotal").textContent = rupiah(total);
+  $("sumTotalDibayar").textContent = rupiah(totalDibayar);
   $("sumKembalian").textContent = rupiah(kembalian);
   $("sumKembalian").parentElement.classList.toggle("minus", kembalian < 0);
 
-  $("btnSimpan").disabled = items.length === 0 || dibayar < total;
-  return { subtotal, diskon, total, dibayar, kembalian };
+  if(promoResult.diterapkan.length){
+    $("promoDiterapkanWrap").style.display = "block";
+    $("promoDiterapkanList").innerHTML = promoResult.diterapkan.map(p => `${p.nama}: -${rupiah(p.jumlah)}`).join("<br>");
+  }else{
+    $("promoDiterapkanWrap").style.display = "none";
+  }
+
+  $("btnSimpan").disabled = items.length === 0 || totalDibayar < total;
+  return { subtotal, diskonPromo, diskonManual, total, totalDibayar, kembalian, promoDiterapkan: promoResult.diterapkan };
 }
 $("inputDiskon").addEventListener("input", hitungTotal);
-$("inputBayar").addEventListener("input", hitungTotal);
+
+/* ============================================================
+   PEMBAYARAN SPLIT — beberapa metode bayar dalam 1 transaksi
+   ============================================================ */
+let daftarPembayaranState = [{ metode: "Tunai", nominal: 0 }];
+
+function renderDaftarPembayaran(){
+  $("daftarPembayaran").innerHTML = daftarPembayaranState.map((b, i) => `
+    <div class="bayar-row" data-idx="${i}">
+      <div class="field" style="flex:1.1;">
+        <label>Metode</label>
+        <select class="bayar-metode">
+          <option value="Tunai" ${b.metode==="Tunai"?"selected":""}>Tunai</option>
+          <option value="QRIS" ${b.metode==="QRIS"?"selected":""}>QRIS</option>
+          <option value="Transfer" ${b.metode==="Transfer"?"selected":""}>Transfer</option>
+        </select>
+      </div>
+      <div class="field" style="flex:1;">
+        <label>Nominal</label>
+        <input type="number" class="bayar-nominal" min="0" inputmode="numeric" placeholder="0" value="${b.nominal || ""}" />
+      </div>
+      ${daftarPembayaranState.length > 1 ? `<button type="button" class="bayar-row-hapus" data-hapus-bayar="${i}">✕</button>` : ""}
+    </div>
+  `).join("");
+
+  $("daftarPembayaran").querySelectorAll(".bayar-row").forEach(row => {
+    const idx = Number(row.dataset.idx);
+    row.querySelector(".bayar-metode").addEventListener("change", e => { daftarPembayaranState[idx].metode = e.target.value; });
+    row.querySelector(".bayar-nominal").addEventListener("input", e => {
+      daftarPembayaranState[idx].nominal = Number(e.target.value) || 0;
+      hitungTotal();
+    });
+  });
+  $("daftarPembayaran").querySelectorAll("[data-hapus-bayar]").forEach(btn => {
+    btn.onclick = () => {
+      daftarPembayaranState.splice(Number(btn.dataset.hapusBayar), 1);
+      renderDaftarPembayaran();
+      hitungTotal();
+    };
+  });
+}
+$("btnTambahMetodeBayar").onclick = () => {
+  daftarPembayaranState.push({ metode: "Tunai", nominal: 0 });
+  renderDaftarPembayaran();
+  hitungTotal();
+};
 
 /* ============================================================
    BUKA / TUTUP SHEET
    ============================================================ */
 function bukaSheetBayar(){
   renderCartList();
+  daftarPembayaranState = [{ metode: "Tunai", nominal: 0 }];
+  renderDaftarPembayaran();
   hitungTotal();
   $("overlay").classList.add("show");
   $("sheetBayar").classList.add("show");
@@ -2142,19 +2519,25 @@ function buatIdTransaksi(){
 }
 
 function simpanTransaksi(){
-  const { subtotal, diskon, total, dibayar, kembalian } = hitungTotal();
+  const { subtotal, diskonPromo, diskonManual, total, totalDibayar, kembalian, promoDiterapkan } = hitungTotal();
   const items = Object.values(cart).map(i => ({
     idProduk: i.id, namaProduk: i.nama, qty: i.qty, hargaSatuan: i.harga
   }));
   if(items.length === 0) return;
+
+  const pembayaran = daftarPembayaranState
+    .filter(b => Number(b.nominal) > 0)
+    .map(b => ({ metode: b.metode, nominal: Number(b.nominal) }));
+  const metodeBayarText = pembayaran.map(b => b.metode).join(" + ") || "Tunai";
 
   const now = new Date();
   const idTransaksi = buatIdTransaksi();
   const dataTransaksi = {
     idTransaksi, tanggal: formatTanggal(now),
     jam: String(now.getHours()).padStart(2,"0") + ":" + String(now.getMinutes()).padStart(2,"0"),
-    kasir: NAMA_KASIR, items, subtotal, diskon, total,
-    metodeBayar: $("metodeBayar").value, nominalDibayar: dibayar, kembalian,
+    kasir: NAMA_KASIR, items, subtotal,
+    diskonPromo, diskon: diskonManual, promoDiterapkan,
+    total, pembayaran, metodeBayarText, nominalDibayar: totalDibayar, kembalian,
     status: "Selesai"
   };
 
@@ -2167,14 +2550,13 @@ function simpanTransaksi(){
     if(p) p.stok -= it.qty;
   });
   localStorage.setItem("th_produk_cache", JSON.stringify(PRODUK));
-  tampilkanStruk(idTransaksi, items, subtotal, diskon, total, dibayar, kembalian);
+  tampilkanStruk(idTransaksi, items, subtotal, diskonPromo, diskonManual, total, pembayaran, totalDibayar, kembalian, promoDiterapkan);
   cart = {};
   renderCartBar();
   renderGrid();
   renderPesanan();
   tutupSheetBayar();
   $("inputDiskon").value = 0;
-  $("inputBayar").value = "";
   $("btnSimpan").disabled = false;
   $("btnSimpan").textContent = "Simpan Transaksi";
 
@@ -2195,8 +2577,8 @@ $("btnSimpan").onclick = simpanTransaksi;
    ============================================================ */
 let strukTerakhir = null;
 
-function tampilkanStruk(idTrx, items, subtotal, diskon, total, dibayar, kembalian){
-  strukTerakhir = { idTrx, items, subtotal, diskon, total, dibayar, kembalian };
+function tampilkanStruk(idTrx, items, subtotal, diskonPromo, diskonManual, total, pembayaran, totalDibayar, kembalian, promoDiterapkan){
+  strukTerakhir = { idTrx, items, subtotal, diskonPromo, diskonManual, total, pembayaran, totalDibayar, kembalian, promoDiterapkan };
 
   const waktu = new Date().toLocaleString("id-ID");
   let html = `
@@ -2208,12 +2590,18 @@ function tampilkanStruk(idTrx, items, subtotal, diskon, total, dibayar, kembalia
   items.forEach(i=>{
     html += `<div class="line"><span>${i.namaProduk} x${i.qty}</span><span>${rupiah(i.qty*i.hargaSatuan)}</span></div>`;
   });
+  html += `<hr/><div class="line"><span>Subtotal</span><span>${rupiah(subtotal)}</span></div>`;
+  (promoDiterapkan || []).forEach(p => {
+    html += `<div class="line"><span>🏷️ ${p.nama}</span><span>-${rupiah(p.jumlah)}</span></div>`;
+  });
+  if(diskonManual > 0){
+    html += `<div class="line"><span>Diskon Tambahan</span><span>-${rupiah(diskonManual)}</span></div>`;
+  }
+  html += `<div class="line"><strong>Total</strong><strong>${rupiah(total)}</strong></div><hr/>`;
+  (pembayaran || []).forEach(b => {
+    html += `<div class="line"><span>${b.metode}</span><span>${rupiah(b.nominal)}</span></div>`;
+  });
   html += `
-    <hr/>
-    <div class="line"><span>Subtotal</span><span>${rupiah(subtotal)}</span></div>
-    <div class="line"><span>Diskon</span><span>${rupiah(diskon)}</span></div>
-    <div class="line"><strong>Total</strong><strong>${rupiah(total)}</strong></div>
-    <div class="line"><span>Dibayar</span><span>${rupiah(dibayar)}</span></div>
     <div class="line"><span>Kembali</span><span>${rupiah(kembalian)}</span></div>
     <hr/>
     <div class="t-center">Terima kasih</div>
@@ -2267,7 +2655,7 @@ function formatBaris(kiri, kanan, W){
 
 function cetakViaRawBT(){
   if(!strukTerakhir){ showToast("Belum ada transaksi untuk dicetak"); return; }
-  const { idTrx, items, subtotal, diskon, total, dibayar, kembalian } = strukTerakhir;
+  const { idTrx, items, subtotal, diskonPromo, diskonManual, total, pembayaran, kembalian, promoDiterapkan } = strukTerakhir;
   const W = PRINTER_LEBAR_KARAKTER;
   const garis = "-".repeat(W);
   const waktu = new Date().toLocaleString("id-ID");
@@ -2286,9 +2674,17 @@ function cetakViaRawBT(){
   });
   p.line(garis);
   p.line(formatBaris("Subtotal", rupiahPolos(subtotal), W));
-  p.line(formatBaris("Diskon", rupiahPolos(diskon), W));
+  (promoDiterapkan || []).forEach(pr => {
+    p.line(formatBaris(pr.nama, "-" + rupiahPolos(pr.jumlah), W));
+  });
+  if(diskonManual > 0){
+    p.line(formatBaris("Diskon Tambahan", "-" + rupiahPolos(diskonManual), W));
+  }
   p.bold(true).line(formatBaris("TOTAL", rupiahPolos(total), W)).bold(false);
-  p.line(formatBaris("Dibayar", rupiahPolos(dibayar), W));
+  p.line(garis);
+  (pembayaran || []).forEach(b => {
+    p.line(formatBaris(b.metode, rupiahPolos(b.nominal), W));
+  });
   p.line(formatBaris("Kembali", rupiahPolos(kembalian), W));
   p.line(garis);
   p.center().line("Terima kasih");
