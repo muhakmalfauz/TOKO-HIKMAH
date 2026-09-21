@@ -375,11 +375,24 @@
 <!-- ===== LOGIN SCREEN ===== -->
 <div class="login-screen" id="loginScreen">
   <div class="login-box">
-    <div class="login-logo">TOKO HIKMAH</div>
-    <div class="login-sub">Pilih siapa yang bertugas</div>
+    <div class="login-logo" id="loginLogoText">TOKO HIKMAH</div>
+    <div class="login-sub" id="loginSubText">Pilih siapa yang bertugas</div>
     <div class="user-list" id="userList">
       <div class="login-msg">Memuat daftar user...</div>
     </div>
+  </div>
+</div>
+
+<!-- ===== MASUKKAN PIN (kalau user yang dipilih punya PIN) ===== -->
+<div class="login-screen" id="pinScreen" style="display:none;">
+  <div class="login-box">
+    <div class="login-logo" id="pinNamaUser" style="font-size:19px;">Nama User</div>
+    <div class="login-sub">Masukkan PIN 4 digit</div>
+    <input type="password" id="inputPinLogin" inputmode="numeric" maxlength="4"
+      style="width:140px;text-align:center;letter-spacing:10px;font-size:22px;padding:12px;border-radius:12px;border:none;margin:8px auto 6px;display:block;" />
+    <div id="pinLoginError" style="color:#F4B6A6;font-size:12.5px;min-height:18px;text-align:center;">&nbsp;</div>
+    <button class="btn-primary" id="btnMasukPin" style="max-width:220px;margin:6px auto 0;display:block;">Masuk</button>
+    <button class="btn-secondary" id="btnBatalPin" style="max-width:220px;margin:8px auto 0;display:block;border-color:rgba(255,255,255,.35);color:#fff;">Batal</button>
   </div>
 </div>
 
@@ -389,7 +402,7 @@
 <!-- DRAWER MENU -->
 <div class="drawer-overlay" id="drawerOverlay"></div>
 <div class="drawer-panel" id="drawerPanel">
-  <div class="drawer-title">TOKO HIKMAH</div>
+  <div class="drawer-title" id="drawerTitleText">TOKO HIKMAH</div>
   <button class="nav-btn drawer-item active" data-view="beranda"><span class="nav-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11l9-8 9 8"/><path d="M5 10v10a1 1 0 0 0 1 1h4v-6h4v6h4a1 1 0 0 0 1-1V10"/></svg></span>Beranda</button>
   <button class="nav-btn drawer-item" data-view="kasir"><span class="nav-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="21" r="1"/><circle cx="18" cy="21" r="1"/><path d="M2.5 3h2l2.4 12.2a2 2 0 0 0 2 1.6h7.7a2 2 0 0 0 2-1.6L20.5 8H6"/></svg></span>Kasir</button>
   <button class="nav-btn drawer-item" data-view="produk"><span class="nav-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 7.5l-9-5-9 5 9 5 9-5z"/><path d="M3 7.5v9l9 5 9-5v-9"/><path d="M12 12.5v9"/></svg></span>Produk<span class="drawer-dot" data-badge="produk" style="display:none;"></span></button>
@@ -594,6 +607,42 @@
   <!-- ===== VIEW: PENGATURAN ===== -->
   <div id="viewPengaturan" style="display:none;">
     <div class="page-head">
+      <h2 style="font-size:14.5px;">Profil Toko</h2>
+    </div>
+    <div style="padding:0 16px 16px;">
+      <div class="field">
+        <label>Nama Toko</label>
+        <input type="text" id="tkNamaToko" placeholder="TOKO HIKMAH" />
+      </div>
+      <div class="field">
+        <label>Alamat (opsional)</label>
+        <input type="text" id="tkAlamat" />
+      </div>
+      <div class="field">
+        <label>No. Telepon (opsional)</label>
+        <input type="text" id="tkNoTelp" inputmode="tel" />
+      </div>
+      <div class="field">
+        <label>Ukuran Kertas Printer</label>
+        <select id="tkPrinterLebar">
+          <option value="32">58mm (paling umum)</option>
+          <option value="48">80mm</option>
+        </select>
+      </div>
+      <div class="field">
+        <label>Pesan Footer Struk</label>
+        <input type="text" id="tkPesanStruk" placeholder="Terima kasih" />
+      </div>
+      <button class="btn-primary" id="btnSimpanInfoToko">Simpan Profil Toko</button>
+    </div>
+
+    <div class="page-head" style="padding-top:6px;">
+      <h2 style="font-size:14.5px;">Kelola Kategori</h2>
+      <button class="btn-add" id="btnTambahKategori">+ Kategori</button>
+    </div>
+    <div class="list-panel" id="kategoriList"></div>
+
+    <div class="page-head">
       <h2>Kelola User</h2>
       <button class="btn-add" id="btnTambahUser">+ User</button>
     </div>
@@ -625,6 +674,11 @@
       <h2 style="font-size:14.5px;">Purchase Order</h2>
     </div>
     <div class="list-panel" id="poList"></div>
+
+    <div class="page-head" style="padding-top:6px;">
+      <h2 style="font-size:14.5px;">Log Aktivitas</h2>
+    </div>
+    <div class="list-panel" id="logAktivitasList"></div>
 
     <div class="page-head" style="padding-top:6px;">
       <h2 style="font-size:14.5px;">Backup Data</h2>
@@ -766,6 +820,7 @@
           <option value="kg">kg</option>
           <option value="ltr">ltr</option>
           <option value="pck">pck</option>
+          <option value="dus">dus</option>
         </select>
       </div>
     </div>
@@ -775,6 +830,14 @@
         <input type="text" id="pfBarcode" />
         <button class="scan-btn" id="btnScanProduk" type="button"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:19px;height:19px;"><path d="M4 8a2 2 0 0 1 2-2h1.2l1-1.6A1 1 0 0 1 9 4h6a1 1 0 0 1 .8.4l1 1.6H18a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V8z"/><circle cx="12" cy="13" r="3.4"/></svg></button>
       </div>
+    </div>
+    <div id="pfBlokKalkulatorDus" style="display:none;background:var(--cream);border-radius:10px;padding:12px;margin-top:2px;">
+      <div style="font-size:12px;font-weight:700;color:var(--navy);margin-bottom:8px;">🧮 Kalkulator Modal per Dus/Pack</div>
+      <div class="pay-row">
+        <div class="field" style="margin-top:0;"><label>Isi per Dus/Pack</label><input type="number" id="pfIsiDus" inputmode="numeric" placeholder="misal 40" /></div>
+        <div class="field" style="margin-top:0;"><label>Harga Beli per Dus/Pack</label><input type="number" id="pfHargaBeliDus" inputmode="numeric" placeholder="misal 100000" /></div>
+      </div>
+      <div id="pfInfoModalDus" style="font-size:12.5px;color:var(--ink-soft);margin-top:8px;line-height:1.6;"></div>
     </div>
     <div class="pay-row">
       <div class="field"><label>Harga Beli</label><input type="number" id="pfHargaBeli" inputmode="numeric" /></div>
@@ -1112,6 +1175,23 @@
   </div>
 </div>
 
+<!-- SHEET: TAMBAH KATEGORI -->
+<div class="sheet-overlay" id="overlayKategoriForm"></div>
+<div class="sheet" id="sheetKategoriForm">
+  <div class="sheet-handle"></div>
+  <div class="sheet-head">
+    <h2>Tambah Kategori</h2>
+    <button id="btnCloseKategoriForm">✕</button>
+  </div>
+  <div class="sheet-body">
+    <div class="field">
+      <label>Nama Kategori</label>
+      <input type="text" id="kgNama" placeholder="misal Alat Tulis" />
+    </div>
+    <button class="btn-primary" id="btnSimpanKategori">Simpan Kategori</button>
+  </div>
+</div>
+
 <!-- SHEET: TAMBAH/EDIT USER -->
 <div class="sheet-overlay" id="overlayUserForm"></div>
 <div class="sheet" id="sheetUserForm">
@@ -1131,6 +1211,10 @@
         <option value="Kasir">Kasir — hanya akses tab Kasir</option>
         <option value="Owner">Owner — akses semua tab</option>
       </select>
+    </div>
+    <div class="field">
+      <label>PIN 4 Digit (opsional)</label>
+      <input type="password" id="ufPin" inputmode="numeric" maxlength="4" placeholder="Kosongkan = tanpa PIN" />
     </div>
     <button class="btn-primary" id="btnSimpanUser">Simpan User</button>
   </div>
@@ -1180,11 +1264,15 @@ const colPelanggan = collection(db, "pelanggan");
 const colSupplier = collection(db, "supplier");
 const colStokOpname = collection(db, "stokOpname");
 const colPurchaseOrder = collection(db, "purchaseOrder");
+const colPengaturanToko = collection(db, "pengaturanToko");
+const colKategori = collection(db, "kategori");
+const colLogAktivitas = collection(db, "logAktivitas");
+const docProfilToko = doc(colPengaturanToko, "profil");
 
 const POIN_PER_RUPIAH = 10000; // 1 poin didapat tiap kelipatan Rp10.000 belanja
 const RUPIAH_PER_POIN = 100;   // 1 poin setara Rp100 saat ditukar
 
-const PRINTER_LEBAR_KARAKTER = 32; // 32 = printer thermal 58mm (paling umum), ganti ke 48 kalau pakai printer 80mm
+let PRINTER_LEBAR_KARAKTER = 32; // 32 = printer thermal 58mm (paling umum), 48 = 80mm — bisa diubah lewat Pengaturan
 
 /* ============================================================
    STATE
@@ -1195,7 +1283,8 @@ let activeCategory = "Semua";
 let activeCategoryProduk = "Semua";
 let NAMA_KASIR = "";
 let ROLE_KASIR = "";
-const DAFTAR_KATEGORI = ["Semua", "Makanan", "Minuman", "Snack", "Sembako", "Obat", "Sabun", "Gas & Galon", "Lainnya"];
+let DAFTAR_KATEGORI = ["Semua", "Makanan", "Minuman", "Snack", "Sembako", "Obat", "Sabun", "Gas & Galon", "Lainnya"];
+let PROFIL_TOKO = { namaToko: "TOKO HIKMAH", alamat: "", noTelp: "", pesanStruk: "Terima kasih" };
 
 const $ = (id) => document.getElementById(id);
 const rupiah = (n) => "Rp " + Math.round(n).toLocaleString("id-ID");
@@ -1217,6 +1306,61 @@ function setStatus(online, text){
 }
 
 /* ============================================================
+   PENGATURAN TOKO — nama, alamat, printer, pesan struk, kategori.
+   Dimuat lebih dulu (sebelum login) karena nama toko sudah tampil
+   di layar login.
+   ============================================================ */
+async function muatPengaturanToko(){
+  try{
+    const snap = await denganBatasWaktu(getDoc(docProfilToko), 15);
+    if(snap.exists()){
+      const d = snap.data();
+      PROFIL_TOKO = {
+        namaToko: d.namaToko || "TOKO HIKMAH",
+        alamat: d.alamat || "", noTelp: d.noTelp || "",
+        pesanStruk: d.pesanStruk || "Terima kasih"
+      };
+      if(d.printerLebar) PRINTER_LEBAR_KARAKTER = Number(d.printerLebar);
+    }
+  }catch(err){
+    // gagal diam-diam, tetap pakai nilai default
+  }
+  terapkanProfilToko();
+}
+
+function terapkanProfilToko(){
+  document.title = PROFIL_TOKO.namaToko;
+  const elHeader = $("btnLogoBeranda");
+  if(elHeader) elHeader.textContent = PROFIL_TOKO.namaToko;
+  const elLogin = $("loginLogoText");
+  if(elLogin) elLogin.textContent = PROFIL_TOKO.namaToko;
+}
+
+let DAFTAR_KATEGORI_DATA = []; // [{id, nama}] — dipakai halaman Kelola Kategori (butuh id Firestore buat hapus)
+
+async function muatKategori(){
+  try{
+    let snap = await denganBatasWaktu(getDocs(colKategori), 15);
+    if(snap.empty){
+      // belum pernah diatur — seed sekali pakai kategori bawaan, biar bisa dikelola dari sini
+      const batch = writeBatch(db);
+      DAFTAR_KATEGORI.filter(k => k !== "Semua").forEach(nama => { batch.set(doc(colKategori), { nama }); });
+      await denganBatasWaktu(batch.commit(), 15);
+      snap = await denganBatasWaktu(getDocs(colKategori), 15);
+    }
+    DAFTAR_KATEGORI_DATA = snap.docs.map(d => ({ id: d.id, nama: d.data().nama }))
+      .filter(k => k.nama).sort((a,b) => a.nama.localeCompare(b.nama));
+    DAFTAR_KATEGORI = ["Semua", ...DAFTAR_KATEGORI_DATA.map(k => k.nama)];
+  }catch(err){
+    DAFTAR_KATEGORI_DATA = DAFTAR_KATEGORI.filter(k => k !== "Semua").map(nama => ({ id: null, nama }));
+  }
+  renderKategoriList();
+}
+
+muatPengaturanToko();
+muatKategori();
+
+/* ============================================================
    LOGIN — pilih user dari daftar (tanpa PIN)
    ============================================================ */
 let DAFTAR_USER = [];
@@ -1227,7 +1371,7 @@ let pelangganTerpilih = null; // {id, nama, noHp, poin} — dipilih saat transak
 async function muatDaftarUser(){
   try{
     const snap = await denganBatasWaktu(getDocs(colUser));
-    DAFTAR_USER = snap.docs.map(d => ({ Nama: d.id, Role: d.data().role }));
+    DAFTAR_USER = snap.docs.map(d => ({ Nama: d.id, Role: d.data().role, Pin: d.data().pin || "" }));
     renderUserList();
   }catch(err){
     $("userList").innerHTML = `<div class="login-msg">Gagal memuat daftar user. Cek koneksi internet, lalu buka ulang halaman ini.</div>`;
@@ -1246,9 +1390,51 @@ function renderUserList(){
     </button>
   `).join("");
   $("userList").querySelectorAll(".user-item").forEach(btn=>{
-    btn.onclick = () => masuk(btn.dataset.nama, btn.dataset.role);
+    btn.onclick = () => pilihUserLogin(btn.dataset.nama, btn.dataset.role);
   });
 }
+
+let _pinLoginTarget = null;
+
+function pilihUserLogin(nama, role){
+  const u = DAFTAR_USER.find(x => x.Nama === nama);
+  if(u && u.Pin){
+    _pinLoginTarget = { nama, role };
+    $("pinNamaUser").textContent = nama;
+    $("inputPinLogin").value = "";
+    $("pinLoginError").innerHTML = "&nbsp;";
+    $("loginScreen").style.display = "none";
+    $("pinScreen").style.display = "flex";
+    setTimeout(() => $("inputPinLogin").focus(), 150);
+  }else{
+    masuk(nama, role);
+  }
+}
+
+function batalkanPinLogin(){
+  _pinLoginTarget = null;
+  $("pinScreen").style.display = "none";
+  $("loginScreen").style.display = "flex";
+}
+$("btnBatalPin").onclick = batalkanPinLogin;
+
+function cobaMasukDenganPin(){
+  if(!_pinLoginTarget) return;
+  const u = DAFTAR_USER.find(x => x.Nama === _pinLoginTarget.nama);
+  const pinInput = $("inputPinLogin").value.trim();
+  if(u && pinInput && pinInput === u.Pin){
+    const target = _pinLoginTarget;
+    _pinLoginTarget = null;
+    $("pinScreen").style.display = "none";
+    masuk(target.nama, target.role);
+  }else{
+    $("pinLoginError").textContent = "PIN salah, coba lagi";
+    $("inputPinLogin").value = "";
+    $("inputPinLogin").focus();
+  }
+}
+$("btnMasukPin").onclick = cobaMasukDenganPin;
+$("inputPinLogin").addEventListener("keydown", (e) => { if(e.key === "Enter") cobaMasukDenganPin(); });
 
 function masuk(nama, role){
   NAMA_KASIR = nama;
@@ -1396,7 +1582,7 @@ function switchView(view){
   if(view === "pesanan"){ renderPesanan(); muatKecepatanJual(); }
   if(view === "pelanggan") renderPelangganList();
   if(view === "laporan") renderLaporan();
-  if(view === "pengaturan") renderPengaturanList();
+  if(view === "pengaturan"){ renderPengaturanList(); isiFormProfilToko(); renderKategoriList(); muatLogAktivitas(); }
 }
 document.querySelectorAll(".nav-btn").forEach(btn=>{
   btn.onclick = () => { switchView(btn.dataset.view); tutupDrawer(); };
@@ -1561,6 +1747,7 @@ async function nonaktifkanProduk(id){
     renderGrid();
     renderKategori();
     renderPesanan();
+    catatLog(`Menonaktifkan produk "${p.nama}"`);
     showToast("Produk dinonaktifkan");
   }catch(err){
     showToast("Gagal: " + err.message);
@@ -1599,6 +1786,7 @@ function bukaFormTambahProduk(){
   $("pfId").value = saranIdProduk();
   $("pfId").disabled = false;
   $("pfNama").value = "";
+  isiSelectKategoriProduk();
   $("pfKategori").value = "Sembako";
   $("pfSatuan").value = "pcs";
   $("pfBarcode").value = "";
@@ -1608,10 +1796,18 @@ function bukaFormTambahProduk(){
   $("pfMinQtyGrosir").value = "";
   $("pfStok").value = 0;
   $("pfStokMin").value = 5;
+  $("pfIsiDus").value = "";
+  $("pfHargaBeliDus").value = "";
+  $("pfInfoModalDus").textContent = "";
+  cekTampilkanKalkulatorDus();
   cekPeringatanRugi();
   bukaSheet("sheetProdukForm", "overlayProdukForm");
 }
 $("btnTambahProduk").onclick = bukaFormTambahProduk;
+
+function isiSelectKategoriProduk(){
+  $("pfKategori").innerHTML = DAFTAR_KATEGORI.filter(k => k !== "Semua").map(k => `<option value="${k}">${k}</option>`).join("");
+}
 
 function cekPeringatanRugi(){
   const hargaBeli = Number($("pfHargaBeli").value) || 0;
@@ -1621,6 +1817,45 @@ function cekPeringatanRugi(){
 }
 $("pfHargaBeli").addEventListener("input", cekPeringatanRugi);
 $("pfHargaJual").addEventListener("input", cekPeringatanRugi);
+
+/* ============================================================
+   KALKULATOR MODAL PER DUS/PACK
+   Muncul saat Satuan = pck/dus. Isi jumlah per dus + harga beli
+   per dus → otomatis mengisi Harga Beli per satuan + tampilkan
+   perkiraan keuntungan.
+   ============================================================ */
+function cekTampilkanKalkulatorDus(){
+  const satuan = $("pfSatuan").value;
+  $("pfBlokKalkulatorDus").style.display = (satuan === "pck" || satuan === "dus") ? "block" : "none";
+}
+$("pfSatuan").addEventListener("change", cekTampilkanKalkulatorDus);
+
+function hitungKalkulatorDus(){
+  const isi = Number($("pfIsiDus").value) || 0;
+  const hargaBeliDus = Number($("pfHargaBeliDus").value) || 0;
+  const satuan = $("pfSatuan").value || "satuan";
+
+  if(isi <= 0 || hargaBeliDus <= 0){
+    $("pfInfoModalDus").textContent = "";
+    return;
+  }
+
+  const modalPerSatuan = hargaBeliDus / isi;
+  $("pfHargaBeli").value = Math.round(modalPerSatuan);
+  cekPeringatanRugi();
+
+  const hargaJual = Number($("pfHargaJual").value) || 0;
+  let teks = `Modal: ${rupiah(modalPerSatuan)} / ${satuan.replace('pck','pcs')}`;
+  if(hargaJual > 0){
+    const untungPerSatuan = hargaJual - modalPerSatuan;
+    const untungPerDus = untungPerSatuan * isi;
+    teks += `<br/>Keuntungan: ${rupiah(untungPerSatuan)} / satuan · ${rupiah(untungPerDus)} / ${satuan}`;
+  }
+  $("pfInfoModalDus").innerHTML = teks;
+}
+$("pfIsiDus").addEventListener("input", hitungKalkulatorDus);
+$("pfHargaBeliDus").addEventListener("input", hitungKalkulatorDus);
+$("pfHargaJual").addEventListener("input", hitungKalkulatorDus);
 
 function pilihAtauTambahOpsi(selectEl, value){
   if(!value) return;
@@ -1642,6 +1877,7 @@ function bukaFormEditProduk(id){
   $("pfId").value = p.id;
   $("pfId").disabled = true;
   $("pfNama").value = p.nama;
+  isiSelectKategoriProduk();
   pilihAtauTambahOpsi($("pfKategori"), p.kategori);
   pilihAtauTambahOpsi($("pfSatuan"), p.satuan || "pcs");
   $("pfBarcode").value = p.barcode || "";
@@ -1651,6 +1887,10 @@ function bukaFormEditProduk(id){
   $("pfMinQtyGrosir").value = p.minQtyGrosir || "";
   $("pfStok").value = p.stok;
   $("pfStokMin").value = p.stokMin;
+  $("pfIsiDus").value = "";
+  $("pfHargaBeliDus").value = "";
+  $("pfInfoModalDus").textContent = "";
+  cekTampilkanKalkulatorDus();
   cekPeringatanRugi();
   bukaSheet("sheetProdukForm", "overlayProdukForm");
 }
@@ -1694,6 +1934,7 @@ async function simpanProduk(){
     renderKategori();
     renderGrid();
     renderPesanan();
+    catatLog(produkFormMode === "tambah" ? `Menambah produk "${nama}"` : `Mengedit produk "${nama}" (harga jual: ${rupiah(hargaJual)})`);
     showToast(produkFormMode === "tambah" ? "Produk ditambahkan" : "Produk diperbarui");
   }catch(err){
     showToast("Gagal simpan: " + err.message);
@@ -1952,14 +2193,14 @@ function bagikanDaftarPesanan(){
   const list = PRODUK.filter(p => p.aktif !== false && p.stok <= p.stokMin).sort((a,b) => a.stok - b.stok);
   if(list.length === 0){ showToast("Tidak ada produk yang perlu direstock"); return; }
 
-  let teks = `Daftar Pesanan - TOKO HIKMAH\n${new Date().toLocaleDateString("id-ID")}\n\n`;
+  let teks = `Daftar Pesanan - ${PROFIL_TOKO.namaToko}\n${new Date().toLocaleDateString("id-ID")}\n\n`;
   list.forEach(p => {
     const saran = saranRestock(p.id);
     teks += `- ${p.nama}: stok ${p.stok}${saran ? `, saran beli ${saran} ${p.satuan}` : ''}\n`;
   });
 
   if(navigator.share){
-    navigator.share({ title: "Daftar Pesanan TOKO HIKMAH", text: teks }).catch(() => {});
+    navigator.share({ title: `Daftar Pesanan ${PROFIL_TOKO.namaToko}`, text: teks }).catch(() => {});
   }else if(navigator.clipboard){
     navigator.clipboard.writeText(teks).then(() => showToast("Daftar pesanan disalin, tinggal tempel ke WhatsApp"))
       .catch(() => showToast("Gagal menyalin, coba lagi"));
@@ -2055,6 +2296,7 @@ async function simpanPO(){
     tutupSheet("sheetBuatPO", "overlayBuatPO");
     renderPesanan();
     renderPOList();
+    catatLog(`Membuat PO ke "${supplier.nama}" (${items.length} item)`);
     showToast("Purchase Order tersimpan sebagai Draft");
   }catch(err){
     showToast("Gagal simpan: " + err.message);
@@ -2092,6 +2334,7 @@ $("btnTandaiDikirim").onclick = async () => {
     if(po) po.status = "Dikirim";
     tutupSheet("sheetDetailPO", "overlayDetailPO");
     renderPOList();
+    catatLog(`PO ke "${po.supplierNama}" ditandai Dikirim`);
     showToast("PO ditandai sudah dikirim");
   }catch(err){
     showToast("Gagal: " + err.message);
@@ -2129,6 +2372,7 @@ $("btnTandaiDiterima").onclick = async () => {
     renderGrid();
     renderProdukList();
     renderPesanan();
+    catatLog(`PO ke "${po.supplierNama}" ditandai Diterima, stok bertambah`);
     showToast("PO diterima, stok otomatis ditambahkan");
   }catch(err){
     showToast("Gagal: " + err.message);
@@ -2165,6 +2409,7 @@ async function hapusProduk(id){
     renderProdukList();
     renderPesanan();
     renderCartBar();
+    catatLog(`Menghapus permanen produk "${p.nama}"`);
     showToast("Produk dihapus");
   }catch(err){
     showToast("Gagal hapus: " + err.message);
@@ -2629,6 +2874,7 @@ async function batalkanTransaksi(idTrx){
     await denganBatasWaktu(batch.commit());
 
     showToast("Transaksi dibatalkan, stok dikembalikan");
+    catatLog(`Membatalkan transaksi ${idTrx}`);
     renderLaporan();
     muatProduk();
   }catch(err){
@@ -2667,6 +2913,7 @@ async function simpanTutupKasir(){
     const info = selisih === 0
       ? "Tutup kasir tersimpan. Uang pas, tidak ada selisih."
       : `Tutup kasir tersimpan. Selisih: ${rupiah(selisih)}${selisih < 0 ? " (kurang)" : " (lebih)"}`;
+    catatLog(`Tutup kasir — total Rp${totalPenjualan}, selisih Rp${selisih}`);
     showToast(info);
   }catch(err){
     showToast("Gagal simpan: " + err.message);
@@ -2710,6 +2957,7 @@ function bukaFormTambahUser(){
   $("userFormTitle").textContent = "Tambah User";
   $("ufNama").value = "";
   $("ufRole").value = "Kasir";
+  $("ufPin").value = "";
   bukaSheet("sheetUserForm", "overlayUserForm");
 }
 $("btnTambahUser").onclick = bukaFormTambahUser;
@@ -2722,6 +2970,7 @@ function bukaFormEditUser(nama){
   $("userFormTitle").textContent = "Edit User";
   $("ufNama").value = u.Nama;
   $("ufRole").value = u.Role;
+  $("ufPin").value = u.Pin || "";
   bukaSheet("sheetUserForm", "overlayUserForm");
 }
 $("btnCloseUserForm").onclick = () => tutupSheet("sheetUserForm", "overlayUserForm");
@@ -2730,8 +2979,10 @@ $("overlayUserForm").onclick = () => tutupSheet("sheetUserForm", "overlayUserFor
 async function simpanUser(){
   const nama = $("ufNama").value.trim();
   const role = $("ufRole").value;
+  const pin = $("ufPin").value.trim();
 
   if(!nama){ showToast("Isi nama dulu"); return; }
+  if(pin && !/^\d{4}$/.test(pin)){ showToast("PIN harus 4 digit angka, atau kosongkan"); return; }
   if(userFormMode === "tambah" && DAFTAR_USER.find(u => u.Nama.toLowerCase() === nama.toLowerCase())){
     showToast("Nama sudah dipakai, pakai nama lain");
     return;
@@ -2741,20 +2992,20 @@ async function simpanUser(){
   $("btnSimpanUser").textContent = "Menyimpan...";
   try{
     if(userFormMode === "tambah"){
-      await denganBatasWaktu(setDoc(doc(colUser, nama), { role }));
-      DAFTAR_USER.push({ Nama: nama, Role: role });
+      await denganBatasWaktu(setDoc(doc(colUser, nama), { role, pin }));
+      DAFTAR_USER.push({ Nama: nama, Role: role, Pin: pin });
     }else if(nama !== userFormNamaLama){
       // nama diubah → nama itu ID dokumen, jadi harus buat dokumen baru + hapus yang lama
       const batch = writeBatch(db);
-      batch.set(doc(colUser, nama), { role });
+      batch.set(doc(colUser, nama), { role, pin });
       batch.delete(doc(colUser, userFormNamaLama));
       await denganBatasWaktu(batch.commit());
       const u = DAFTAR_USER.find(x => x.Nama === userFormNamaLama);
-      if(u){ u.Nama = nama; u.Role = role; }
+      if(u){ u.Nama = nama; u.Role = role; u.Pin = pin; }
     }else{
-      await denganBatasWaktu(updateDoc(doc(colUser, nama), { role }));
+      await denganBatasWaktu(updateDoc(doc(colUser, nama), { role, pin }));
       const u = DAFTAR_USER.find(x => x.Nama === nama);
-      if(u) u.Role = role;
+      if(u){ u.Role = role; u.Pin = pin; }
     }
 
     // kalau yang diedit adalah akun yang sedang login, update sesi juga
@@ -2768,6 +3019,7 @@ async function simpanUser(){
 
     tutupSheet("sheetUserForm", "overlayUserForm");
     renderPengaturanList();
+    catatLog(userFormMode === "tambah" ? `Menambah user "${nama}"` : `Mengedit user "${nama}"`);
     showToast(userFormMode === "tambah" ? "User ditambahkan" : "User diperbarui");
   }catch(err){
     showToast("Gagal simpan: " + err.message);
@@ -2786,6 +3038,7 @@ async function hapusUser(nama){
     await denganBatasWaktu(deleteDoc(doc(colUser, nama)));
     DAFTAR_USER = DAFTAR_USER.filter(u => u.Nama !== nama);
     renderPengaturanList();
+    catatLog(`Menghapus user "${nama}"`);
     showToast("User dihapus");
   }catch(err){
     showToast("Gagal hapus: " + err.message);
@@ -2953,9 +3206,152 @@ async function hapusPromo(id){
     await denganBatasWaktu(deleteDoc(doc(colPromo, id)));
     DAFTAR_PROMO = DAFTAR_PROMO.filter(x => x.id !== id);
     renderPromoList();
+    catatLog(`Menghapus promo "${p.nama}"`);
     showToast("Promo dihapus");
   }catch(err){
     showToast("Gagal hapus: " + err.message);
+  }
+}
+
+/* ============================================================
+   KELOLA KATEGORI
+   ============================================================ */
+function renderKategoriList(){
+  const el = $("kategoriList");
+  if(!el) return;
+  el.innerHTML = DAFTAR_KATEGORI_DATA.map(k => `
+    <div class="list-row">
+      <div class="lr-main"><div class="lr-name">${k.nama}</div></div>
+      <button class="lr-btn danger" data-hapus-kategori="${k.id || ''}" data-nama-kategori="${k.nama}">Hapus</button>
+    </div>
+  `).join("") || `<p style="color:var(--ink-soft);font-size:13.5px;padding:16px 0;">Belum ada kategori.</p>`;
+
+  el.querySelectorAll("[data-hapus-kategori]").forEach(btn=>{
+    btn.onclick = () => hapusKategori(btn.dataset.hapusKategori, btn.dataset.namaKategori);
+  });
+}
+
+function bukaFormTambahKategori(){
+  $("kgNama").value = "";
+  bukaSheet("sheetKategoriForm", "overlayKategoriForm");
+}
+$("btnTambahKategori").onclick = bukaFormTambahKategori;
+$("btnCloseKategoriForm").onclick = () => tutupSheet("sheetKategoriForm", "overlayKategoriForm");
+$("overlayKategoriForm").onclick = () => tutupSheet("sheetKategoriForm", "overlayKategoriForm");
+
+async function simpanKategori(){
+  const nama = $("kgNama").value.trim();
+  if(!nama){ showToast("Isi nama kategori dulu"); return; }
+  if(DAFTAR_KATEGORI_DATA.some(k => k.nama.toLowerCase() === nama.toLowerCase())){
+    showToast("Kategori ini sudah ada"); return;
+  }
+  $("btnSimpanKategori").disabled = true;
+  $("btnSimpanKategori").textContent = "Menyimpan...";
+  try{
+    const ref = doc(colKategori);
+    await denganBatasWaktu(setDoc(ref, { nama }));
+    DAFTAR_KATEGORI_DATA.push({ id: ref.id, nama });
+    DAFTAR_KATEGORI_DATA.sort((a,b) => a.nama.localeCompare(b.nama));
+    DAFTAR_KATEGORI = ["Semua", ...DAFTAR_KATEGORI_DATA.map(k => k.nama)];
+    tutupSheet("sheetKategoriForm", "overlayKategoriForm");
+    renderKategoriList();
+    renderKategori();
+    renderKategoriProduk();
+    catatLog(`Menambah kategori "${nama}"`);
+    showToast("Kategori ditambahkan");
+  }catch(err){
+    showToast("Gagal simpan: " + err.message);
+  }finally{
+    $("btnSimpanKategori").disabled = false;
+    $("btnSimpanKategori").textContent = "Simpan Kategori";
+  }
+}
+$("btnSimpanKategori").onclick = simpanKategori;
+
+async function hapusKategori(id, nama){
+  if(!(await konfirmasi(`Produk yang sudah pakai kategori ini tidak berubah, tapi kategori tidak akan bisa dipilih lagi untuk produk baru.`, { judul: `Hapus kategori "${nama}"?`, labelYa: "Ya, Hapus", bahaya: true }))) return;
+  try{
+    if(id) await denganBatasWaktu(deleteDoc(doc(colKategori, id)));
+    DAFTAR_KATEGORI_DATA = DAFTAR_KATEGORI_DATA.filter(k => k.id !== id);
+    DAFTAR_KATEGORI = ["Semua", ...DAFTAR_KATEGORI_DATA.map(k => k.nama)];
+    renderKategoriList();
+    renderKategori();
+    renderKategoriProduk();
+    catatLog(`Menghapus kategori "${nama}"`);
+    showToast("Kategori dihapus");
+  }catch(err){
+    showToast("Gagal hapus: " + err.message);
+  }
+}
+
+/* ============================================================
+   PROFIL TOKO — nama, alamat, no. telp, printer, pesan struk
+   ============================================================ */
+function isiFormProfilToko(){
+  $("tkNamaToko").value = PROFIL_TOKO.namaToko;
+  $("tkAlamat").value = PROFIL_TOKO.alamat;
+  $("tkNoTelp").value = PROFIL_TOKO.noTelp;
+  $("tkPrinterLebar").value = String(PRINTER_LEBAR_KARAKTER);
+  $("tkPesanStruk").value = PROFIL_TOKO.pesanStruk;
+}
+
+async function simpanProfilToko(){
+  const namaToko = $("tkNamaToko").value.trim() || "TOKO HIKMAH";
+  const alamat = $("tkAlamat").value.trim();
+  const noTelp = $("tkNoTelp").value.trim();
+  const printerLebar = Number($("tkPrinterLebar").value) || 32;
+  const pesanStruk = $("tkPesanStruk").value.trim() || "Terima kasih";
+
+  $("btnSimpanInfoToko").disabled = true;
+  $("btnSimpanInfoToko").textContent = "Menyimpan...";
+  try{
+    await denganBatasWaktu(setDoc(docProfilToko, { namaToko, alamat, noTelp, printerLebar, pesanStruk }));
+    PROFIL_TOKO = { namaToko, alamat, noTelp, pesanStruk };
+    PRINTER_LEBAR_KARAKTER = printerLebar;
+    terapkanProfilToko();
+    catatLog("Memperbarui Profil Toko");
+    showToast("Profil toko disimpan");
+  }catch(err){
+    showToast("Gagal simpan: " + err.message);
+  }finally{
+    $("btnSimpanInfoToko").disabled = false;
+    $("btnSimpanInfoToko").textContent = "Simpan Profil Toko";
+  }
+}
+$("btnSimpanInfoToko").onclick = simpanProfilToko;
+
+/* ============================================================
+   LOG AKTIVITAS — jejak audit aksi penting
+   ============================================================ */
+async function catatLog(aksi){
+  try{
+    const now = new Date();
+    await setDoc(doc(colLogAktivitas), {
+      tanggal: formatTanggal(now),
+      jam: String(now.getHours()).padStart(2,"0") + ":" + String(now.getMinutes()).padStart(2,"0"),
+      user: NAMA_KASIR || "-", aksi
+    });
+  }catch(err){
+    // gagal diam-diam; log aktivitas tidak boleh menghalangi aksi utama
+  }
+}
+
+async function muatLogAktivitas(){
+  try{
+    const snap = await denganBatasWaktu(getDocs(colLogAktivitas), 15);
+    const semua = snap.docs.map(d => d.data());
+    semua.sort((a,b) => (b.tanggal + b.jam).localeCompare(a.tanggal + a.jam));
+    const terbaru = semua.slice(0, 100);
+    $("logAktivitasList").innerHTML = terbaru.map(l => `
+      <div class="list-row">
+        <div class="lr-main">
+          <div class="lr-name">${l.aksi}</div>
+          <div class="lr-sub">${l.tanggal} ${l.jam} · ${l.user}</div>
+        </div>
+      </div>
+    `).join("") || `<p style="color:var(--ink-soft);font-size:13.5px;padding:16px 0;">Belum ada aktivitas tercatat.</p>`;
+  }catch(err){
+    $("logAktivitasList").innerHTML = `<p style="color:var(--red);font-size:13px;padding:16px 0;">Gagal memuat log.</p>`;
   }
 }
 
@@ -3069,6 +3465,7 @@ async function hapusSupplier(id){
     DAFTAR_SUPPLIER = DAFTAR_SUPPLIER.filter(x => x.id !== id);
     renderSupplierList();
     isiDatalistSupplier();
+    catatLog(`Menghapus supplier "${s.nama}"`);
     showToast("Supplier dihapus");
   }catch(err){
     showToast("Gagal hapus: " + err.message);
@@ -3138,6 +3535,7 @@ async function simpanOpname(){
     renderGrid();
     renderProdukList();
     renderPesanan();
+    catatLog(`Stok opname — ${perubahan.length} produk disesuaikan`);
     showToast(`Stok opname tersimpan, ${perubahan.length} produk disesuaikan`);
   }catch(err){
     showToast("Gagal simpan: " + err.message);
@@ -3680,7 +4078,7 @@ function tampilkanStruk(idTrx, items, subtotal, diskonPromo, diskonManual, disko
 
   const waktu = new Date().toLocaleString("id-ID");
   let html = `
-    <div class="t-center"><strong>TOKO HIKMAH</strong><br/>${waktu}</div>
+    <div class="t-center"><strong>${PROFIL_TOKO.namaToko}</strong>${PROFIL_TOKO.alamat ? `<br/>${PROFIL_TOKO.alamat}` : ''}${PROFIL_TOKO.noTelp ? `<br/>${PROFIL_TOKO.noTelp}` : ''}<br/>${waktu}</div>
     <hr/>
     <div>ID: ${idTrx}</div>
     <div>Kasir: ${NAMA_KASIR}</div>`;
@@ -3709,7 +4107,7 @@ function tampilkanStruk(idTrx, items, subtotal, diskonPromo, diskonManual, disko
   }
   html += `
     <hr/>
-    <div class="t-center">Terima kasih</div>
+    <div class="t-center">${PROFIL_TOKO.pesanStruk}</div>
   `;
   $("strukContent").innerHTML = html;
   $("overlayStruk").classList.add("show");
@@ -3767,7 +4165,9 @@ function cetakViaRawBT(){
 
   const p = escposBuilder();
   p.init();
-  p.center().bold(true).line("TOKO HIKMAH").bold(false);
+  p.center().bold(true).line(PROFIL_TOKO.namaToko).bold(false);
+  if(PROFIL_TOKO.alamat) p.line(PROFIL_TOKO.alamat);
+  if(PROFIL_TOKO.noTelp) p.line(PROFIL_TOKO.noTelp);
   p.line(waktu);
   p.line(garis);
   p.left();
@@ -3800,7 +4200,7 @@ function cetakViaRawBT(){
     p.line(formatBaris("Poin Didapat", "+" + poinDidapat, W));
   }
   p.line(garis);
-  p.center().line("Terima kasih");
+  p.center().line(PROFIL_TOKO.pesanStruk);
   p.feed(3);
   p.cut();
 
