@@ -116,6 +116,22 @@
 
   /* ===== Halaman Produk / Stok ===== */
   .page-head{display:flex;justify-content:space-between;align-items:center;padding:14px 16px 4px;}
+
+  /* ===== Menu Pengaturan ===== */
+  .pengaturan-group-label{
+    font-size:11px;font-weight:700;color:var(--ink-soft);text-transform:uppercase;
+    letter-spacing:.5px;padding:16px 16px 6px;
+  }
+  .pengaturan-menu-row{
+    display:flex;align-items:center;gap:12px;background:var(--paper);
+    border:none;box-shadow:var(--shadow-card);border-radius:14px;padding:13px 14px;
+    width:calc(100% - 32px);margin:0 16px 8px;text-align:left;
+  }
+  .pengaturan-menu-row .pm-icon{font-size:19px;flex:none;width:24px;text-align:center;}
+  .pengaturan-menu-row .pm-text{flex:1;min-width:0;display:flex;flex-direction:column;}
+  .pengaturan-menu-row .pm-title{font-size:13.5px;font-weight:600;color:var(--ink);}
+  .pengaturan-menu-row .pm-sub{font-size:11.5px;color:var(--ink-soft);margin-top:2px;}
+  .pengaturan-menu-row .pm-chevron{color:var(--ink-soft);font-size:19px;flex:none;line-height:1;}
   .page-head h2{font-size:17px;margin:0;}
   .btn-add{background:var(--amber);color:#fff;border:none;padding:9px 15px;border-radius:10px;font-size:13px;font-weight:700;}
 
@@ -604,94 +620,201 @@
     </div>
   </div>
 
-  <!-- ===== VIEW: PENGATURAN ===== -->
+  <!-- ===== VIEW: PENGATURAN (menu utama) ===== -->
   <div id="viewPengaturan" style="display:none;">
-    <div class="page-head">
-      <h2 style="font-size:14.5px;">Profil Toko</h2>
-    </div>
-    <div style="padding:0 16px 16px;">
-      <div class="field">
-        <label>Nama Toko</label>
-        <input type="text" id="tkNamaToko" placeholder="TOKO HIKMAH" />
-      </div>
-      <div class="field">
-        <label>Alamat (opsional)</label>
-        <input type="text" id="tkAlamat" />
-      </div>
-      <div class="field">
-        <label>No. Telepon (opsional)</label>
-        <input type="text" id="tkNoTelp" inputmode="tel" />
-      </div>
-      <div class="field">
-        <label>Ukuran Kertas Printer</label>
-        <select id="tkPrinterLebar">
-          <option value="32">58mm (paling umum)</option>
-          <option value="48">80mm</option>
-        </select>
-      </div>
-      <div class="field">
-        <label>Pesan Footer Struk</label>
-        <input type="text" id="tkPesanStruk" placeholder="Terima kasih" />
-      </div>
-      <button class="btn-primary" id="btnSimpanInfoToko">Simpan Profil Toko</button>
-    </div>
+    <div class="page-head"><h2>Pengaturan</h2></div>
 
-    <div class="page-head" style="padding-top:6px;">
-      <h2 style="font-size:14.5px;">Kelola Kategori</h2>
-      <button class="btn-add" id="btnTambahKategori">+ Kategori</button>
-    </div>
-    <div class="list-panel" id="kategoriList"></div>
+    <div class="pengaturan-group-label">Toko</div>
+    <button class="pengaturan-menu-row" data-buka-pengaturan="ProfilToko">
+      <span class="pm-icon">🏪</span>
+      <span class="pm-text"><span class="pm-title">Profil Toko</span><span class="pm-sub">Nama, alamat, printer, pesan struk</span></span>
+      <span class="pm-chevron">›</span>
+    </button>
+    <button class="pengaturan-menu-row" data-buka-pengaturan="Kategori">
+      <span class="pm-icon">🏷️</span>
+      <span class="pm-text"><span class="pm-title">Kelola Kategori</span><span class="pm-sub">Kategori produk</span></span>
+      <span class="pm-chevron">›</span>
+    </button>
 
-    <div class="page-head">
-      <h2>Kelola User</h2>
-      <button class="btn-add" id="btnTambahUser">+ User</button>
-    </div>
-    <div class="list-panel" id="pengaturanList"></div>
+    <div class="pengaturan-group-label">Pengguna</div>
+    <button class="pengaturan-menu-row" data-buka-pengaturan="User">
+      <span class="pm-icon">👤</span>
+      <span class="pm-text"><span class="pm-title">Kelola User</span><span class="pm-sub">Akun, role, PIN login</span></span>
+      <span class="pm-chevron">›</span>
+    </button>
 
-    <div class="page-head" style="padding-top:6px;">
-      <h2 style="font-size:14.5px;">Kelola Promo</h2>
-      <button class="btn-add" id="btnTambahPromo">+ Promo</button>
-    </div>
-    <div class="list-panel" id="promoList"></div>
+    <div class="pengaturan-group-label">Penjualan</div>
+    <button class="pengaturan-menu-row" data-buka-pengaturan="Promo">
+      <span class="pm-icon">🎟️</span>
+      <span class="pm-text"><span class="pm-title">Kelola Promo</span><span class="pm-sub">Diskon produk, beli X gratis Y</span></span>
+      <span class="pm-chevron">›</span>
+    </button>
 
-    <div class="page-head" style="padding-top:6px;">
-      <h2 style="font-size:14.5px;">Kelola Supplier</h2>
-      <button class="btn-add" id="btnTambahSupplier">+ Supplier</button>
-    </div>
-    <div class="list-panel" id="supplierList"></div>
+    <div class="pengaturan-group-label">Inventori</div>
+    <button class="pengaturan-menu-row" data-buka-pengaturan="Supplier">
+      <span class="pm-icon">🚚</span>
+      <span class="pm-text"><span class="pm-title">Kelola Supplier</span><span class="pm-sub">Data pemasok barang</span></span>
+      <span class="pm-chevron">›</span>
+    </button>
+    <button class="pengaturan-menu-row" data-buka-pengaturan="Opname">
+      <span class="pm-icon">📋</span>
+      <span class="pm-text"><span class="pm-title">Stok Opname</span><span class="pm-sub">Cocokkan stok fisik vs sistem</span></span>
+      <span class="pm-chevron">›</span>
+    </button>
+    <button class="pengaturan-menu-row" data-buka-pengaturan="PO">
+      <span class="pm-icon">📦</span>
+      <span class="pm-text"><span class="pm-title">Purchase Order</span><span class="pm-sub">Riwayat pesanan ke supplier</span></span>
+      <span class="pm-chevron">›</span>
+    </button>
 
-    <div class="page-head" style="padding-top:6px;">
-      <h2 style="font-size:14.5px;">Stok Opname</h2>
-    </div>
-    <div style="padding:0 16px 16px;">
-      <div style="font-size:12.5px;color:var(--ink-soft);margin-bottom:10px;">
-        Hitung stok fisik toko lalu cocokkan ke sistem — otomatis menyesuaikan stok kalau ada selisih (susut, rusak, salah hitung).
-      </div>
-      <button class="btn-secondary" id="btnMulaiOpname" style="border-color:var(--line);">📋 Mulai Stok Opname</button>
-    </div>
-
-    <div class="page-head" style="padding-top:6px;">
-      <h2 style="font-size:14.5px;">Purchase Order</h2>
-    </div>
-    <div class="list-panel" id="poList"></div>
-
-    <div class="page-head" style="padding-top:6px;">
-      <h2 style="font-size:14.5px;">Log Aktivitas</h2>
-    </div>
-    <div class="list-panel" id="logAktivitasList"></div>
-
-    <div class="page-head" style="padding-top:6px;">
-      <h2 style="font-size:14.5px;">Backup Data</h2>
-    </div>
-    <div style="padding:0 16px 16px;">
-      <div style="font-size:12.5px;color:var(--ink-soft);margin-bottom:10px;">
-        Unduh semua data toko (Produk, Transaksi, Stok Masuk, Rekap Harian, User, Promo, Pelanggan, Supplier) sebagai 1 file Excel — buat jaga-jaga kalau sewaktu-waktu diperlukan.
-      </div>
-      <button class="btn-secondary" id="btnExportData" style="border-color:var(--line);">⬇️ Export Data ke Excel</button>
-    </div>
+    <div class="pengaturan-group-label">Sistem</div>
+    <button class="pengaturan-menu-row" data-buka-pengaturan="Log">
+      <span class="pm-icon">📜</span>
+      <span class="pm-text"><span class="pm-title">Log Aktivitas</span><span class="pm-sub">Jejak aksi penting</span></span>
+      <span class="pm-chevron">›</span>
+    </button>
+    <button class="pengaturan-menu-row" data-buka-pengaturan="Backup">
+      <span class="pm-icon">💾</span>
+      <span class="pm-text"><span class="pm-title">Backup Data</span><span class="pm-sub">Export semua data ke Excel</span></span>
+      <span class="pm-chevron">›</span>
+    </button>
   </div>
 
 </div>
+
+<!-- ===== SHEET-SHEET HALAMAN PENGATURAN ===== -->
+
+<!-- Profil Toko -->
+<div class="sheet-overlay" id="overlayHalProfilToko"></div>
+<div class="sheet" id="sheetHalProfilToko">
+  <div class="sheet-handle"></div>
+  <div class="sheet-head"><h2>Profil Toko</h2><button data-tutup-pengaturan="ProfilToko">✕</button></div>
+  <div class="sheet-body">
+    <div class="field">
+      <label>Nama Toko</label>
+      <input type="text" id="tkNamaToko" placeholder="TOKO HIKMAH" />
+    </div>
+    <div class="field">
+      <label>Alamat (opsional)</label>
+      <input type="text" id="tkAlamat" />
+    </div>
+    <div class="field">
+      <label>No. Telepon (opsional)</label>
+      <input type="text" id="tkNoTelp" inputmode="tel" />
+    </div>
+    <div class="field">
+      <label>Ukuran Kertas Printer</label>
+      <select id="tkPrinterLebar">
+        <option value="32">58mm (paling umum)</option>
+        <option value="48">80mm</option>
+      </select>
+    </div>
+    <div class="field">
+      <label>Pesan Footer Struk</label>
+      <input type="text" id="tkPesanStruk" placeholder="Terima kasih" />
+    </div>
+    <button class="btn-primary" id="btnSimpanInfoToko">Simpan Profil Toko</button>
+  </div>
+</div>
+
+<!-- Kelola Kategori -->
+<div class="sheet-overlay" id="overlayHalKategori"></div>
+<div class="sheet" id="sheetHalKategori">
+  <div class="sheet-handle"></div>
+  <div class="sheet-head"><h2>Kelola Kategori</h2><button data-tutup-pengaturan="Kategori">✕</button></div>
+  <div class="sheet-body" style="padding:0 0 8px;">
+    <div style="padding:0 18px 10px;text-align:right;">
+      <button class="btn-add" id="btnTambahKategori">+ Kategori</button>
+    </div>
+    <div class="list-panel" id="kategoriList"></div>
+  </div>
+</div>
+
+<!-- Kelola User -->
+<div class="sheet-overlay" id="overlayHalUser"></div>
+<div class="sheet" id="sheetHalUser">
+  <div class="sheet-handle"></div>
+  <div class="sheet-head"><h2>Kelola User</h2><button data-tutup-pengaturan="User">✕</button></div>
+  <div class="sheet-body" style="padding:0 0 8px;">
+    <div style="padding:0 18px 10px;text-align:right;">
+      <button class="btn-add" id="btnTambahUser">+ User</button>
+    </div>
+    <div class="list-panel" id="pengaturanList"></div>
+  </div>
+</div>
+
+<!-- Kelola Promo -->
+<div class="sheet-overlay" id="overlayHalPromo"></div>
+<div class="sheet" id="sheetHalPromo">
+  <div class="sheet-handle"></div>
+  <div class="sheet-head"><h2>Kelola Promo</h2><button data-tutup-pengaturan="Promo">✕</button></div>
+  <div class="sheet-body" style="padding:0 0 8px;">
+    <div style="padding:0 18px 10px;text-align:right;">
+      <button class="btn-add" id="btnTambahPromo">+ Promo</button>
+    </div>
+    <div class="list-panel" id="promoList"></div>
+  </div>
+</div>
+
+<!-- Kelola Supplier -->
+<div class="sheet-overlay" id="overlayHalSupplier"></div>
+<div class="sheet" id="sheetHalSupplier">
+  <div class="sheet-handle"></div>
+  <div class="sheet-head"><h2>Kelola Supplier</h2><button data-tutup-pengaturan="Supplier">✕</button></div>
+  <div class="sheet-body" style="padding:0 0 8px;">
+    <div style="padding:0 18px 10px;text-align:right;">
+      <button class="btn-add" id="btnTambahSupplier">+ Supplier</button>
+    </div>
+    <div class="list-panel" id="supplierList"></div>
+  </div>
+</div>
+
+<!-- Stok Opname -->
+<div class="sheet-overlay" id="overlayHalOpname"></div>
+<div class="sheet" id="sheetHalOpname">
+  <div class="sheet-handle"></div>
+  <div class="sheet-head"><h2>Stok Opname</h2><button data-tutup-pengaturan="Opname">✕</button></div>
+  <div class="sheet-body">
+    <div style="font-size:12.5px;color:var(--ink-soft);margin-bottom:12px;">
+      Hitung stok fisik toko lalu cocokkan ke sistem — otomatis menyesuaikan stok kalau ada selisih (susut, rusak, salah hitung).
+    </div>
+    <button class="btn-secondary" id="btnMulaiOpname" style="border-color:var(--line);">📋 Mulai Stok Opname</button>
+  </div>
+</div>
+
+<!-- Purchase Order -->
+<div class="sheet-overlay" id="overlayHalPO"></div>
+<div class="sheet" id="sheetHalPO">
+  <div class="sheet-handle"></div>
+  <div class="sheet-head"><h2>Purchase Order</h2><button data-tutup-pengaturan="PO">✕</button></div>
+  <div class="sheet-body" style="padding:0 0 8px;">
+    <div class="list-panel" id="poList"></div>
+  </div>
+</div>
+
+<!-- Log Aktivitas -->
+<div class="sheet-overlay" id="overlayHalLog"></div>
+<div class="sheet" id="sheetHalLog">
+  <div class="sheet-handle"></div>
+  <div class="sheet-head"><h2>Log Aktivitas</h2><button data-tutup-pengaturan="Log">✕</button></div>
+  <div class="sheet-body" style="padding:0 0 8px;">
+    <div class="list-panel" id="logAktivitasList"></div>
+  </div>
+</div>
+
+<!-- Backup Data -->
+<div class="sheet-overlay" id="overlayHalBackup"></div>
+<div class="sheet" id="sheetHalBackup">
+  <div class="sheet-handle"></div>
+  <div class="sheet-head"><h2>Backup Data</h2><button data-tutup-pengaturan="Backup">✕</button></div>
+  <div class="sheet-body">
+    <div style="font-size:12.5px;color:var(--ink-soft);margin-bottom:12px;">
+      Unduh semua data toko (Produk, Transaksi, Stok Masuk, Rekap Harian, User, Promo, Pelanggan, Supplier) sebagai 1 file Excel — buat jaga-jaga kalau sewaktu-waktu diperlukan.
+    </div>
+    <button class="btn-secondary" id="btnExportData" style="border-color:var(--line);">⬇️ Export Data ke Excel</button>
+  </div>
+</div>
+
 
 <div class="cart-bar" id="cartBar" style="display:none;">
   <div class="wrap">
@@ -1582,13 +1705,45 @@ function switchView(view){
   if(view === "pesanan"){ renderPesanan(); muatKecepatanJual(); }
   if(view === "pelanggan") renderPelangganList();
   if(view === "laporan") renderLaporan();
-  if(view === "pengaturan"){ renderPengaturanList(); isiFormProfilToko(); renderKategoriList(); muatLogAktivitas(); }
+  if(view === "pengaturan"){ /* menu saja; tiap section dimuat saat sheet-nya dibuka */ }
 }
 document.querySelectorAll(".nav-btn").forEach(btn=>{
   btn.onclick = () => { switchView(btn.dataset.view); tutupDrawer(); };
 });
 document.querySelectorAll(".dash-tile").forEach(btn=>{
   btn.onclick = () => switchView(btn.dataset.view);
+});
+
+/* ============================================================
+   MENU PENGATURAN — tiap section dibuka sebagai halaman (sheet)
+   terpisah, biar halaman utama Pengaturan tetap ringkas.
+   ============================================================ */
+const PENGATURAN_REFRESH = {
+  ProfilToko: () => isiFormProfilToko(),
+  Kategori: () => renderKategoriList(),
+  User: () => renderPengaturanList(),
+  Promo: () => renderPromoList(),
+  Supplier: () => renderSupplierList(),
+  PO: () => renderPOList(),
+  Log: () => muatLogAktivitas()
+};
+
+document.querySelectorAll("[data-buka-pengaturan]").forEach(btn=>{
+  btn.onclick = () => {
+    const kunci = btn.dataset.bukaPengaturan;
+    if(PENGATURAN_REFRESH[kunci]) PENGATURAN_REFRESH[kunci]();
+    bukaSheet("sheetHal" + kunci, "overlayHal" + kunci);
+  };
+});
+document.querySelectorAll("[data-tutup-pengaturan]").forEach(btn=>{
+  btn.onclick = () => {
+    const kunci = btn.dataset.tutupPengaturan;
+    tutupSheet("sheetHal" + kunci, "overlayHal" + kunci);
+  };
+});
+["ProfilToko","Kategori","User","Promo","Supplier","Opname","PO","Log","Backup"].forEach(kunci=>{
+  const overlay = $("overlayHal" + kunci);
+  if(overlay) overlay.onclick = () => tutupSheet("sheetHal" + kunci, "overlayHal" + kunci);
 });
 
 /* ============================================================
