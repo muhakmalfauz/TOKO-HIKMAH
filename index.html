@@ -201,13 +201,32 @@
   .summary-card .sc-value{font-size:17px;font-weight:700;color:var(--navy);margin-top:2px;}
 
   /* ===== Beranda (Dashboard) ===== */
-  .dash-card{
-    margin:14px 16px 6px;padding:20px 20px 18px;border-radius:20px;
-    background:linear-gradient(135deg,var(--navy) 0%,var(--navy-dark) 100%);color:#fff;
+  .dash-report-card{
+    margin:14px 16px 6px;padding:20px;border-radius:20px;
+    background:var(--paper);box-shadow:var(--shadow-card);
   }
-  .dash-card .dc-label{font-size:12.5px;color:#D9D5F5;}
-  .dash-card .dc-value{font-size:26px;font-weight:800;margin-top:2px;}
-  .dash-card .dc-sub{font-size:12px;color:#D9D5F5;margin-top:8px;}
+  .drc-stats-row{display:grid;grid-template-columns:1fr 1fr;gap:16px;}
+  .drc-label{display:flex;align-items:center;gap:6px;font-size:10px;color:var(--ink-soft);letter-spacing:.4px;}
+  .drc-icon-badge{width:20px;height:20px;border-radius:7px;display:flex;align-items:center;justify-content:center;flex:none;}
+  .drc-icon-badge svg{width:12px;height:12px;}
+  .drc-icon-badge.grey{background:#F0F1F5;color:#6C6F80;}
+  .drc-icon-badge.violet{background:#EEEDFE;color:var(--navy-dark);}
+  .drc-icon-badge.coral{background:#FAECE7;color:var(--red);}
+  .drc-value{font-size:22px;font-weight:700;color:var(--ink);margin-top:8px;}
+  .drc-sub{font-size:10.5px;color:var(--ink-soft);margin-top:3px;}
+  .drc-pill{display:inline-block;font-size:10px;font-weight:700;color:var(--green);background:#E1F5EE;padding:2px 8px;border-radius:999px;margin-top:5px;}
+  .drc-pengeluaran-row{display:flex;align-items:center;gap:8px;margin-top:22px;}
+  .drc-pengeluaran-label{font-size:11px;color:var(--ink-soft);}
+  .drc-pengeluaran-value{font-size:12px;font-weight:700;color:var(--red);margin-left:auto;}
+  .drc-bottom-row{margin-top:24px;display:grid;grid-template-columns:1fr 1fr;gap:18px;}
+  .drc-section-label{font-size:10px;color:var(--ink-soft);letter-spacing:.5px;margin-bottom:10px;}
+  .drc-tren-dates{display:flex;justify-content:space-between;margin-top:4px;}
+  .drc-tren-dates span{font-size:8.5px;color:#B4B2A9;}
+  .drc-donut-wrap{display:flex;align-items:center;gap:10px;}
+  .drc-donut-legend{display:flex;flex-direction:column;gap:4px;}
+  .drc-donut-legend .dl-row{display:flex;align-items:center;gap:5px;font-size:9px;color:#5C6066;}
+  .drc-donut-legend .dl-dot{width:6px;height:6px;border-radius:50%;flex:none;}
+  .drc-donut-legend b{color:var(--ink);}
   .dash-grid{
     display:grid;grid-template-columns:repeat(3,1fr);gap:10px;padding:16px;
   }
@@ -454,10 +473,45 @@
 
   <!-- ===== VIEW: BERANDA ===== -->
   <div id="viewBeranda">
-    <div class="dash-card">
-      <div class="dc-label">Penjualan Hari Ini</div>
-      <div class="dc-value" id="dashTotalHariIni">Rp 0</div>
-      <div class="dc-sub" id="dashJumlahHariIni">0 transaksi</div>
+    <div class="dash-report-card">
+
+      <div class="drc-stats-row">
+        <div>
+          <div class="drc-label"><span class="drc-icon-badge grey"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 8h12l-1 12H7L6 8z"/><path d="M9 8V6a3 3 0 0 1 6 0v2"/></svg></span>PENJUALAN</div>
+          <div class="drc-value" id="dashTotalHariIni">Rp 0</div>
+          <div class="drc-sub" id="dashJumlahHariIni">0 transaksi</div>
+        </div>
+        <div>
+          <div class="drc-label"><span class="drc-icon-badge violet"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="4 15 10 9 14 13 20 6"/><polyline points="15 6 20 6 20 11"/></svg></span>KEUNTUNGAN</div>
+          <div class="drc-value" id="dashProfitHariIni" style="color:var(--navy-dark);">Rp 0</div>
+          <div class="drc-pill" id="dashVsKemarin">—</div>
+        </div>
+      </div>
+
+      <div class="drc-pengeluaran-row">
+        <span class="drc-icon-badge coral"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="6" width="18" height="13" rx="2"/><path d="M3 10h18"/><circle cx="16.5" cy="14" r="1"/></svg></span>
+        <span class="drc-pengeluaran-label">Pengeluaran hari ini</span>
+        <span class="drc-pengeluaran-value" id="dashPengeluaranHariIni">Rp 0</span>
+      </div>
+
+      <div class="drc-bottom-row">
+        <div>
+          <div class="drc-section-label">TREN 7 HARI</div>
+          <svg id="dashTrenSvg" viewBox="0 0 130 70" style="width:100%;height:64px;"></svg>
+          <div class="drc-tren-dates">
+            <span id="dashTrenTglAwal">-</span>
+            <span id="dashTrenTglAkhir" style="font-weight:700;color:var(--navy-dark);">-</span>
+          </div>
+        </div>
+        <div>
+          <div class="drc-section-label">PER KATEGORI</div>
+          <div class="drc-donut-wrap">
+            <svg id="dashDonutSvg" width="54" height="54" viewBox="0 0 90 90" style="flex:none;"></svg>
+            <div class="drc-donut-legend" id="dashDonutLegend"></div>
+          </div>
+        </div>
+      </div>
+
     </div>
 
     <div class="dash-grid">
@@ -1776,14 +1830,110 @@ async function ambilTransaksiTanggal(tanggal){
 /* ============================================================
    BERANDA (Dashboard) — ringkasan penjualan hari ini
    ============================================================ */
+const WARNA_DONUT = ["#534AB7", "#7F77DD", "#D98E2C", "#D9D8D3", "#0F6E56", "#B4402A"];
+
 async function renderBeranda(){
   try{
-    const tanggal = formatTanggal(new Date());
+    const now = new Date();
+    const tanggal = formatTanggal(now);
     const semua = await ambilTransaksiTanggal(tanggal);
     const aktif = semua.filter(t => t.status !== "Dibatalkan");
     const total = aktif.reduce((s, t) => s + Number(t.total), 0);
     $("dashTotalHariIni").textContent = rupiah(total);
     $("dashJumlahHariIni").textContent = aktif.length + " transaksi";
+
+    // Modal (pengeluaran) & penjualan per kategori, dari transaksi hari ini
+    let modal = 0;
+    const perKategori = {};
+    aktif.forEach(t => {
+      (t.items || []).forEach(it => {
+        const p = PRODUK.find(x => x.id === it.idProduk);
+        modal += (p ? p.hargaBeli : 0) * Number(it.qty);
+        const kategori = p ? p.kategori : "Lainnya";
+        perKategori[kategori] = (perKategori[kategori] || 0) + (Number(it.qty) * Number(it.hargaSatuan));
+      });
+    });
+    const profit = total - modal;
+    $("dashProfitHariIni").textContent = rupiah(profit);
+    $("dashPengeluaranHariIni").textContent = rupiah(modal);
+
+    // vs kemarin
+    const kemarin = new Date(now); kemarin.setDate(kemarin.getDate() - 1);
+    const semuaKemarin = await ambilTransaksiTanggal(formatTanggal(kemarin));
+    const totalKemarin = semuaKemarin.filter(t => t.status !== "Dibatalkan").reduce((s, t) => s + Number(t.total), 0);
+    const elVs = $("dashVsKemarin");
+    if(totalKemarin > 0){
+      const persen = Math.round(((total - totalKemarin) / totalKemarin) * 100);
+      elVs.textContent = (persen >= 0 ? "↑ " : "↓ ") + Math.abs(persen) + "%";
+      elVs.style.color = persen >= 0 ? "var(--green)" : "var(--red)";
+      elVs.style.background = persen >= 0 ? "#E1F5EE" : "#FAECE7";
+    }else{
+      elVs.textContent = total > 0 ? "Baru mulai" : "—";
+      elVs.style.color = "var(--ink-soft)";
+      elVs.style.background = "#F0F1F5";
+    }
+
+    // Tren 7 hari (sparkline)
+    const mulai7 = new Date(now); mulai7.setDate(mulai7.getDate() - 6);
+    const q7 = query(colTransaksi, where("tanggal", ">=", formatTanggal(mulai7)), where("tanggal", "<=", tanggal));
+    const snap7 = await denganBatasWaktu(getDocs(q7), 15);
+    const perHari = {};
+    snap7.docs.forEach(d => {
+      const t = d.data();
+      if(t.status === "Dibatalkan") return;
+      perHari[t.tanggal] = (perHari[t.tanggal] || 0) + Number(t.total);
+    });
+    const daftarTanggal7 = [];
+    for(let i = 6; i >= 0; i--){
+      const d = new Date(now); d.setDate(d.getDate() - i);
+      daftarTanggal7.push(formatTanggal(d));
+    }
+    const nilai7 = daftarTanggal7.map(tgl => perHari[tgl] || 0);
+    const maxNilai = Math.max(...nilai7, 1);
+    const minNilai = Math.min(...nilai7);
+    const lebar = 130, tinggi = 70, marginY = 8;
+    const titik = nilai7.map((v, i) => {
+      const x = (i / 6) * (lebar - 10) + 5;
+      const y = tinggi - marginY - ((v - minNilai) / (maxNilai - minNilai || 1)) * (tinggi - marginY * 2);
+      return [x, y];
+    });
+    const pointsStr = titik.map(p => p.join(",")).join(" ");
+    const poligonStr = pointsStr + ` ${titik[6][0]},${tinggi} ${titik[0][0]},${tinggi}`;
+    $("dashTrenSvg").innerHTML = `
+      <polyline points="${pointsStr}" fill="none" stroke="#534AB7" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
+      <polygon points="${poligonStr}" fill="#534AB7" opacity="0.06"/>
+      <circle cx="${titik[6][0]}" cy="${titik[6][1]}" r="3.5" fill="#3C3489"/>
+    `;
+    const opsiTgl = { day: "2-digit", month: "short" };
+    $("dashTrenTglAwal").textContent = new Date(daftarTanggal7[0] + "T00:00:00").toLocaleDateString("id-ID", opsiTgl);
+    $("dashTrenTglAkhir").textContent = new Date(daftarTanggal7[6] + "T00:00:00").toLocaleDateString("id-ID", opsiTgl);
+
+    // Donat per kategori (top 3 + "Lainnya")
+    const entri = Object.entries(perKategori).sort((a,b) => b[1] - a[1]);
+    let segmen = entri.slice(0, 3).map(([nama, nilai]) => ({ nama, nilai }));
+    const sisa = entri.slice(3).reduce((s, [,nilai]) => s + nilai, 0);
+    if(sisa > 0) segmen.push({ nama: "Lainnya", nilai: sisa });
+    const totalKategori = segmen.reduce((s, x) => s + x.nilai, 0);
+
+    if(totalKategori > 0){
+      const R = 34, C = 2 * Math.PI * R;
+      let offset = 0;
+      let svgSegmen = `<circle cx="45" cy="45" r="${R}" fill="none" stroke="#F5F5F7" stroke-width="16"/>`;
+      let legendHtml = "";
+      segmen.forEach((s, i) => {
+        const persen = (s.nilai / totalKategori) * 100;
+        const panjang = (persen / 100) * C;
+        const warna = WARNA_DONUT[i % WARNA_DONUT.length];
+        svgSegmen += `<circle cx="45" cy="45" r="${R}" fill="none" stroke="${warna}" stroke-width="16" stroke-dasharray="${panjang.toFixed(1)} ${C.toFixed(1)}" stroke-dashoffset="${(-offset).toFixed(1)}" transform="rotate(-90 45 45)"/>`;
+        legendHtml += `<div class="dl-row"><span class="dl-dot" style="background:${warna};"></span>${s.nama} <b>${Math.round(persen)}%</b></div>`;
+        offset += panjang;
+      });
+      $("dashDonutSvg").innerHTML = svgSegmen;
+      $("dashDonutLegend").innerHTML = legendHtml;
+    }else{
+      $("dashDonutSvg").innerHTML = `<circle cx="45" cy="45" r="34" fill="none" stroke="#F5F5F7" stroke-width="16"/>`;
+      $("dashDonutLegend").innerHTML = `<div class="dl-row" style="color:var(--ink-soft);">Belum ada penjualan</div>`;
+    }
   }catch(err){
     $("dashJumlahHariIni").textContent = "Gagal memuat data";
   }
