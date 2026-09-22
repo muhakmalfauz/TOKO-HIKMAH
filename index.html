@@ -208,6 +208,11 @@
   .dash-card .dc-label{font-size:12.5px;color:#D9D5F5;}
   .dash-card .dc-value{font-size:26px;font-weight:800;margin-top:2px;}
   .dash-card .dc-sub{font-size:12px;color:#D9D5F5;margin-top:8px;}
+  .dc-stats-row{display:flex;gap:20px;margin-top:14px;padding-top:14px;border-top:1px solid rgba(255,255,255,.18);}
+  .dc-stat-label{font-size:11px;color:#D9D5F5;}
+  .dc-stat-value{font-size:15px;font-weight:700;margin-top:2px;}
+  .dc-stat-value.naik{color:#8CE8B5;}
+  .dc-stat-value.turun{color:#F4B6A6;}
   .dash-grid{
     display:grid;grid-template-columns:repeat(3,1fr);gap:10px;padding:16px;
   }
@@ -458,7 +463,28 @@
       <div class="dc-label">Penjualan Hari Ini</div>
       <div class="dc-value" id="dashTotalHariIni">Rp 0</div>
       <div class="dc-sub" id="dashJumlahHariIni">0 transaksi</div>
+      <div class="dc-stats-row">
+        <div class="dc-stat">
+          <div class="dc-stat-label">Profit Hari Ini</div>
+          <div class="dc-stat-value" id="dashProfitHariIni">Rp 0</div>
+        </div>
+        <div class="dc-stat">
+          <div class="dc-stat-label">vs Kemarin</div>
+          <div class="dc-stat-value" id="dashVsKemarin">—</div>
+        </div>
+      </div>
     </div>
+
+    <div class="page-head" style="padding-top:14px;">
+      <h2 style="font-size:14.5px;">Produk Terlaris Hari Ini</h2>
+    </div>
+    <div class="list-panel" id="dashTerlarisList"></div>
+
+    <div class="page-head" style="padding-top:2px;">
+      <h2 style="font-size:14.5px;">Tren 7 Hari Terakhir</h2>
+    </div>
+    <div class="list-panel" id="dashTrenList"></div>
+
     <div class="dash-grid">
       <button class="dash-tile" data-view="kasir"><span class="dt-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="21" r="1"/><circle cx="18" cy="21" r="1"/><path d="M2.5 3h2l2.4 12.2a2 2 0 0 0 2 1.6h7.7a2 2 0 0 0 2-1.6L20.5 8H6"/></svg></span><span class="dt-label">Kasir</span></button>
       <button class="dash-tile" data-view="produk"><span class="dt-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 7.5l-9-5-9 5 9 5 9-5z"/><path d="M3 7.5v9l9 5 9-5v-9"/><path d="M12 12.5v9"/></svg></span><span class="dt-label">Produk</span><span class="dt-dot" data-badge="produk" style="display:none;"></span></button>
@@ -1777,13 +1803,79 @@ async function ambilTransaksiTanggal(tanggal){
    ============================================================ */
 async function renderBeranda(){
   try{
-    const tz = new Date();
-    const tanggal = formatTanggal(tz);
+    const now = new Date();
+    const tanggal = formatTanggal(now);
     const semua = await ambilTransaksiTanggal(tanggal);
     const aktif = semua.filter(t => t.status !== "Dibatalkan");
     const total = aktif.reduce((s, t) => s + Number(t.total), 0);
     $("dashTotalHariIni").textContent = rupiah(total);
     $("dashJumlahHariIni").textContent = aktif.length + " transaksi";
+
+    // Profit hari ini & produk terlaris hari ini
+    let modal = 0;
+    const perProdukHariIni = {};
+    aktif.forEach(t => {
+      (t.items || []).forEach(it => {
+        const p = PRODUK.find(x => x.id === it.idProduk);
+        modal += (p ? p.hargaBeli : 0) * Number(it.qty);
+        if(!perProdukHariIni[it.idProduk]) perProdukHariIni[it.idProduk] = { nama: it.namaProduk, qty: 0 };
+        perProdukHariIni[it.idProduk].qty += Number(it.qty);
+      });
+    });
+    $("dashProfitHariIni").textContent = rupiah(total - modal);
+
+    const topProduk = Object.values(perProdukHariIni).sort((a,b) => b.qty - a.qty).slice(0, 5);
+    $("dashTerlarisList").innerHTML = topProduk.map((p, i) => `
+      <div class="list-row">
+        <div style="font-weight:700;color:var(--navy);width:22px;flex:none;">#${i+1}</div>
+        <div class="lr-main"><div class="lr-name">${p.nama}</div></div>
+        <div style="font-weight:700;font-size:13px;flex:none;">${p.qty} terjual</div>
+      </div>
+    `).join("") || `<p style="color:var(--ink-soft);font-size:13.5px;padding:16px 0;">Belum ada penjualan hari ini.</p>`;
+
+    // Perbandingan dengan kemarin
+    const kemarin = new Date(now); kemarin.setDate(kemarin.getDate() - 1);
+    const semuaKemarin = await ambilTransaksiTanggal(formatTanggal(kemarin));
+    const totalKemarin = semuaKemarin.filter(t => t.status !== "Dibatalkan").reduce((s, t) => s + Number(t.total), 0);
+    const elVs = $("dashVsKemarin");
+    if(totalKemarin > 0){
+      const persen = Math.round(((total - totalKemarin) / totalKemarin) * 100);
+      elVs.textContent = (persen >= 0 ? "↑ " : "↓ ") + Math.abs(persen) + "%";
+      elVs.className = "dc-stat-value " + (persen >= 0 ? "naik" : "turun");
+    }else if(total > 0){
+      elVs.textContent = "Baru mulai";
+      elVs.className = "dc-stat-value";
+    }else{
+      elVs.textContent = "—";
+      elVs.className = "dc-stat-value";
+    }
+
+    // Tren 7 hari terakhir
+    const mulai7 = new Date(now); mulai7.setDate(mulai7.getDate() - 6);
+    const q7 = query(colTransaksi, where("tanggal", ">=", formatTanggal(mulai7)), where("tanggal", "<=", tanggal));
+    const snap7 = await denganBatasWaktu(getDocs(q7), 15);
+    const perHari = {};
+    snap7.docs.forEach(d => {
+      const t = d.data();
+      if(t.status === "Dibatalkan") return;
+      perHari[t.tanggal] = (perHari[t.tanggal] || 0) + Number(t.total);
+    });
+    const daftarTanggal7 = [];
+    for(let i = 6; i >= 0; i--){
+      const d = new Date(now); d.setDate(d.getDate() - i);
+      daftarTanggal7.push(formatTanggal(d));
+    }
+    const maxTotal7 = Math.max(...daftarTanggal7.map(tgl => perHari[tgl] || 0), 1);
+    $("dashTrenList").innerHTML = daftarTanggal7.map(tgl => {
+      const nilai = perHari[tgl] || 0;
+      return `
+        <div class="tren-row">
+          <div class="tren-label">${new Date(tgl + "T00:00:00").toLocaleDateString("id-ID", {day:"2-digit", month:"short"})}</div>
+          <div class="tren-bar-wrap"><div class="tren-bar" style="width:${((nilai / maxTotal7) * 100).toFixed(0)}%"></div></div>
+          <div class="tren-value">${rupiah(nilai)}</div>
+        </div>
+      `;
+    }).join("");
   }catch(err){
     $("dashJumlahHariIni").textContent = "Gagal memuat data";
   }
