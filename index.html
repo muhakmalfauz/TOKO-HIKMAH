@@ -453,21 +453,45 @@
 
   /* ===== Login ===== */
   .login-screen{
-    position:fixed;inset:0;background:var(--navy);z-index:100;
+    position:fixed;inset:0;background:var(--cream);z-index:100;
     display:flex;align-items:center;justify-content:center;padding:20px;
   }
-  .login-box{width:100%;max-width:320px;text-align:center;}
-  .login-logo{color:#fff;font-size:24px;font-weight:800;letter-spacing:.3px;}
-  .login-sub{color:#D9D5F5;font-size:13px;margin-top:6px;margin-bottom:22px;}
-  .user-list{display:flex;flex-direction:column;gap:10px;}
-  .user-item{
-    background:rgba(255,255,255,.08);color:#fff;border:none;border-radius:14px;
-    padding:15px 18px;text-align:left;display:flex;justify-content:space-between;align-items:center;
+  .login-card{
+    width:100%;max-width:340px;background:var(--paper);border-radius:24px;
+    padding:44px 24px;text-align:center;box-shadow:var(--shadow-card);
+    position:relative;overflow:hidden;
   }
-  .user-item:active{background:rgba(255,255,255,.2);}
-  .user-item .ui-name{font-size:15px;font-weight:700;}
-  .user-item .ui-role{font-size:11px;color:#D9D5F5;background:rgba(255,255,255,.12);padding:3px 10px;border-radius:999px;}
-  .login-msg{color:#D9D5F5;font-size:13px;}
+  .login-decor{position:absolute;border-radius:50%;background:#F3F1FD;pointer-events:none;}
+  .login-decor-1{width:140px;height:140px;top:-50px;right:-50px;opacity:.7;}
+  .login-decor-2{width:110px;height:110px;bottom:-50px;left:-40px;opacity:.5;}
+  .login-icon-box{
+    width:72px;height:72px;border-radius:22px;background:var(--navy);
+    display:flex;align-items:center;justify-content:center;margin:0 auto 18px;
+    box-shadow:0 8px 20px rgba(83,74,183,.25);position:relative;z-index:1;
+  }
+  .login-icon-box svg{width:32px;height:32px;color:#fff;}
+  .login-logo{color:var(--ink);font-size:20px;font-weight:700;letter-spacing:.2px;position:relative;z-index:1;}
+  .login-clock{
+    display:flex;align-items:center;justify-content:center;gap:6px;margin:8px 0 26px;
+    color:var(--ink-soft);font-size:12px;position:relative;z-index:1;
+  }
+  .login-clock svg{width:13px;height:13px;flex:none;}
+  .login-mulai-btn{
+    background:var(--navy);color:#fff;border:none;border-radius:13px;padding:14px 32px;
+    font-size:13.5px;font-weight:700;display:inline-flex;align-items:center;gap:8px;
+    box-shadow:0 6px 16px rgba(83,74,183,.3);position:relative;z-index:1;margin:0 auto;
+  }
+  .login-mulai-btn svg{width:15px;height:15px;}
+  .login-sub{color:var(--ink-soft);font-size:13px;margin-bottom:22px;position:relative;z-index:1;}
+  .user-avatar-grid{display:flex;flex-wrap:wrap;justify-content:center;gap:18px 14px;position:relative;z-index:1;}
+  .user-avatar-item{display:flex;flex-direction:column;align-items:center;gap:8px;width:76px;background:none;border:none;padding:0;}
+  .user-avatar-circle{
+    width:60px;height:60px;border-radius:50%;display:flex;align-items:center;justify-content:center;
+    color:#fff;font-size:18px;font-weight:700;
+  }
+  .user-avatar-item .ui-name{font-size:11.5px;font-weight:600;color:var(--ink);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:76px;}
+  .user-avatar-item .ui-role{font-size:9.5px;color:var(--ink-soft);margin-top:-4px;}
+  .login-msg{color:var(--ink-soft);font-size:13px;position:relative;z-index:1;}
 </style>
 </head>
 
@@ -475,30 +499,53 @@
 
 <!-- ===== LOGIN SCREEN ===== -->
 <div class="login-screen" id="loginScreen">
-  <div class="login-box">
-    <div class="login-logo" id="loginLogoText">TOKO HIKMAH</div>
-    <div class="login-sub" id="loginSubText">Pilih siapa yang bertugas</div>
-    <div class="user-list" id="userList">
-      <div class="login-msg">Memuat daftar user...</div>
+  <div class="login-card">
+    <div class="login-decor login-decor-1"></div>
+    <div class="login-decor login-decor-2"></div>
+
+    <div id="loginStageBranding">
+      <div class="login-icon-box">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7l1-3h16l1 3"/><path d="M4 7h16v12a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V7z"/><path d="M9 11h6"/></svg>
+      </div>
+      <div class="login-logo" id="loginLogoText">TOKO HIKMAH</div>
+      <div class="login-clock">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><polyline points="12 7 12 12 15 14"/></svg>
+        <span id="loginClockText">-</span>
+      </div>
+      <button class="login-mulai-btn" id="btnMulaiBertugas">
+        Mulai Bertugas
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+      </button>
+    </div>
+
+    <div id="loginStageUser" style="display:none;">
+      <div class="login-sub" id="loginSubText">Pilih siapa yang bertugas</div>
+      <div class="user-avatar-grid" id="userList">
+        <div class="login-msg">Memuat daftar user...</div>
+      </div>
     </div>
   </div>
 </div>
 
 <!-- ===== MASUKKAN PIN (kalau user yang dipilih punya PIN) ===== -->
 <div class="login-screen" id="pinScreen" style="display:none;">
-  <div class="login-box">
-    <div class="login-logo" id="pinNamaUser" style="font-size:19px;">Nama User</div>
+  <div class="login-card">
+    <div class="login-decor login-decor-1"></div>
+    <div class="login-decor login-decor-2"></div>
+    <div class="login-icon-box" id="pinAvatarBox" style="font-size:22px;font-weight:700;color:#fff;">?</div>
+    <div class="login-logo" id="pinNamaUser" style="font-size:18px;">Nama User</div>
     <div class="login-sub">Masukkan PIN 4 digit</div>
     <input type="password" id="inputPinLogin" inputmode="numeric" maxlength="4"
-      style="width:140px;text-align:center;letter-spacing:10px;font-size:22px;padding:12px;border-radius:12px;border:none;margin:8px auto 6px;display:block;" />
-    <div id="pinLoginError" style="color:#F4B6A6;font-size:12.5px;min-height:18px;text-align:center;">&nbsp;</div>
-    <button class="btn-primary" id="btnMasukPin" style="max-width:220px;margin:6px auto 0;display:block;">Masuk</button>
-    <button class="btn-secondary" id="btnBatalPin" style="max-width:220px;margin:8px auto 0;display:block;border-color:rgba(255,255,255,.35);color:#fff;">Batal</button>
+      style="width:140px;text-align:center;letter-spacing:10px;font-size:22px;padding:12px;border-radius:12px;border:1px solid var(--line);margin:4px auto 6px;display:block;position:relative;z-index:1;" />
+    <div id="pinLoginError" style="color:var(--red);font-size:12.5px;min-height:18px;text-align:center;position:relative;z-index:1;">&nbsp;</div>
+    <button class="login-mulai-btn" id="btnMasukPin" style="margin:6px auto 0;display:flex;">Masuk</button>
+    <button class="btn-secondary" id="btnBatalPin" style="max-width:220px;margin:10px auto 0;display:block;position:relative;z-index:1;">Batal</button>
   </div>
 </div>
 
 <!-- ===== ISI APLIKASI (tersembunyi sampai login berhasil) ===== -->
 <div id="appContainer" style="display:none;">
+
 
 <!-- DRAWER MENU -->
 <div class="drawer-overlay" id="drawerOverlay"></div>
@@ -1720,21 +1767,51 @@ async function muatDaftarUser(){
   }
 }
 
+const WARNA_AVATAR = ["#534AB7", "#D98E2C", "#0F6E56", "#993C1D", "#7F77DD", "#993556"];
+
+function getInisial(nama){
+  const kata = nama.trim().split(/\s+/);
+  if(kata.length === 1) return kata[0].slice(0, 2).toUpperCase();
+  return (kata[0][0] + kata[1][0]).toUpperCase();
+}
+
+function getWarnaAvatar(nama){
+  let hash = 0;
+  for(let i = 0; i < nama.length; i++) hash = nama.charCodeAt(i) + ((hash << 5) - hash);
+  return WARNA_AVATAR[Math.abs(hash) % WARNA_AVATAR.length];
+}
+
 function renderUserList(){
   if(!DAFTAR_USER.length){
     $("userList").innerHTML = `<div class="login-msg">Belum ada user. Tambahkan dulu lewat Firebase Console (koleksi "user").</div>`;
     return;
   }
   $("userList").innerHTML = DAFTAR_USER.map(u => `
-    <button class="user-item" data-nama="${u.Nama}" data-role="${u.Role}">
+    <button class="user-avatar-item" data-nama="${u.Nama}" data-role="${u.Role}">
+      <div class="user-avatar-circle" style="background:${getWarnaAvatar(u.Nama)};">${getInisial(u.Nama)}</div>
       <span class="ui-name">${u.Nama}</span>
       <span class="ui-role">${u.Role}</span>
     </button>
   `).join("");
-  $("userList").querySelectorAll(".user-item").forEach(btn=>{
+  $("userList").querySelectorAll(".user-avatar-item").forEach(btn=>{
     btn.onclick = () => pilihUserLogin(btn.dataset.nama, btn.dataset.role);
   });
 }
+
+$("btnMulaiBertugas").onclick = () => {
+  $("loginStageBranding").style.display = "none";
+  $("loginStageUser").style.display = "block";
+};
+
+function perbaruiJamLogin(){
+  const el = $("loginClockText");
+  if(!el) return;
+  const now = new Date();
+  el.textContent = now.toLocaleDateString("id-ID", { weekday: "long", day: "2-digit", month: "short" }) +
+    " · " + now.toLocaleTimeString("id-ID", { hour: "2-digit", minute: "2-digit" });
+}
+perbaruiJamLogin();
+setInterval(perbaruiJamLogin, 30000);
 
 let _pinLoginTarget = null;
 
@@ -1743,6 +1820,8 @@ function pilihUserLogin(nama, role){
   if(u && u.PinHash){
     _pinLoginTarget = { nama, role };
     $("pinNamaUser").textContent = nama;
+    $("pinAvatarBox").textContent = getInisial(nama);
+    $("pinAvatarBox").style.background = getWarnaAvatar(nama);
     $("inputPinLogin").value = "";
     $("pinLoginError").innerHTML = "&nbsp;";
     $("loginScreen").style.display = "none";
