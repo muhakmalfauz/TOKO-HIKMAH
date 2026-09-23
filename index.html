@@ -2007,6 +2007,17 @@ async function cekSesi(){
    membaca database tanpa lewat aplikasi sama sekali.
    ============================================================ */
 async function mulaiAplikasi(){
+  // Kalau dibuka lewat QR (?masuk=Nama), langsung tampilkan status memuat —
+  // jangan sempat kelihatan layar "Mulai Bertugas" dulu.
+  const namaOtomatis = new URLSearchParams(window.location.search).get("masuk");
+  if(namaOtomatis){
+    $("loginStageBranding").innerHTML = `
+      <div class="login-icon-box"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7l1-3h16l1 3"/><path d="M4 7h16v12a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V7z"/><path d="M9 11h6"/></svg></div>
+      <div class="login-logo">${namaOtomatis}</div>
+      <div class="login-clock"><span>Masuk otomatis...</span></div>
+    `;
+  }
+
   try{
     await signInAnonymously(auth);
   }catch(err){
