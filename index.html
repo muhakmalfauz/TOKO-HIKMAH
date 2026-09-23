@@ -630,48 +630,78 @@
     <div class="list-panel" id="pelangganList"></div>
   </div>
 
-  <!-- ===== VIEW: LAPORAN ===== -->
+  <!-- ===== VIEW: LAPORAN (menu utama) ===== -->
   <div id="viewLaporan" style="display:none;">
-    <div class="page-head">
-      <h2>Laporan</h2>
-    </div>
-    <div class="cat-row" id="periodeRow">
-      <button class="cat-chip active" data-periode="harian">Hari Ini</button>
-      <button class="cat-chip" data-periode="mingguan">Minggu Ini</button>
-      <button class="cat-chip" data-periode="bulanan">Bulan Ini</button>
-    </div>
-    <div class="summary-cards">
-      <div class="summary-card">
-        <div class="sc-label">Total Penjualan</div>
-        <div class="sc-value" id="lapTotalPenjualan">Rp 0</div>
-      </div>
-      <div class="summary-card">
-        <div class="sc-label">Jumlah Transaksi</div>
-        <div class="sc-value" id="lapJumlahTransaksi">0</div>
-      </div>
-    </div>
+    <div class="page-head"><h2>Laporan</h2></div>
 
-    <div class="page-head" style="padding-top:14px;">
-      <h2 style="font-size:14.5px;">Produk Terlaris</h2>
-    </div>
-    <div class="list-panel" id="produkTerlarisList"></div>
+    <button class="pengaturan-menu-row" data-buka-laporan="Transaksi">
+      <span class="pm-icon">🧾</span>
+      <span class="pm-text"><span class="pm-title">Riwayat Transaksi</span><span class="pm-sub">Lihat, cetak ulang & batalkan transaksi</span></span>
+      <span class="pm-chevron">›</span>
+    </button>
+    <button class="pengaturan-menu-row" data-buka-laporan="StokMasuk">
+      <span class="pm-icon">📦</span>
+      <span class="pm-text"><span class="pm-title">Riwayat Stok Masuk</span><span class="pm-sub">Riwayat penambahan stok & pengeluarannya</span></span>
+      <span class="pm-chevron">›</span>
+    </button>
+    <button class="pengaturan-menu-row" data-buka-laporan="TutupKasir">
+      <span class="pm-icon">💰</span>
+      <span class="pm-text"><span class="pm-title">Tutup Kasir</span><span class="pm-sub">Rekonsiliasi kas & riwayatnya</span></span>
+      <span class="pm-chevron">›</span>
+    </button>
+  </div>
 
-    <div id="trenHarianWrap" style="display:none;">
-      <div class="page-head" style="padding-top:2px;">
-        <h2 style="font-size:14.5px;">Tren Harian</h2>
+  <!-- ===== SHEET: RIWAYAT TRANSAKSI ===== -->
+  <div class="sheet-overlay" id="overlayHalTransaksi"></div>
+  <div class="sheet" id="sheetHalTransaksi">
+    <div class="sheet-handle"></div>
+    <div class="sheet-head"><h2>Riwayat Transaksi</h2><button data-tutup-laporan="Transaksi">✕</button></div>
+    <div class="sheet-body" style="padding:0 0 8px;">
+      <div style="padding:0 18px 10px;">
+        <input type="date" id="rtTanggal" style="width:100%;padding:10px 12px;border-radius:10px;border:1px solid var(--line);font-size:14px;" />
       </div>
-      <div class="list-panel" id="trenHarianList"></div>
+      <div class="list-panel" id="riwayatTransaksiList"></div>
     </div>
+  </div>
 
-    <div id="riwayatHarianWrap">
-      <div class="page-head" style="padding-top:2px;">
-        <h2 style="font-size:14.5px;">Riwayat Transaksi Hari Ini</h2>
+  <!-- ===== SHEET: DETAIL TRANSAKSI ===== -->
+  <div class="sheet-overlay" id="overlayDetailTrx"></div>
+  <div class="sheet" id="sheetDetailTrx">
+    <div class="sheet-handle"></div>
+    <div class="sheet-head"><h2>Detail Transaksi</h2><button id="btnCloseDetailTrx">✕</button></div>
+    <div class="sheet-body">
+      <div id="detailTrxInfo" style="font-size:12.5px;color:var(--ink-soft);margin-bottom:10px;"></div>
+      <div id="detailTrxItemList" style="margin-bottom:10px;"></div>
+      <div id="detailTrxTotal" style="font-size:16px;font-weight:700;text-align:right;margin-bottom:16px;padding-top:10px;border-top:1px solid var(--line);"></div>
+      <button class="btn-primary" id="btnCetakUlangTrx">🖨️ Cetak Ulang Struk</button>
+      <button class="btn-secondary" id="btnBatalkanTrxDetail" style="border-color:var(--red);color:var(--red);margin-top:8px;">Batalkan Transaksi Ini</button>
+    </div>
+  </div>
+
+  <!-- ===== SHEET: RIWAYAT STOK MASUK ===== -->
+  <div class="sheet-overlay" id="overlayHalStokMasuk"></div>
+  <div class="sheet" id="sheetHalStokMasuk">
+    <div class="sheet-handle"></div>
+    <div class="sheet-head"><h2>Riwayat Stok Masuk</h2><button data-tutup-laporan="StokMasuk">✕</button></div>
+    <div class="sheet-body" style="padding:0 0 8px;">
+      <div style="padding:0 18px 10px;">
+        <input type="date" id="rsTanggal" style="width:100%;padding:10px 12px;border-radius:10px;border:1px solid var(--line);font-size:14px;" />
       </div>
-      <div class="list-panel" id="laporanList"></div>
+      <div class="list-panel" id="riwayatStokMasukList"></div>
     </div>
+  </div>
 
-    <div style="padding:4px 16px 16px;" id="tutupKasirWrap">
-      <button class="btn-primary" id="btnTutupKasir" style="margin-top:0;">Tutup Kasir</button>
+  <!-- ===== SHEET: TUTUP KASIR (menu) ===== -->
+  <div class="sheet-overlay" id="overlayHalTutupKasir"></div>
+  <div class="sheet" id="sheetHalTutupKasir">
+    <div class="sheet-handle"></div>
+    <div class="sheet-head"><h2>Tutup Kasir</h2><button data-tutup-laporan="TutupKasir">✕</button></div>
+    <div class="sheet-body" style="padding:0 0 8px;">
+      <div style="padding:0 18px 14px;">
+        <button class="btn-primary" id="btnTutupKasir" style="margin-top:0;">Tutup Kasir Hari Ini</button>
+      </div>
+      <div class="page-head" style="padding-top:2px;"><h2 style="font-size:13.5px;">Riwayat Tutup Kasir</h2></div>
+      <div class="list-panel" id="riwayatTutupKasirList"></div>
     </div>
   </div>
 
@@ -946,7 +976,7 @@
 <div class="sheet" id="sheetStruk">
   <div class="sheet-handle"></div>
   <div class="sheet-head">
-    <h2>Transaksi Berhasil</h2>
+    <h2 id="judulSheetStruk">Transaksi Berhasil</h2>
     <button id="btnCloseStruk">✕</button>
   </div>
   <div class="sheet-body">
@@ -1804,7 +1834,7 @@ function switchView(view){
   if(view === "riwayat") renderRiwayatPenjualan();
   if(view === "pesanan"){ renderPesanan(); muatKecepatanJual(); }
   if(view === "pelanggan") renderPelangganList();
-  if(view === "laporan") renderLaporan();
+  if(view === "laporan"){ /* menu saja; tiap section dimuat saat sheet-nya dibuka */ }
   if(view === "pengaturan"){ /* menu saja; tiap section dimuat saat sheet-nya dibuka */ }
 }
 document.querySelectorAll(".nav-btn").forEach(btn=>{
@@ -3183,126 +3213,109 @@ $("overlayRwKategori").onclick = () => tutupSheet("sheetRwKategori", "overlayRwK
 renderKontrolTanggalRiwayat();
 
 /* ============================================================
-   HALAMAN LAPORAN — riwayat hari ini, mingguan/bulanan & tutup kasir
+   HALAMAN LAPORAN — menu: Riwayat Transaksi, Riwayat Stok Masuk, Tutup Kasir
    ============================================================ */
-let periodeLaporan = "harian";
-
 function formatTanggal(d){
   const y = d.getFullYear(), m = String(d.getMonth()+1).padStart(2,"0"), day = String(d.getDate()).padStart(2,"0");
   return `${y}-${m}-${day}`;
 }
 
-function getRentangTanggal(periode){
-  const now = new Date();
-  let mulai = new Date(now);
-  if(periode === "mingguan"){
-    const hari = mulai.getDay(); // 0 = Minggu
-    const mundur = hari === 0 ? 6 : hari - 1; // mundur ke Senin terdekat
-    mulai.setDate(mulai.getDate() - mundur);
-  }else if(periode === "bulanan"){
-    mulai = new Date(now.getFullYear(), now.getMonth(), 1);
-  }
-  return { mulai: formatTanggal(mulai), selesai: formatTanggal(now) };
-}
-
-document.querySelectorAll("#periodeRow .cat-chip").forEach(btn=>{
+const LAPORAN_REFRESH = {
+  Transaksi: () => { $("rtTanggal").value = formatTanggal(new Date()); muatRiwayatTransaksi(); },
+  StokMasuk: () => { $("rsTanggal").value = formatTanggal(new Date()); muatRiwayatStokMasuk(); },
+  TutupKasir: () => muatRiwayatTutupKasir()
+};
+document.querySelectorAll("[data-buka-laporan]").forEach(btn=>{
   btn.onclick = () => {
-    periodeLaporan = btn.dataset.periode;
-    document.querySelectorAll("#periodeRow .cat-chip").forEach(b => b.classList.toggle("active", b === btn));
-    renderLaporan();
+    const kunci = btn.dataset.bukaLaporan;
+    if(LAPORAN_REFRESH[kunci]) LAPORAN_REFRESH[kunci]();
+    bukaSheet("sheetHal" + kunci, "overlayHal" + kunci);
   };
 });
+document.querySelectorAll("[data-tutup-laporan]").forEach(btn=>{
+  btn.onclick = () => {
+    const kunci = btn.dataset.tutupLaporan;
+    tutupSheet("sheetHal" + kunci, "overlayHal" + kunci);
+  };
+});
+["Transaksi","StokMasuk","TutupKasir"].forEach(kunci=>{
+  const overlay = $("overlayHal" + kunci);
+  if(overlay) overlay.onclick = () => tutupSheet("sheetHal" + kunci, "overlayHal" + kunci);
+});
 
-async function renderLaporan(){
-  const isHarian = periodeLaporan === "harian";
-  $("riwayatHarianWrap").style.display = isHarian ? "" : "none";
-  $("tutupKasirWrap").style.display = isHarian ? "" : "none";
-  $("trenHarianWrap").style.display = isHarian ? "none" : "";
-  $("produkTerlarisList").innerHTML = `<p style="color:var(--ink-soft);font-size:13.5px;padding:16px 0;">Memuat laporan...</p>`;
+/* ---------- Riwayat Transaksi ---------- */
+let dataTransaksiTerpilih = {}; // cache { idTrx: dataTransaksi } dari tanggal yang sedang dilihat
 
-  const { mulai, selesai } = getRentangTanggal(periodeLaporan);
+$("rtTanggal").addEventListener("change", muatRiwayatTransaksi);
 
+async function muatRiwayatTransaksi(){
+  const tanggal = $("rtTanggal").value || formatTanggal(new Date());
+  $("riwayatTransaksiList").innerHTML = `<p style="color:var(--ink-soft);font-size:13.5px;padding:16px 0;">Memuat...</p>`;
   try{
-    const q = query(colTransaksi, where("tanggal", ">=", mulai), where("tanggal", "<=", selesai));
-    const snap = await denganBatasWaktu(getDocs(q));
-    const semua = snap.docs.map(d => ({ id: d.id, ...d.data() }));
-    const aktif = semua.filter(t => t.status !== "Dibatalkan");
-
-    const totalPenjualan = aktif.reduce((s, t) => s + Number(t.total), 0);
-    $("lapTotalPenjualan").textContent = rupiah(totalPenjualan);
-    $("lapJumlahTransaksi").textContent = aktif.length;
-    $("tkTotalSistem").textContent = rupiah(totalPenjualan);
-
-    // Produk terlaris (10 teratas)
-    const perProduk = {};
-    aktif.forEach(t => {
-      (t.items || []).forEach(it => {
-        if(!perProduk[it.idProduk]) perProduk[it.idProduk] = { nama: it.namaProduk, qty: 0, omzet: 0 };
-        perProduk[it.idProduk].qty += Number(it.qty);
-        perProduk[it.idProduk].omzet += Number(it.qty) * Number(it.hargaSatuan);
-      });
-    });
-    const top = Object.values(perProduk).sort((a,b) => b.qty - a.qty).slice(0, 10);
-    $("produkTerlarisList").innerHTML = top.map((p, i) => `
-      <div class="list-row">
-        <div style="font-weight:700;color:var(--navy);width:24px;flex:none;">#${i+1}</div>
+    const semua = await ambilTransaksiTanggal(tanggal);
+    dataTransaksiTerpilih = {};
+    semua.forEach(t => { dataTransaksiTerpilih[t.id] = t; });
+    const urut = [...semua].sort((a, b) => (a.jam < b.jam ? 1 : -1));
+    $("riwayatTransaksiList").innerHTML = urut.map(t => {
+      const batal = t.status === "Dibatalkan";
+      const jumlahItem = (t.items || []).reduce((s, it) => s + Number(it.qty), 0);
+      return `
+      <div class="list-row" style="cursor:pointer;${batal ? 'opacity:.55;' : ''}" data-lihat-trx="${t.id}">
         <div class="lr-main">
-          <div class="lr-name">${p.nama}</div>
-          <div class="lr-sub">Terjual ${p.qty} pcs</div>
+          <div class="lr-name">${t.id}${batal ? ' <span style="color:var(--red);font-weight:700;">(Dibatalkan)</span>' : ''}</div>
+          <div class="lr-sub">${t.jam} · ${jumlahItem} item · ${t.kasir}</div>
         </div>
-        <div style="font-weight:700;font-size:13px;">${rupiah(p.omzet)}</div>
-      </div>
-    `).join("") || `<p style="color:var(--ink-soft);font-size:13.5px;padding:16px 0;">Belum ada penjualan di periode ini.</p>`;
+        <div style="font-weight:700;font-size:13.5px;flex:none;${batal ? 'text-decoration:line-through;' : ''}">${rupiah(t.total)}</div>
+      </div>`;
+    }).join("") || `<p style="color:var(--ink-soft);font-size:13.5px;padding:16px 0;">Tidak ada transaksi di tanggal ini.</p>`;
 
-    // Tren harian (khusus mingguan/bulanan)
-    if(!isHarian){
-      const perHari = {};
-      aktif.forEach(t => { perHari[t.tanggal] = (perHari[t.tanggal] || 0) + Number(t.total); });
-      const trenHarian = Object.keys(perHari).sort().map(tgl => ({ tanggal: tgl, total: perHari[tgl] }));
-      const maxTotal = Math.max(...trenHarian.map(t => t.total), 1);
-      $("trenHarianList").innerHTML = trenHarian.map(t => `
-        <div class="tren-row">
-          <div class="tren-label">${new Date(t.tanggal + "T00:00:00").toLocaleDateString("id-ID", {day:"2-digit", month:"short"})}</div>
-          <div class="tren-bar-wrap"><div class="tren-bar" style="width:${((t.total / maxTotal) * 100).toFixed(0)}%"></div></div>
-          <div class="tren-value">${rupiah(t.total)}</div>
-        </div>
-      `).join("") || `<p style="color:var(--ink-soft);font-size:13.5px;padding:16px 0;">Belum ada data.</p>`;
-    }
-
-    // Riwayat transaksi (khusus harian) — urut terbaru dulu
-    if(isHarian){
-      const urut = [...semua].sort((a, b) => (a.jam < b.jam ? 1 : -1));
-      $("laporanList").innerHTML = urut.map(t => {
-        const batal = t.status === "Dibatalkan";
-        const jumlahItem = (t.items || []).reduce((s, it) => s + Number(it.qty), 0);
-        return `
-        <div class="list-row" style="${batal ? 'opacity:.55;' : ''}">
-          <div class="lr-main">
-            <div class="lr-name">${t.id}${batal ? ' <span style="color:var(--red);font-weight:700;">(Dibatalkan)</span>' : ''}</div>
-            <div class="lr-sub">${t.jam} · ${jumlahItem} item · ${t.metodeBayarText || t.metodeBayar || '-'} · ${t.kasir}</div>
-          </div>
-          <div style="display:flex;flex-direction:column;align-items:flex-end;gap:5px;flex:none;">
-            <div style="font-weight:700;font-size:13.5px;${batal ? 'text-decoration:line-through;' : ''}">${rupiah(t.total)}</div>
-            ${!batal ? `<button class="lr-btn danger" style="font-size:11px;padding:5px 10px;" data-batal="${t.id}">Batalkan</button>` : ''}
-          </div>
-        </div>`;
-      }).join("") || `<p style="color:var(--ink-soft);font-size:13.5px;padding:16px 0;">Belum ada transaksi hari ini.</p>`;
-
-      $("laporanList").querySelectorAll("[data-batal]").forEach(btn=>{
-        btn.onclick = () => batalkanTransaksi(btn.dataset.batal);
-      });
-    }
+    $("riwayatTransaksiList").querySelectorAll("[data-lihat-trx]").forEach(row=>{
+      row.onclick = () => bukaDetailTransaksi(row.dataset.lihatTrx);
+    });
   }catch(err){
-    $("produkTerlarisList").innerHTML = `<p style="color:var(--red);font-size:13px;padding:16px 0;">Gagal memuat: ${err.message}</p>`;
+    $("riwayatTransaksiList").innerHTML = `<p style="color:var(--red);font-size:13px;padding:16px 0;">Gagal memuat: ${err.message}</p>`;
   }
 }
+
+let idTrxDetailAktif = null;
+
+function bukaDetailTransaksi(id){
+  const t = dataTransaksiTerpilih[id];
+  if(!t) return;
+  idTrxDetailAktif = id;
+  const batal = t.status === "Dibatalkan";
+  $("detailTrxInfo").innerHTML = `${t.tanggal} ${t.jam} · Kasir: ${t.kasir}${t.pelangganNama ? " · Pelanggan: " + t.pelangganNama : ""}${batal ? ' · <span style="color:var(--red);font-weight:700;">Dibatalkan</span>' : ''}`;
+  $("detailTrxItemList").innerHTML = (t.items || []).map(it => `
+    <div class="list-row" style="padding:8px 0;">
+      <div class="lr-main">
+        <div class="lr-name">${it.namaProduk}</div>
+        <div class="lr-sub">${it.qty} x ${rupiah(it.hargaSatuan)}</div>
+      </div>
+      <div style="font-weight:600;font-size:13px;flex:none;">${rupiah(it.qty * it.hargaSatuan)}</div>
+    </div>
+  `).join("");
+  $("detailTrxTotal").textContent = "Total: " + rupiah(t.total);
+  $("btnBatalkanTrxDetail").style.display = batal ? "none" : "block";
+  bukaSheet("sheetDetailTrx", "overlayDetailTrx");
+}
+$("btnCloseDetailTrx").onclick = () => tutupSheet("sheetDetailTrx", "overlayDetailTrx");
+$("overlayDetailTrx").onclick = () => tutupSheet("sheetDetailTrx", "overlayDetailTrx");
+
+$("btnCetakUlangTrx").onclick = () => {
+  if(!idTrxDetailAktif) return;
+  const t = dataTransaksiTerpilih[idTrxDetailAktif];
+  if(!t) return;
+  cetakUlangStruk(t);
+};
+
+$("btnBatalkanTrxDetail").onclick = async () => {
+  if(!idTrxDetailAktif) return;
+  await batalkanTransaksi(idTrxDetailAktif);
+  tutupSheet("sheetDetailTrx", "overlayDetailTrx");
+};
 
 async function batalkanTransaksi(idTrx){
   if(!(await konfirmasi(`Stok akan otomatis dikembalikan.`, { judul: `Batalkan transaksi ${idTrx}?`, labelYa: "Ya, Batalkan", bahaya: true }))) return;
-
-  const tombol = document.querySelector(`[data-batal="${idTrx}"]`);
-  if(tombol){ tombol.disabled = true; tombol.textContent = "Memproses..."; }
-
   try{
     const ref = doc(colTransaksi, idTrx);
     const snap = await denganBatasWaktu(getDoc(ref));
@@ -3319,17 +3332,47 @@ async function batalkanTransaksi(idTrx){
 
     showToast("Transaksi dibatalkan, stok dikembalikan");
     catatLog(`Membatalkan transaksi ${idTrx}`);
-    renderLaporan();
+    muatRiwayatTransaksi();
     muatProduk();
   }catch(err){
     showToast("Gagal: " + err.message);
-    if(tombol){ tombol.disabled = false; tombol.textContent = "Batalkan"; }
   }
 }
 
-$("btnTutupKasir").onclick = () => {
+/* ---------- Riwayat Stok Masuk ---------- */
+$("rsTanggal").addEventListener("change", muatRiwayatStokMasuk);
+
+async function muatRiwayatStokMasuk(){
+  const tanggal = $("rsTanggal").value || formatTanggal(new Date());
+  $("riwayatStokMasukList").innerHTML = `<p style="color:var(--ink-soft);font-size:13.5px;padding:16px 0;">Memuat...</p>`;
+  try{
+    const q = query(colStokMasuk, where("tanggal", "==", tanggal));
+    const snap = await denganBatasWaktu(getDocs(q));
+    const semua = snap.docs.map(d => d.data());
+    $("riwayatStokMasukList").innerHTML = semua.map(s => {
+      const total = (s.hargaBeli || 0) * (s.jumlahMasuk || 0);
+      return `
+      <div class="list-row">
+        <div class="lr-main">
+          <div class="lr-name">${s.namaProduk}</div>
+          <div class="lr-sub">+${s.jumlahMasuk} · ${rupiah(s.hargaBeli || 0)}/satuan${s.supplier ? " · " + s.supplier : ""}</div>
+        </div>
+        <div style="font-weight:700;font-size:13.5px;flex:none;">${rupiah(total)}</div>
+      </div>`;
+    }).join("") || `<p style="color:var(--ink-soft);font-size:13.5px;padding:16px 0;">Tidak ada stok masuk di tanggal ini.</p>`;
+  }catch(err){
+    $("riwayatStokMasukList").innerHTML = `<p style="color:var(--red);font-size:13px;padding:16px 0;">Gagal memuat: ${err.message}</p>`;
+  }
+}
+
+/* ---------- Tutup Kasir ---------- */
+$("btnTutupKasir").onclick = async () => {
   $("tkModalAwal").value = "";
   $("tkSetoranAkhir").value = "";
+  const tanggal = formatTanggal(new Date());
+  const semua = await ambilTransaksiTanggal(tanggal);
+  const totalPenjualan = semua.filter(t => t.status !== "Dibatalkan").reduce((s, t) => s + Number(t.total), 0);
+  $("tkTotalSistem").textContent = rupiah(totalPenjualan);
   bukaSheet("sheetTutupKasir", "overlayTutupKasir");
 };
 $("btnCloseTutupKasir").onclick = () => tutupSheet("sheetTutupKasir", "overlayTutupKasir");
@@ -3359,6 +3402,7 @@ async function simpanTutupKasir(){
       : `Tutup kasir tersimpan. Selisih: ${rupiah(selisih)}${selisih < 0 ? " (kurang)" : " (lebih)"}`;
     catatLog(`Tutup kasir — total Rp${totalPenjualan}, selisih Rp${selisih}`);
     showToast(info);
+    muatRiwayatTutupKasir();
   }catch(err){
     showToast("Gagal simpan: " + err.message);
   }finally{
@@ -3367,6 +3411,28 @@ async function simpanTutupKasir(){
   }
 }
 $("btnSimpanTutupKasir").onclick = simpanTutupKasir;
+
+async function muatRiwayatTutupKasir(){
+  $("riwayatTutupKasirList").innerHTML = `<p style="color:var(--ink-soft);font-size:13.5px;padding:16px 0;">Memuat...</p>`;
+  try{
+    const snap = await denganBatasWaktu(getDocs(colRekapHarian));
+    const semua = snap.docs.map(d => d.data()).sort((a,b) => b.tanggal.localeCompare(a.tanggal));
+    $("riwayatTutupKasirList").innerHTML = semua.map(r => {
+      const selisihWarna = r.selisih === 0 ? "var(--ink-soft)" : (r.selisih < 0 ? "var(--red)" : "var(--green)");
+      const selisihTeks = r.selisih === 0 ? "Pas" : (r.selisih < 0 ? "Kurang " + rupiah(Math.abs(r.selisih)) : "Lebih " + rupiah(r.selisih));
+      return `
+      <div class="list-row">
+        <div class="lr-main">
+          <div class="lr-name">${new Date(r.tanggal + "T00:00:00").toLocaleDateString("id-ID", {weekday:"short", day:"2-digit", month:"short", year:"numeric"})}</div>
+          <div class="lr-sub">Penjualan ${rupiah(r.totalPenjualan)} · ${r.jumlahTransaksi} trx · ${r.kasir}</div>
+        </div>
+        <div style="font-weight:700;font-size:12.5px;color:${selisihWarna};flex:none;text-align:right;">${selisihTeks}</div>
+      </div>`;
+    }).join("") || `<p style="color:var(--ink-soft);font-size:13.5px;padding:16px 0;">Belum ada riwayat tutup kasir.</p>`;
+  }catch(err){
+    $("riwayatTutupKasirList").innerHTML = `<p style="color:var(--red);font-size:13px;padding:16px 0;">Gagal memuat: ${err.message}</p>`;
+  }
+}
 
 /* ============================================================
    HALAMAN PENGATURAN — kelola user (tambah/edit/hapus)
@@ -4536,10 +4602,10 @@ $("btnSimpan").onclick = simpanTransaksi;
    ============================================================ */
 let strukTerakhir = null;
 
-function tampilkanStruk(idTrx, items, subtotal, diskonPromo, diskonManual, diskonPoin, total, pembayaran, totalDibayar, kembalian, promoDiterapkan, pelanggan, poinDidapat){
+function tampilkanStruk(idTrx, items, subtotal, diskonPromo, diskonManual, diskonPoin, total, pembayaran, totalDibayar, kembalian, promoDiterapkan, pelanggan, poinDidapat, waktuTampil){
   strukTerakhir = { idTrx, items, subtotal, diskonPromo, diskonManual, diskonPoin, total, pembayaran, totalDibayar, kembalian, promoDiterapkan, pelanggan, poinDidapat };
 
-  const waktu = new Date().toLocaleString("id-ID");
+  const waktu = waktuTampil || new Date().toLocaleString("id-ID");
   let html = `
     <div class="t-center"><strong>${PROFIL_TOKO.namaToko}</strong>${PROFIL_TOKO.alamat ? `<br/>${PROFIL_TOKO.alamat}` : ''}${PROFIL_TOKO.noTelp ? `<br/>${PROFIL_TOKO.noTelp}` : ''}<br/>${waktu}</div>
     <hr/>
@@ -4573,8 +4639,20 @@ function tampilkanStruk(idTrx, items, subtotal, diskonPromo, diskonManual, disko
     <div class="t-center">${PROFIL_TOKO.pesanStruk}</div>
   `;
   $("strukContent").innerHTML = html;
+  $("judulSheetStruk").textContent = "Transaksi Berhasil";
+  $("btnTransaksiBaru").style.display = "";
   $("overlayStruk").classList.add("show");
   $("sheetStruk").classList.add("show");
+}
+
+function cetakUlangStruk(trx){
+  const pelanggan = trx.pelangganId ? { id: trx.pelangganId, nama: trx.pelangganNama } : null;
+  const waktuAsli = `${trx.tanggal} ${trx.jam}`;
+  tampilkanStruk(trx.idTransaksi || trx.id, trx.items || [], trx.subtotal || 0, trx.diskonPromo || 0,
+    trx.diskon || 0, trx.diskonPoin || 0, trx.total, trx.pembayaran || [], trx.nominalDibayar,
+    trx.kembalian || 0, trx.promoDiterapkan || [], pelanggan, trx.poinDidapat || 0, waktuAsli);
+  $("judulSheetStruk").textContent = "Struk Transaksi (Cetak Ulang)";
+  $("btnTransaksiBaru").style.display = "none";
 }
 $("btnCloseStruk").onclick = () => {
   $("overlayStruk").classList.remove("show");
