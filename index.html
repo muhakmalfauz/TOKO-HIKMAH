@@ -1566,6 +1566,9 @@
    ============================================================ */
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.11.0/firebase-app.js";
 import {
+  getAuth, signInAnonymously, onAuthStateChanged
+} from "https://www.gstatic.com/firebasejs/12.11.0/firebase-auth.js";
+import {
   initializeFirestore, persistentLocalCache, persistentSingleTabManager,
   collection, doc, getDoc, getDocs, setDoc, updateDoc, deleteDoc,
   query, where, writeBatch, increment
@@ -1586,6 +1589,7 @@ const fbApp = initializeApp(firebaseConfig);
 const db = initializeFirestore(fbApp, {
   localCache: persistentLocalCache({ tabManager: persistentSingleTabManager() })
 });
+const auth = getAuth(fbApp);
 
 const colProduk = collection(db, "produk");
 const colUser = collection(db, "user");
@@ -1621,6 +1625,13 @@ let PROFIL_TOKO = { namaToko: "TOKO HIKMAH", alamat: "", noTelp: "", pesanStruk:
 
 const $ = (id) => document.getElementById(id);
 const rupiah = (n) => "Rp " + Math.round(n).toLocaleString("id-ID");
+
+async function hashPin(pin){
+  if(!pin) return "";
+  const data = new TextEncoder().encode(pin);
+  const hashBuffer = await crypto.subtle.digest("SHA-256", data);
+  return Array.from(new Uint8Array(hashBuffer)).map(b => b.toString(16).padStart(2, "0")).join("");
+}
 
 // Batasi waktu tunggu operasi Firestore (10 detik), supaya kalau koneksi
 // sempat macet, aplikasi kasih pesan jelas alih-alih terlihat "freeze" selamanya.
@@ -1690,21 +1701,19 @@ async function muatKategori(){
   renderKategoriList();
 }
 
-muatPengaturanToko();
-muatKategori();
+let DAFTAR_PROMO = [];
+let DAFTAR_PELANGGAN = [];
+let pelangganTerpilih = null; // {id, nama, noHp, poin} — dipilih saat transaksi di Kasir
 
 /* ============================================================
    LOGIN — pilih user dari daftar (tanpa PIN)
    ============================================================ */
 let DAFTAR_USER = [];
-let DAFTAR_PROMO = [];
-let DAFTAR_PELANGGAN = [];
-let pelangganTerpilih = null; // {id, nama, noHp, poin} — dipilih saat transaksi di Kasir
 
 async function muatDaftarUser(){
   try{
     const snap = await denganBatasWaktu(getDocs(colUser));
-    DAFTAR_USER = snap.docs.map(d => ({ Nama: d.id, Role: d.data().role, Pin: d.data().pin || "" }));
+    DAFTAR_USER = snap.docs.map(d => ({ Nama: d.id, Role: d.data().role, PinHash: d.data().pinHash || "" }));
     renderUserList();
   }catch(err){
     $("userList").innerHTML = `<div class="login-msg">Gagal memuat daftar user. Cek koneksi internet, lalu buka ulang halaman ini.</div>`;
@@ -1731,7 +1740,7 @@ let _pinLoginTarget = null;
 
 function pilihUserLogin(nama, role){
   const u = DAFTAR_USER.find(x => x.Nama === nama);
-  if(u && u.Pin){
+  if(u && u.PinHash){
     _pinLoginTarget = { nama, role };
     $("pinNamaUser").textContent = nama;
     $("inputPinLogin").value = "";
@@ -1751,11 +1760,12 @@ function batalkanPinLogin(){
 }
 $("btnBatalPin").onclick = batalkanPinLogin;
 
-function cobaMasukDenganPin(){
+async function cobaMasukDenganPin(){
   if(!_pinLoginTarget) return;
   const u = DAFTAR_USER.find(x => x.Nama === _pinLoginTarget.nama);
   const pinInput = $("inputPinLogin").value.trim();
-  if(u && pinInput && pinInput === u.Pin){
+  const hashInput = pinInput ? await hashPin(pinInput) : "";
+  if(u && hashInput && hashInput === u.PinHash){
     const target = _pinLoginTarget;
     _pinLoginTarget = null;
     $("pinScreen").style.display = "none";
@@ -1802,7 +1812,7 @@ $("btnLogout").onclick = () => {
 
 // coba lanjutkan sesi kalau baru refresh halaman (belum tutup browser)
 // kalau belum ada sesi, muat daftar user untuk ditampilkan di layar login
-(function cekSesi(){
+function cekSesi(){
   const saved = sessionStorage.getItem("th_user");
   if(saved){
     const u = JSON.parse(saved);
@@ -1810,7 +1820,25 @@ $("btnLogout").onclick = () => {
   }else{
     muatDaftarUser();
   }
-})();
+}
+
+/* ============================================================
+   MULAI APLIKASI — login anonim Firebase dulu, baru boleh akses
+   data. Ini penting untuk keamanan: mencegah bot/scanner otomatis
+   membaca database tanpa lewat aplikasi sama sekali.
+   ============================================================ */
+async function mulaiAplikasi(){
+  try{
+    await signInAnonymously(auth);
+  }catch(err){
+    $("userList").innerHTML = `<div class="login-msg">Gagal terhubung ke server (${err.message}). Pastikan "Anonymous" sudah diaktifkan di Firebase Console → Authentication → Sign-in method, lalu buka ulang halaman ini.</div>`;
+    return;
+  }
+  muatPengaturanToko();
+  muatKategori();
+  cekSesi();
+}
+mulaiAplikasi();
 
 /* ============================================================
    AMBIL DATA PRODUK
@@ -3593,6 +3621,7 @@ function bukaFormTambahUser(){
   $("ufNama").value = "";
   $("ufRole").value = "Kasir";
   $("ufPin").value = "";
+  $("ufPin").placeholder = "Kosongkan = tanpa PIN";
   bukaSheet("sheetUserForm", "overlayUserForm");
 }
 $("btnTambahUser").onclick = bukaFormTambahUser;
@@ -3605,7 +3634,8 @@ function bukaFormEditUser(nama){
   $("userFormTitle").textContent = "Edit User";
   $("ufNama").value = u.Nama;
   $("ufRole").value = u.Role;
-  $("ufPin").value = u.Pin || "";
+  $("ufPin").value = "";
+  $("ufPin").placeholder = u.PinHash ? "Sudah diatur — isi untuk ganti" : "Kosongkan = tanpa PIN";
   bukaSheet("sheetUserForm", "overlayUserForm");
 }
 $("btnCloseUserForm").onclick = () => tutupSheet("sheetUserForm", "overlayUserForm");
@@ -3614,10 +3644,10 @@ $("overlayUserForm").onclick = () => tutupSheet("sheetUserForm", "overlayUserFor
 async function simpanUser(){
   const nama = $("ufNama").value.trim();
   const role = $("ufRole").value;
-  const pin = $("ufPin").value.trim();
+  const pinBaru = $("ufPin").value.trim();
 
   if(!nama){ showToast("Isi nama dulu"); return; }
-  if(pin && !/^\d{4}$/.test(pin)){ showToast("PIN harus 4 digit angka, atau kosongkan"); return; }
+  if(pinBaru && !/^\d{4}$/.test(pinBaru)){ showToast("PIN harus 4 digit angka, atau kosongkan"); return; }
   if(userFormMode === "tambah" && DAFTAR_USER.find(u => u.Nama.toLowerCase() === nama.toLowerCase())){
     showToast("Nama sudah dipakai, pakai nama lain");
     return;
@@ -3626,21 +3656,25 @@ async function simpanUser(){
   $("btnSimpanUser").disabled = true;
   $("btnSimpanUser").textContent = "Menyimpan...";
   try{
+    // kalau field PIN dikosongkan saat edit, pertahankan PIN lama (bukan dihapus)
+    const uLama = DAFTAR_USER.find(x => x.Nama === userFormNamaLama);
+    const pinHash = pinBaru ? await hashPin(pinBaru) : (userFormMode === "edit" ? (uLama?.PinHash || "") : "");
+
     if(userFormMode === "tambah"){
-      await denganBatasWaktu(setDoc(doc(colUser, nama), { role, pin }));
-      DAFTAR_USER.push({ Nama: nama, Role: role, Pin: pin });
+      await denganBatasWaktu(setDoc(doc(colUser, nama), { role, pinHash }));
+      DAFTAR_USER.push({ Nama: nama, Role: role, PinHash: pinHash });
     }else if(nama !== userFormNamaLama){
       // nama diubah → nama itu ID dokumen, jadi harus buat dokumen baru + hapus yang lama
       const batch = writeBatch(db);
-      batch.set(doc(colUser, nama), { role, pin });
+      batch.set(doc(colUser, nama), { role, pinHash });
       batch.delete(doc(colUser, userFormNamaLama));
       await denganBatasWaktu(batch.commit());
       const u = DAFTAR_USER.find(x => x.Nama === userFormNamaLama);
-      if(u){ u.Nama = nama; u.Role = role; u.Pin = pin; }
+      if(u){ u.Nama = nama; u.Role = role; u.PinHash = pinHash; }
     }else{
-      await denganBatasWaktu(updateDoc(doc(colUser, nama), { role, pin }));
+      await denganBatasWaktu(updateDoc(doc(colUser, nama), { role, pinHash }));
       const u = DAFTAR_USER.find(x => x.Nama === nama);
-      if(u){ u.Role = role; u.Pin = pin; }
+      if(u){ u.Role = role; u.PinHash = pinHash; }
     }
 
     // kalau yang diedit adalah akun yang sedang login, update sesi juga
