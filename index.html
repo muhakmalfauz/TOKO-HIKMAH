@@ -490,7 +490,7 @@
 
       <div class="drc-pengeluaran-row">
         <span class="drc-icon-badge coral"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="6" width="18" height="13" rx="2"/><path d="M3 10h18"/><circle cx="16.5" cy="14" r="1"/></svg></span>
-        <span class="drc-pengeluaran-label">Pengeluaran hari ini</span>
+        <span class="drc-pengeluaran-label">Pengeluaran (stok masuk)</span>
         <span class="drc-pengeluaran-value" id="dashPengeluaranHariIni">Rp 0</span>
       </div>
 
@@ -1059,6 +1059,11 @@
     <div class="field">
       <label>Jumlah Masuk</label>
       <input type="number" id="sfJumlah" inputmode="numeric" placeholder="0" />
+    </div>
+    <div class="field">
+      <label>Harga Beli per Satuan</label>
+      <input type="number" id="sfHargaBeli" inputmode="numeric" placeholder="0" />
+      <div id="sfHargaBeliLama" style="font-size:11px;color:var(--ink-soft);margin-top:4px;"></div>
     </div>
     <div class="field">
       <label>Supplier (opsional)</label>
@@ -1842,7 +1847,7 @@ async function renderBeranda(){
     $("dashTotalHariIni").textContent = rupiah(total);
     $("dashJumlahHariIni").textContent = aktif.length + " transaksi";
 
-    // Modal (pengeluaran) & penjualan per kategori, dari transaksi hari ini
+    // Keuntungan: dari margin barang terjual (Harga Jual - Harga Beli), dihitung saat penjualan
     let modal = 0;
     const perKategori = {};
     aktif.forEach(t => {
@@ -1855,7 +1860,20 @@ async function renderBeranda(){
     });
     const profit = total - modal;
     $("dashProfitHariIni").textContent = rupiah(profit);
-    $("dashPengeluaranHariIni").textContent = rupiah(modal);
+
+    // Pengeluaran: dari Stok Masuk hari ini (tombol +Stok di Daftar Pesanan / PO Diterima).
+    // Pakai harga yang tercatat di catatan stok masuk itu sendiri (akurat sesuai saat beli);
+    // kalau data lama belum punya harga tercatat, pakai Harga Beli produk saat ini sebagai fallback.
+    const qStokHariIni = query(colStokMasuk, where("tanggal", "==", tanggal));
+    const snapStokHariIni = await denganBatasWaktu(getDocs(qStokHariIni), 15);
+    let pengeluaranStok = 0;
+    snapStokHariIni.docs.forEach(d => {
+      const s = d.data();
+      const p = PRODUK.find(x => x.id === s.idProduk);
+      const hargaDipakai = s.hargaBeli > 0 ? s.hargaBeli : (p ? p.hargaBeli : 0);
+      pengeluaranStok += hargaDipakai * Number(s.jumlahMasuk || 0);
+    });
+    $("dashPengeluaranHariIni").textContent = rupiah(pengeluaranStok);
 
     // vs kemarin
     const kemarin = new Date(now); kemarin.setDate(kemarin.getDate() - 1);
@@ -2376,6 +2394,8 @@ function bukaFormStok(id){
   stokFormProdukId = id;
   $("sfNamaProduk").textContent = p.nama + " (stok saat ini: " + p.stok + ")";
   $("sfJumlah").value = "";
+  $("sfHargaBeli").value = p.hargaBeli || "";
+  $("sfHargaBeliLama").textContent = "Harga beli saat ini: " + rupiah(p.hargaBeli || 0) + " — ubah kalau harga dari supplier berubah";
   $("sfSupplier").value = "";
   $("sfKeterangan").value = "";
   bukaSheet("sheetStokForm", "overlayStokForm");
@@ -2389,23 +2409,32 @@ async function simpanStokMasuk(){
   const p = PRODUK.find(x => x.id === stokFormProdukId);
   if(!p) return;
 
+  const hargaBeliBaru = Number($("sfHargaBeli").value) || 0;
+  const hargaBeliBerubah = hargaBeliBaru > 0 && hargaBeliBaru !== p.hargaBeli;
+
   $("btnSimpanStok").disabled = true;
   $("btnSimpanStok").textContent = "Menyimpan...";
   try{
     const batch = writeBatch(db);
     batch.set(doc(colStokMasuk), {
       tanggal: formatTanggal(new Date()), idProduk: p.id, namaProduk: p.nama,
-      jumlahMasuk: jumlah, supplier: $("sfSupplier").value.trim(), keterangan: $("sfKeterangan").value.trim()
+      jumlahMasuk: jumlah, hargaBeli: hargaBeliBaru,
+      supplier: $("sfSupplier").value.trim(), keterangan: $("sfKeterangan").value.trim()
     });
-    batch.update(doc(colProduk, p.id), { stok: increment(jumlah) });
+    batch.update(doc(colProduk, p.id), hargaBeliBerubah
+      ? { stok: increment(jumlah), hargaBeli: hargaBeliBaru }
+      : { stok: increment(jumlah) });
     await denganBatasWaktu(batch.commit());
 
     p.stok += jumlah;
+    if(hargaBeliBerubah) p.hargaBeli = hargaBeliBaru;
     localStorage.setItem("th_produk_cache", JSON.stringify(PRODUK));
     tutupSheet("sheetStokForm", "overlayStokForm");
     renderGrid();
     renderPesanan();
-    showToast("Stok berhasil ditambahkan");
+    renderProdukList();
+    if(hargaBeliBerubah) catatLog(`Update Harga Beli "${p.nama}" jadi ${rupiah(hargaBeliBaru)} (via Stok Masuk)`);
+    showToast(hargaBeliBerubah ? "Stok & Harga Beli diperbarui" : "Stok berhasil ditambahkan");
   }catch(err){
     showToast("Gagal simpan: " + err.message);
   }finally{
@@ -3903,7 +3932,9 @@ async function exportDataExcel(){
       const s = d.data();
       return {
         "Tanggal": s.tanggal, "ID Produk": s.idProduk, "Nama Produk": s.namaProduk,
-        "Jumlah Masuk": s.jumlahMasuk, "Supplier": s.supplier || "", "Keterangan": s.keterangan || ""
+        "Jumlah Masuk": s.jumlahMasuk, "Harga Beli": s.hargaBeli || "",
+        "Total": (s.hargaBeli || 0) * (s.jumlahMasuk || 0),
+        "Supplier": s.supplier || "", "Keterangan": s.keterangan || ""
       };
     });
 
