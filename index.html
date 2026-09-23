@@ -280,18 +280,50 @@
   .drc-donut-legend .dl-row{display:flex;align-items:center;gap:5px;font-size:9px;color:#5C6066;}
   .drc-donut-legend .dl-dot{width:6px;height:6px;border-radius:50%;flex:none;}
   .drc-donut-legend b{color:var(--ink);}
-  .dash-grid{
-    display:grid;grid-template-columns:repeat(3,1fr);gap:10px;padding:16px;
+  .dash-bento{
+    display:grid;grid-template-columns:1.2fr 1fr;gap:10px;padding:0 16px 10px;
   }
-  .dash-tile{
-    background:var(--paper);border:none;box-shadow:var(--shadow-card);border-radius:18px;
-    padding:16px 8px;display:flex;flex-direction:column;align-items:center;gap:8px;
-    position:relative;
+  .db-kasir{
+    grid-row:1/3;border:none;border-radius:20px;padding:18px;
+    background:linear-gradient(150deg,#655CC9 0%,var(--navy-dark) 100%);
+    box-shadow:0 10px 24px rgba(83,74,183,.28);
+    display:flex;flex-direction:column;justify-content:space-between;
+    min-height:158px;position:relative;overflow:hidden;text-align:left;
   }
-  .dash-tile:active{background:#EEEDFE;}
-  .dash-tile .dt-icon{font-size:24px;line-height:1;color:var(--navy);}
-  .dash-tile .dt-icon svg{width:24px;height:24px;display:block;}
-  .dash-tile .dt-label{font-size:12px;font-weight:600;color:var(--ink);text-align:center;}
+  .db-decor{position:absolute;top:-30px;right:-30px;width:100px;height:100px;border-radius:50%;background:rgba(255,255,255,.07);}
+  .db-kasir-icon{width:46px;height:46px;border-radius:50%;background:rgba(255,255,255,.16);display:flex;align-items:center;justify-content:center;position:relative;z-index:1;}
+  .db-kasir-icon svg{width:22px;height:22px;color:#fff;}
+  .db-kasir-text{position:relative;z-index:1;display:flex;flex-direction:column;}
+  .db-kasir-title{font-size:15px;font-weight:700;color:#fff;}
+  .db-kasir-sub{font-size:9.5px;color:#D9D5F5;letter-spacing:.3px;margin-top:2px;}
+
+  .db-side{display:flex;flex-direction:column;gap:10px;}
+  .db-stat-row{
+    background:var(--paper);border:none;border-radius:16px;padding:12px;
+    box-shadow:0 2px 8px rgba(20,20,30,.05);display:flex;align-items:center;gap:10px;text-align:left;
+  }
+  .db-icon-badge{
+    width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex:none;
+  }
+  .db-icon-badge svg{width:16px;height:16px;}
+  .db-icon-badge.amber{background:linear-gradient(145deg,#FDEBD8,#FADCB8);color:#B8730E;}
+  .db-icon-badge.coral{background:linear-gradient(145deg,#FAECE7,#F5D6C9);color:#993C1D;}
+  .db-icon-badge.green{background:linear-gradient(145deg,#E1F5EE,#C9EBDD);color:#0F6E56;}
+  .db-icon-badge.violet{background:linear-gradient(145deg,#EAEAFB,#D5D3F5);color:var(--navy);}
+  .db-icon-badge.blue{background:linear-gradient(145deg,#DCEAFB,#C2DCF5);color:#2E6DA4;}
+  .db-icon-badge.grey{background:linear-gradient(145deg,#F0F1F5,#E1E2E9);color:#5C6066;}
+  .db-stat-text{display:flex;flex-direction:column;min-width:0;}
+  .db-stat-title{font-size:11.5px;font-weight:700;color:var(--ink);display:flex;align-items:center;gap:5px;}
+  .db-stat-sub{font-size:9px;color:var(--ink-soft);letter-spacing:.2px;margin-top:1px;}
+  .db-dot-inline{width:7px;height:7px;border-radius:50%;background:var(--red);flex:none;}
+
+  .db-mini{
+    background:var(--paper);border:none;border-radius:16px;padding:13px 6px;text-align:center;
+    box-shadow:0 2px 8px rgba(20,20,30,.05);display:flex;flex-direction:column;align-items:center;gap:7px;
+  }
+  .db-mini .db-icon-badge{width:34px;height:34px;}
+  .db-mini-label{font-size:10.5px;font-weight:700;color:var(--ink);}
+  .db-mini-row{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;padding:0 16px 16px;}
 
   .tren-row{display:flex;align-items:center;gap:8px;padding:6px 0;font-size:12px;}
   .tren-label{width:50px;color:var(--ink-soft);flex:none;}
@@ -628,14 +660,42 @@
 
     </div>
 
-    <div class="dash-grid">
-      <button class="dash-tile" data-view="kasir"><span class="dt-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="21" r="1"/><circle cx="18" cy="21" r="1"/><path d="M2.5 3h2l2.4 12.2a2 2 0 0 0 2 1.6h7.7a2 2 0 0 0 2-1.6L20.5 8H6"/></svg></span><span class="dt-label">Kasir</span></button>
-      <button class="dash-tile" data-view="produk"><span class="dt-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 7.5l-9-5-9 5 9 5 9-5z"/><path d="M3 7.5v9l9 5 9-5v-9"/><path d="M12 12.5v9"/></svg></span><span class="dt-label">Produk</span><span class="dt-dot" data-badge="produk" style="display:none;"></span></button>
-      <button class="dash-tile" data-view="riwayat"><span class="dt-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 17 9 11 13 15 21 6"/><polyline points="15 6 21 6 21 12"/></svg></span><span class="dt-label">Riwayat Penjualan</span></button>
-      <button class="dash-tile" data-view="pesanan"><span class="dt-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="20" x2="5" y2="11"/><line x1="12" y1="20" x2="12" y2="5"/><line x1="19" y1="20" x2="19" y2="14"/></svg></span><span class="dt-label">Daftar Pesanan</span><span class="dt-badge" data-badge="pesanan" style="display:none;">0</span></button>
-      <button class="dash-tile" data-view="pelanggan"><span class="dt-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="3.5"/><path d="M4.5 20c1-4 4-6 7.5-6s6.5 2 7.5 6"/></svg></span><span class="dt-label">Pelanggan</span></button>
-      <button class="dash-tile" data-view="laporan"><span class="dt-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3h12v18l-3-2-3 2-3-2-3 2V3z"/><line x1="9" y1="8" x2="15" y2="8"/><line x1="9" y1="12" x2="15" y2="12"/></svg></span><span class="dt-label">Laporan</span></button>
-      <button class="dash-tile" data-view="pengaturan"><span class="dt-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3.2"/><path d="M12 2.5v3M12 18.5v3M4.6 4.6l2.1 2.1M17.3 17.3l2.1 2.1M2.5 12h3M18.5 12h3M4.6 19.4l2.1-2.1M17.3 6.7l2.1-2.1"/></svg></span><span class="dt-label">Pengaturan</span></button>
+    <div class="dash-bento">
+      <button class="db-kasir" data-view="kasir">
+        <span class="db-decor"></span>
+        <span class="db-kasir-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="21" r="1"/><circle cx="18" cy="21" r="1"/><path d="M2.5 3h2l2.4 12.2a2 2 0 0 0 2 1.6h7.7a2 2 0 0 0 2-1.6L20.5 8H6"/></svg></span>
+        <span class="db-kasir-text"><span class="db-kasir-title">Kasir</span><span class="db-kasir-sub">MULAI TRANSAKSI</span></span>
+      </button>
+
+      <div class="db-side">
+        <button class="db-stat-row" data-view="produk">
+          <span class="db-icon-badge amber"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 7.5l-9-5-9 5 9 5 9-5z"/><path d="M3 7.5v9l9 5 9-5v-9"/><path d="M12 12.5v9"/></svg></span>
+          <span class="db-stat-text"><span class="db-stat-title">Produk<span class="db-dot-inline" data-badge="produk" style="display:none;"></span></span><span class="db-stat-sub" id="dbStatProduk">0 AKTIF</span></span>
+        </button>
+        <button class="db-stat-row" data-view="pesanan">
+          <span class="db-icon-badge coral"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="20" x2="5" y2="11"/><line x1="12" y1="20" x2="12" y2="5"/><line x1="19" y1="20" x2="19" y2="14"/></svg></span>
+          <span class="db-stat-text"><span class="db-stat-title">Pesanan</span><span class="db-stat-sub" id="dbStatPesanan">Stok aman</span></span>
+        </button>
+      </div>
+    </div>
+
+    <div class="db-mini-row">
+      <button class="db-mini" data-view="riwayat">
+        <span class="db-icon-badge green"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 17 9 11 13 15 21 6"/><polyline points="15 6 21 6 21 12"/></svg></span>
+        <span class="db-mini-label">Riwayat</span>
+      </button>
+      <button class="db-mini" data-view="pelanggan">
+        <span class="db-icon-badge violet"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="3.5"/><path d="M4.5 20c1-4 4-6 7.5-6s6.5 2 7.5 6"/></svg></span>
+        <span class="db-mini-label">Pelanggan</span>
+      </button>
+      <button class="db-mini" data-view="laporan">
+        <span class="db-icon-badge blue"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3h12v18l-3-2-3 2-3-2-3 2V3z"/><line x1="9" y1="8" x2="15" y2="8"/><line x1="9" y1="12" x2="15" y2="12"/></svg></span>
+        <span class="db-mini-label">Laporan</span>
+      </button>
+      <button class="db-mini" data-view="pengaturan">
+        <span class="db-icon-badge grey"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3.2"/><path d="M12 2.5v3M12 18.5v3M4.6 4.6l2.1 2.1M17.3 17.3l2.1 2.1M2.5 12h3M18.5 12h3M4.6 19.4l2.1-2.1M17.3 6.7l2.1-2.1"/></svg></span>
+        <span class="db-mini-label">Pengaturan</span>
+      </button>
     </div>
   </div>
 
@@ -2073,7 +2133,7 @@ function switchView(view){
 document.querySelectorAll(".nav-btn").forEach(btn=>{
   btn.onclick = () => { switchView(btn.dataset.view); tutupDrawer(); };
 });
-document.querySelectorAll(".dash-tile").forEach(btn=>{
+document.querySelectorAll(".db-kasir, .db-stat-row, .db-mini").forEach(btn=>{
   btn.onclick = () => switchView(btn.dataset.view);
 });
 
@@ -3093,12 +3153,21 @@ function updateBadgeNav(){
     el.textContent = jumlahPerluRestock;
     el.style.display = jumlahPerluRestock > 0 ? "flex" : "none";
   });
+  const elStatPesanan = $("dbStatPesanan");
+  if(elStatPesanan){
+    elStatPesanan.textContent = jumlahPerluRestock > 0 ? jumlahPerluRestock + " PERLU RESTOCK" : "Stok aman";
+    elStatPesanan.style.color = jumlahPerluRestock > 0 ? "#993C1D" : "";
+  }
 
   // Produk: ada yang harga jual lebih rendah dari harga beli?
   const adaBermasalah = PRODUK.some(p => produkBermasalah(p));
   document.querySelectorAll('[data-badge="produk"]').forEach(el => {
     el.style.display = adaBermasalah ? "block" : "none";
   });
+  const elStatProduk = $("dbStatProduk");
+  if(elStatProduk){
+    elStatProduk.textContent = PRODUK.filter(p => p.aktif !== false).length + " AKTIF";
+  }
 }
 
 async function hapusProduk(id){
