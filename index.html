@@ -1642,6 +1642,24 @@
   </div>
 </div>
 
+<!-- SHEET: QR LOGIN CEPAT -->
+<div class="sheet-overlay" id="overlayQR"></div>
+<div class="sheet" id="sheetQR">
+  <div class="sheet-handle"></div>
+  <div class="sheet-head">
+    <h2 id="qrJudul">QR Login Cepat</h2>
+    <button id="btnCloseQR">✕</button>
+  </div>
+  <div class="sheet-body" style="text-align:center;">
+    <div style="font-size:12.5px;color:var(--ink-soft);margin-bottom:16px;">
+      Scan QR ini dari HP/tablet kasir untuk langsung masuk sebagai <strong id="qrNamaUser"></strong> dan langsung ke halaman Kasir — tanpa perlu pilih nama satu-satu. Cetak & tempel di meja kasir kalau perlu.
+    </div>
+    <div id="qrCanvasWrap" style="display:inline-block;padding:14px;background:#fff;border-radius:16px;box-shadow:var(--shadow-card);"></div>
+    <div style="font-size:11px;color:var(--ink-soft);margin-top:14px;word-break:break-all;" id="qrUrlText"></div>
+    <button class="btn-secondary" id="btnSalinLinkQR" style="border-color:var(--line);margin-top:12px;">Salin Link</button>
+  </div>
+</div>
+
 <!-- SHEET: TAMBAH/EDIT USER -->
 <div class="sheet-overlay" id="overlayUserForm"></div>
 <div class="sheet" id="sheetUserForm">
@@ -1676,6 +1694,7 @@
 
 <!-- Untuk fitur Export Data ke Excel (Pengaturan) -->
 <script src="https://cdn.sheetjs.com/xlsx-latest/package/dist/xlsx.full.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 
 <script type="module">
 /* ============================================================
@@ -1966,13 +1985,19 @@ $("btnLogout").onclick = () => {
 
 // coba lanjutkan sesi kalau baru refresh halaman (belum tutup browser)
 // kalau belum ada sesi, muat daftar user untuk ditampilkan di layar login
-function cekSesi(){
+async function cekSesi(){
   const saved = sessionStorage.getItem("th_user");
   if(saved){
     const u = JSON.parse(saved);
     masuk(u.nama, u.role);
   }else{
-    muatDaftarUser();
+    await muatDaftarUser();
+    // QR login cepat: ?masuk=NamaUser di URL otomatis pilih user itu (tetap minta PIN kalau diset)
+    const namaOtomatis = new URLSearchParams(window.location.search).get("masuk");
+    if(namaOtomatis){
+      const u = DAFTAR_USER.find(x => x.Nama === namaOtomatis);
+      if(u) pilihUserLogin(u.Nama, u.Role);
+    }
   }
 }
 
@@ -3764,6 +3789,7 @@ function renderPengaturanList(){
         <div class="lr-sub">${u.Role}${u.Nama === NAMA_KASIR ? " · sedang login" : ""}</div>
       </div>
       <div class="lr-actions">
+        <button class="lr-btn" data-qr="${u.Nama}">QR</button>
         <button class="lr-btn" data-edit="${u.Nama}">Edit</button>
         <button class="lr-btn danger" data-hapus="${u.Nama}">Hapus</button>
       </div>
@@ -3776,7 +3802,36 @@ function renderPengaturanList(){
   $("pengaturanList").querySelectorAll("[data-hapus]").forEach(btn=>{
     btn.onclick = () => hapusUser(btn.dataset.hapus);
   });
+  $("pengaturanList").querySelectorAll("[data-qr]").forEach(btn=>{
+    btn.onclick = () => tampilkanQRUser(btn.dataset.qr);
+  });
 }
+
+/* ============================================================
+   QR LOGIN CEPAT — scan langsung pilih user & masuk ke Kasir
+   ============================================================ */
+function tampilkanQRUser(nama){
+  const url = window.location.origin + window.location.pathname + "?masuk=" + encodeURIComponent(nama);
+  $("qrNamaUser").textContent = nama;
+  $("qrUrlText").textContent = url;
+  $("qrCanvasWrap").innerHTML = "";
+  if(typeof QRCode === "undefined"){
+    $("qrCanvasWrap").innerHTML = `<p style="font-size:12px;color:var(--red);padding:20px;">Modul QR belum siap, coba lagi sebentar.</p>`;
+  }else{
+    new QRCode($("qrCanvasWrap"), { text: url, width: 180, height: 180, colorDark: "#1A1D29", colorLight: "#ffffff" });
+  }
+  bukaSheet("sheetQR", "overlayQR");
+}
+$("btnCloseQR").onclick = () => tutupSheet("sheetQR", "overlayQR");
+$("overlayQR").onclick = () => tutupSheet("sheetQR", "overlayQR");
+$("btnSalinLinkQR").onclick = () => {
+  const url = $("qrUrlText").textContent;
+  if(navigator.clipboard){
+    navigator.clipboard.writeText(url).then(() => showToast("Link disalin")).catch(() => showToast("Gagal menyalin"));
+  }else{
+    showToast("Browser tidak mendukung salin otomatis, salin manual dari teks di atas");
+  }
+};
 
 function bukaFormTambahUser(){
   userFormMode = "tambah";
