@@ -1009,6 +1009,10 @@
         <button class="scan-btn" id="btnScanProduk" type="button"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:19px;height:19px;"><path d="M4 8a2 2 0 0 1 2-2h1.2l1-1.6A1 1 0 0 1 9 4h6a1 1 0 0 1 .8.4l1 1.6H18a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V8z"/><circle cx="12" cy="13" r="3.4"/></svg></button>
       </div>
     </div>
+    <div class="field" id="pfSupplierWrap" style="display:none;">
+      <label>Supplier (opsional)</label>
+      <input type="text" id="pfSupplier" list="daftarSupplierDatalist" />
+    </div>
     <div id="pfBlokKalkulatorDus" style="display:none;background:var(--cream);border-radius:10px;padding:12px;margin-top:2px;">
       <div style="font-size:12px;font-weight:700;color:var(--navy);margin-bottom:8px;">🧮 Kalkulator Modal per Dus/Pack</div>
       <div class="pay-row">
@@ -1070,6 +1074,15 @@
       </div>
     </div>
 
+    <div id="sfBlokKalkulatorDus" style="display:none;background:var(--cream);border-radius:10px;padding:12px;margin-top:2px;">
+      <div style="font-size:12px;font-weight:700;color:var(--navy);margin-bottom:8px;">🧮 Kalkulator Modal per Dus/Pack</div>
+      <div class="pay-row">
+        <div class="field" style="margin-top:0;"><label>Isi per Dus/Pack</label><input type="number" id="sfIsiDus" inputmode="numeric" placeholder="misal 40" /></div>
+        <div class="field" style="margin-top:0;"><label>Harga Beli per Dus/Pack</label><input type="number" id="sfHargaBeliDus" inputmode="numeric" placeholder="misal 100000" /></div>
+      </div>
+      <div id="sfInfoModalDus" style="font-size:12.5px;color:var(--ink-soft);margin-top:8px;line-height:1.6;"></div>
+    </div>
+
     <div class="pay-row">
       <div class="field"><label>Harga Beli</label><input type="number" id="sfHargaBeli" inputmode="numeric" placeholder="0" /></div>
       <div class="field"><label>Harga Jual</label><input type="number" id="sfHargaJual" inputmode="numeric" placeholder="0" /></div>
@@ -1092,14 +1105,10 @@
       </div>
     </div>
 
-    <div class="field">
+    <div class="field" id="sfSupplierWrap" style="display:none;">
       <label>Supplier (opsional)</label>
       <input type="text" id="sfSupplier" list="daftarSupplierDatalist" />
       <datalist id="daftarSupplierDatalist"></datalist>
-    </div>
-    <div class="field">
-      <label>Keterangan (opsional)</label>
-      <input type="text" id="sfKeterangan" />
     </div>
     <div style="font-size:11px;color:var(--ink-soft);margin-top:6px;">
       Semua perubahan di atas (satuan, harga, grosir, barcode) otomatis tersimpan juga ke data produk di halaman Produk.
@@ -1707,7 +1716,8 @@ async function muatProduk(){
         hargaBeli: Number(p.hargaBeli) || 0,
         harga: Number(p.hargaJual), stok: Number(p.stok), stokMin: Number(p.stokMin),
         aktif: p.aktif !== false,
-        hargaGrosir: Number(p.hargaGrosir) || 0, minQtyGrosir: Number(p.minQtyGrosir) || 0
+        hargaGrosir: Number(p.hargaGrosir) || 0, minQtyGrosir: Number(p.minQtyGrosir) || 0,
+        supplier: p.supplier || ""
       };
     });
     localStorage.setItem("th_produk_cache", JSON.stringify(PRODUK));
@@ -2143,6 +2153,8 @@ function bukaFormTambahProduk(){
   $("pfKategori").value = "Sembako";
   $("pfSatuan").value = "pcs";
   $("pfBarcode").value = "";
+  $("pfSupplier").value = "";
+  terapkanVisibilitasSupplier();
   $("pfHargaBeli").value = "";
   $("pfHargaJual").value = "";
   $("pfHargaGrosir").value = "";
@@ -2210,6 +2222,39 @@ $("pfIsiDus").addEventListener("input", hitungKalkulatorDus);
 $("pfHargaBeliDus").addEventListener("input", hitungKalkulatorDus);
 $("pfHargaJual").addEventListener("input", hitungKalkulatorDus);
 
+function cekTampilkanKalkulatorDusStok(){
+  const satuan = $("sfSatuan").value;
+  $("sfBlokKalkulatorDus").style.display = (satuan === "pck" || satuan === "dus") ? "block" : "none";
+}
+$("sfSatuan").addEventListener("change", cekTampilkanKalkulatorDusStok);
+
+function hitungKalkulatorDusStok(){
+  const isi = Number($("sfIsiDus").value) || 0;
+  const hargaBeliDus = Number($("sfHargaBeliDus").value) || 0;
+  const satuan = $("sfSatuan").value || "satuan";
+
+  if(isi <= 0 || hargaBeliDus <= 0){
+    $("sfInfoModalDus").textContent = "";
+    return;
+  }
+
+  const modalPerSatuan = hargaBeliDus / isi;
+  $("sfHargaBeli").value = Math.round(modalPerSatuan);
+  cekPeringatanRugiStok();
+
+  const hargaJual = Number($("sfHargaJual").value) || 0;
+  let teks = `Modal: ${rupiah(modalPerSatuan)} / ${satuan.replace('pck','pcs')}`;
+  if(hargaJual > 0){
+    const untungPerSatuan = hargaJual - modalPerSatuan;
+    const untungPerDus = untungPerSatuan * isi;
+    teks += `<br/>Keuntungan: ${rupiah(untungPerSatuan)} / satuan · ${rupiah(untungPerDus)} / ${satuan}`;
+  }
+  $("sfInfoModalDus").innerHTML = teks;
+}
+$("sfIsiDus").addEventListener("input", hitungKalkulatorDusStok);
+$("sfHargaBeliDus").addEventListener("input", hitungKalkulatorDusStok);
+$("sfHargaJual").addEventListener("input", hitungKalkulatorDusStok);
+
 function pilihAtauTambahOpsi(selectEl, value){
   if(!value) return;
   const ada = Array.from(selectEl.options).some(o => o.value === value);
@@ -2234,6 +2279,8 @@ function bukaFormEditProduk(id){
   pilihAtauTambahOpsi($("pfKategori"), p.kategori);
   pilihAtauTambahOpsi($("pfSatuan"), p.satuan || "pcs");
   $("pfBarcode").value = p.barcode || "";
+  $("pfSupplier").value = p.supplier || "";
+  terapkanVisibilitasSupplier();
   $("pfHargaBeli").value = p.hargaBeli || "";
   $("pfHargaJual").value = p.harga;
   $("pfHargaGrosir").value = p.hargaGrosir || "";
@@ -2257,6 +2304,7 @@ async function simpanProduk(){
   const kategori = $("pfKategori").value.trim() || "Lainnya";
   const satuan = $("pfSatuan").value.trim() || "pcs";
   const barcode = $("pfBarcode").value.trim();
+  const supplier = $("pfSupplier").value.trim();
   const hargaBeli = Number($("pfHargaBeli").value) || 0;
   const hargaJual = Number($("pfHargaJual").value) || 0;
   const hargaGrosir = Number($("pfHargaGrosir").value) || 0;
@@ -2267,7 +2315,7 @@ async function simpanProduk(){
   if(!id || !nama || !hargaJual){ showToast("Lengkapi ID, Nama, dan Harga Jual"); return; }
   if(produkFormMode === "tambah" && PRODUK.find(p => p.id === id)){ showToast("ID Produk sudah dipakai"); return; }
 
-  const dataProduk = { nama, kategori, satuan, barcode, hargaBeli, hargaJual, hargaGrosir, minQtyGrosir, stok, stokMin };
+  const dataProduk = { nama, kategori, satuan, barcode, supplier, hargaBeli, hargaJual, hargaGrosir, minQtyGrosir, stok, stokMin };
 
   $("btnSimpanProduk").disabled = true;
   $("btnSimpanProduk").textContent = "Menyimpan...";
@@ -2275,11 +2323,11 @@ async function simpanProduk(){
     if(produkFormMode === "tambah"){
       dataProduk.aktif = true;
       await denganBatasWaktu(setDoc(doc(colProduk, id), dataProduk));
-      PRODUK.push({ id, nama, kategori, satuan, barcode, hargaBeli, harga: hargaJual, hargaGrosir, minQtyGrosir, stok, stokMin, aktif: true });
+      PRODUK.push({ id, nama, kategori, satuan, barcode, supplier, hargaBeli, harga: hargaJual, hargaGrosir, minQtyGrosir, stok, stokMin, aktif: true });
     }else{
       await denganBatasWaktu(updateDoc(doc(colProduk, id), dataProduk));
       const p = PRODUK.find(x => x.id === id);
-      if(p) Object.assign(p, { nama, kategori, satuan, barcode, hargaBeli, harga: hargaJual, hargaGrosir, minQtyGrosir, stok, stokMin });
+      if(p) Object.assign(p, { nama, kategori, satuan, barcode, supplier, hargaBeli, harga: hargaJual, hargaGrosir, minQtyGrosir, stok, stokMin });
     }
     localStorage.setItem("th_produk_cache", JSON.stringify(PRODUK));
     tutupSheet("sheetProdukForm", "overlayProdukForm");
@@ -2430,8 +2478,12 @@ function bukaFormStok(id){
   $("sfHargaGrosir").value = p.hargaGrosir || "";
   $("sfMinQtyGrosir").value = p.minQtyGrosir || "";
   $("sfBarcode").value = p.barcode || "";
-  $("sfSupplier").value = "";
-  $("sfKeterangan").value = "";
+  $("sfSupplier").value = p.supplier || "";
+  $("sfIsiDus").value = "";
+  $("sfHargaBeliDus").value = "";
+  $("sfInfoModalDus").textContent = "";
+  cekTampilkanKalkulatorDusStok();
+  terapkanVisibilitasSupplier();
   cekPeringatanRugiStok();
   bukaSheet("sheetStokForm", "overlayStokForm");
 }
@@ -2460,14 +2512,16 @@ async function simpanStokMasuk(){
   const hargaGrosirBaru = Number($("sfHargaGrosir").value) || 0;
   const minQtyGrosirBaru = Number($("sfMinQtyGrosir").value) || 0;
   const barcodeBaru = $("sfBarcode").value.trim();
+  const supplierBaru = $("sfSupplier").value.trim();
 
   const dataProdukBaru = {
     satuan: satuanBaru, hargaBeli: hargaBeliBaru, hargaJual: hargaJualBaru,
-    hargaGrosir: hargaGrosirBaru, minQtyGrosir: minQtyGrosirBaru, barcode: barcodeBaru
+    hargaGrosir: hargaGrosirBaru, minQtyGrosir: minQtyGrosirBaru, barcode: barcodeBaru, supplier: supplierBaru
   };
   const adaPerubahan = satuanBaru !== (p.satuan || "pcs") || hargaBeliBaru !== p.hargaBeli ||
     hargaJualBaru !== p.harga || hargaGrosirBaru !== (p.hargaGrosir || 0) ||
-    minQtyGrosirBaru !== (p.minQtyGrosir || 0) || barcodeBaru !== (p.barcode || "");
+    minQtyGrosirBaru !== (p.minQtyGrosir || 0) || barcodeBaru !== (p.barcode || "") ||
+    supplierBaru !== (p.supplier || "");
 
   $("btnSimpanStok").disabled = true;
   $("btnSimpanStok").textContent = "Menyimpan...";
@@ -2475,8 +2529,7 @@ async function simpanStokMasuk(){
     const batch = writeBatch(db);
     batch.set(doc(colStokMasuk), {
       tanggal: formatTanggal(new Date()), idProduk: p.id, namaProduk: p.nama,
-      jumlahMasuk: jumlah, hargaBeli: hargaBeliBaru,
-      supplier: $("sfSupplier").value.trim(), keterangan: $("sfKeterangan").value.trim()
+      jumlahMasuk: jumlah, hargaBeli: hargaBeliBaru, supplier: supplierBaru
     });
     batch.update(doc(colProduk, p.id), adaPerubahan
       ? { stok: increment(jumlah), ...dataProdukBaru }
@@ -3762,6 +3815,14 @@ async function muatSupplier(){
   }catch(err){
     // gagal diam-diam; supplier bukan jalur kritis
   }
+  terapkanVisibilitasSupplier();
+}
+
+function terapkanVisibilitasSupplier(){
+  const ada = DAFTAR_SUPPLIER.length > 0;
+  const tampilan = ada ? "block" : "none";
+  if($("sfSupplierWrap")) $("sfSupplierWrap").style.display = tampilan;
+  if($("pfSupplierWrap")) $("pfSupplierWrap").style.display = tampilan;
 }
 
 function isiDatalistSupplier(){
@@ -3837,6 +3898,7 @@ async function simpanSupplier(){
     tutupSheet("sheetSupplierForm", "overlaySupplierForm");
     renderSupplierList();
     isiDatalistSupplier();
+    terapkanVisibilitasSupplier();
     showToast(supplierFormMode === "tambah" ? "Supplier ditambahkan" : "Supplier diperbarui");
   }catch(err){
     showToast("Gagal simpan: " + err.message);
@@ -3856,6 +3918,7 @@ async function hapusSupplier(id){
     DAFTAR_SUPPLIER = DAFTAR_SUPPLIER.filter(x => x.id !== id);
     renderSupplierList();
     isiDatalistSupplier();
+    terapkanVisibilitasSupplier();
     catatLog(`Menghapus supplier "${s.nama}"`);
     showToast("Supplier dihapus");
   }catch(err){
