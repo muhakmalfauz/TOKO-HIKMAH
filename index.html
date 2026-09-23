@@ -1056,15 +1056,42 @@
       <label>Produk</label>
       <div id="sfNamaProduk" style="font-weight:700;font-size:15px;padding-top:4px;"></div>
     </div>
-    <div class="field">
-      <label>Jumlah Masuk</label>
-      <input type="number" id="sfJumlah" inputmode="numeric" placeholder="0" />
+    <div class="pay-row">
+      <div class="field"><label>Jumlah Tambah Stok</label><input type="number" id="sfJumlah" inputmode="numeric" placeholder="0" /></div>
+      <div class="field">
+        <label>Satuan</label>
+        <select id="sfSatuan">
+          <option value="pcs">pcs</option>
+          <option value="kg">kg</option>
+          <option value="ltr">ltr</option>
+          <option value="pck">pck</option>
+          <option value="dus">dus</option>
+        </select>
+      </div>
     </div>
-    <div class="field">
-      <label>Harga Beli per Satuan</label>
-      <input type="number" id="sfHargaBeli" inputmode="numeric" placeholder="0" />
-      <div id="sfHargaBeliLama" style="font-size:11px;color:var(--ink-soft);margin-top:4px;"></div>
+
+    <div class="pay-row">
+      <div class="field"><label>Harga Beli</label><input type="number" id="sfHargaBeli" inputmode="numeric" placeholder="0" /></div>
+      <div class="field"><label>Harga Jual</label><input type="number" id="sfHargaJual" inputmode="numeric" placeholder="0" /></div>
     </div>
+    <div id="sfPeringatanRugi" style="display:none;background:#FCEEE9;border-radius:10px;padding:10px 12px;margin-top:4px;font-size:12.5px;color:#9C3A1D;gap:8px;align-items:flex-start;">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:16px;height:16px;flex:none;margin-top:1px;"><path d="M12 9v4"/><path d="M10.3 3.9L2.5 17a1.5 1.5 0 0 0 1.3 2.2h16.4a1.5 1.5 0 0 0 1.3-2.2L13.7 3.9a1.5 1.5 0 0 0-2.6 0z"/><circle cx="12" cy="16.3" r=".6" fill="currentColor" stroke="none"/></svg>
+      <span>Harga jual lebih rendah dari harga beli — produk ini akan dijual rugi.</span>
+    </div>
+
+    <div class="pay-row">
+      <div class="field"><label>Harga Grosir (opsional)</label><input type="number" id="sfHargaGrosir" inputmode="numeric" placeholder="0 = tidak dipakai" /></div>
+      <div class="field"><label>Min. Qty Grosir</label><input type="number" id="sfMinQtyGrosir" inputmode="numeric" placeholder="misal 12" /></div>
+    </div>
+
+    <div class="field">
+      <label>Barcode (opsional)</label>
+      <div class="search-row">
+        <input type="text" id="sfBarcode" />
+        <button class="scan-btn" id="btnScanStok" type="button"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:19px;height:19px;"><path d="M4 8a2 2 0 0 1 2-2h1.2l1-1.6A1 1 0 0 1 9 4h6a1 1 0 0 1 .8.4l1 1.6H18a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V8z"/><circle cx="12" cy="13" r="3.4"/></svg></button>
+      </div>
+    </div>
+
     <div class="field">
       <label>Supplier (opsional)</label>
       <input type="text" id="sfSupplier" list="daftarSupplierDatalist" />
@@ -1073,6 +1100,9 @@
     <div class="field">
       <label>Keterangan (opsional)</label>
       <input type="text" id="sfKeterangan" />
+    </div>
+    <div style="font-size:11px;color:var(--ink-soft);margin-top:6px;">
+      Semua perubahan di atas (satuan, harga, grosir, barcode) otomatis tersimpan juga ke data produk di halaman Produk.
     </div>
     <button class="btn-primary" id="btnSimpanStok">Simpan Stok Masuk</button>
   </div>
@@ -2394,14 +2424,28 @@ function bukaFormStok(id){
   stokFormProdukId = id;
   $("sfNamaProduk").textContent = p.nama + " (stok saat ini: " + p.stok + ")";
   $("sfJumlah").value = "";
+  $("sfSatuan").value = p.satuan || "pcs";
   $("sfHargaBeli").value = p.hargaBeli || "";
-  $("sfHargaBeliLama").textContent = "Harga beli saat ini: " + rupiah(p.hargaBeli || 0) + " — ubah kalau harga dari supplier berubah";
+  $("sfHargaJual").value = p.harga || "";
+  $("sfHargaGrosir").value = p.hargaGrosir || "";
+  $("sfMinQtyGrosir").value = p.minQtyGrosir || "";
+  $("sfBarcode").value = p.barcode || "";
   $("sfSupplier").value = "";
   $("sfKeterangan").value = "";
+  cekPeringatanRugiStok();
   bukaSheet("sheetStokForm", "overlayStokForm");
 }
 $("btnCloseStokForm").onclick = () => tutupSheet("sheetStokForm", "overlayStokForm");
 $("overlayStokForm").onclick = () => tutupSheet("sheetStokForm", "overlayStokForm");
+
+function cekPeringatanRugiStok(){
+  const hargaBeli = Number($("sfHargaBeli").value) || 0;
+  const hargaJual = Number($("sfHargaJual").value) || 0;
+  const rugi = hargaBeli > 0 && hargaJual > 0 && hargaBeli > hargaJual;
+  $("sfPeringatanRugi").style.display = rugi ? "flex" : "none";
+}
+$("sfHargaBeli").addEventListener("input", cekPeringatanRugiStok);
+$("sfHargaJual").addEventListener("input", cekPeringatanRugiStok);
 
 async function simpanStokMasuk(){
   const jumlah = Number($("sfJumlah").value);
@@ -2409,8 +2453,21 @@ async function simpanStokMasuk(){
   const p = PRODUK.find(x => x.id === stokFormProdukId);
   if(!p) return;
 
+  const satuanBaru = $("sfSatuan").value || "pcs";
   const hargaBeliBaru = Number($("sfHargaBeli").value) || 0;
-  const hargaBeliBerubah = hargaBeliBaru > 0 && hargaBeliBaru !== p.hargaBeli;
+  const hargaJualBaru = Number($("sfHargaJual").value) || 0;
+  if(!hargaJualBaru){ showToast("Harga Jual tidak boleh kosong/0"); return; }
+  const hargaGrosirBaru = Number($("sfHargaGrosir").value) || 0;
+  const minQtyGrosirBaru = Number($("sfMinQtyGrosir").value) || 0;
+  const barcodeBaru = $("sfBarcode").value.trim();
+
+  const dataProdukBaru = {
+    satuan: satuanBaru, hargaBeli: hargaBeliBaru, hargaJual: hargaJualBaru,
+    hargaGrosir: hargaGrosirBaru, minQtyGrosir: minQtyGrosirBaru, barcode: barcodeBaru
+  };
+  const adaPerubahan = satuanBaru !== (p.satuan || "pcs") || hargaBeliBaru !== p.hargaBeli ||
+    hargaJualBaru !== p.harga || hargaGrosirBaru !== (p.hargaGrosir || 0) ||
+    minQtyGrosirBaru !== (p.minQtyGrosir || 0) || barcodeBaru !== (p.barcode || "");
 
   $("btnSimpanStok").disabled = true;
   $("btnSimpanStok").textContent = "Menyimpan...";
@@ -2421,20 +2478,20 @@ async function simpanStokMasuk(){
       jumlahMasuk: jumlah, hargaBeli: hargaBeliBaru,
       supplier: $("sfSupplier").value.trim(), keterangan: $("sfKeterangan").value.trim()
     });
-    batch.update(doc(colProduk, p.id), hargaBeliBerubah
-      ? { stok: increment(jumlah), hargaBeli: hargaBeliBaru }
+    batch.update(doc(colProduk, p.id), adaPerubahan
+      ? { stok: increment(jumlah), ...dataProdukBaru }
       : { stok: increment(jumlah) });
     await denganBatasWaktu(batch.commit());
 
     p.stok += jumlah;
-    if(hargaBeliBerubah) p.hargaBeli = hargaBeliBaru;
+    if(adaPerubahan) Object.assign(p, dataProdukBaru);
     localStorage.setItem("th_produk_cache", JSON.stringify(PRODUK));
     tutupSheet("sheetStokForm", "overlayStokForm");
     renderGrid();
     renderPesanan();
     renderProdukList();
-    if(hargaBeliBerubah) catatLog(`Update Harga Beli "${p.nama}" jadi ${rupiah(hargaBeliBaru)} (via Stok Masuk)`);
-    showToast(hargaBeliBerubah ? "Stok & Harga Beli diperbarui" : "Stok berhasil ditambahkan");
+    if(adaPerubahan) catatLog(`Update data produk "${p.nama}" (via Stok Masuk)`);
+    showToast(adaPerubahan ? "Stok & data produk diperbarui" : "Stok berhasil ditambahkan");
   }catch(err){
     showToast("Gagal simpan: " + err.message);
   }finally{
@@ -4073,6 +4130,12 @@ async function prosesHasilScan(kode){
     showToast("Barcode terisi: " + kode);
     return;
   }
+  if(scanMode === "stok"){
+    $("sfBarcode").value = kode;
+    tutupScan();
+    showToast("Barcode terisi: " + kode);
+    return;
+  }
 
   // mode kasir: cari produk dengan barcode yang cocok
   const p = PRODUK.find(x => x.barcode && x.barcode === kode);
@@ -4092,6 +4155,7 @@ async function prosesHasilScan(kode){
 
 $("btnScanKasir").onclick = () => bukaScan("kasir");
 $("btnScanProduk").onclick = () => bukaScan("produk");
+$("btnScanStok").onclick = () => bukaScan("stok");
 
 function ubahQty(id, delta){
   if(!cart[id]) return;
